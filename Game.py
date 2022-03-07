@@ -1,6 +1,7 @@
 import pygame
 from lib.ImageHandler import ImageHandler
 from lib.Settings import Settings
+from lib.demo.Demo1 import Demo1
 
 
 class Game:
@@ -15,4 +16,4 @@ class Game:
 
 
 if __name__=="__main__":
-    Game()
+    Demo1()
