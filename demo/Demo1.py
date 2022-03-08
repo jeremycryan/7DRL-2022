@@ -10,6 +10,8 @@ import random
 import time
 from demo.Player import Player
 from demo.Wall import Wall, Floor
+from demo.Enemy import Goomba
+from demo.TurnManager import TurnManager
 
 
 class Game:
@@ -17,6 +19,7 @@ class Game:
         pygame.init()
         ImageHandler.init()
         Camera.init()
+        TurnManager.init()
         self.screen = pygame.Surface((640, 360))
         self.true_screen = pygame.display.set_mode((1280, 720))
         self.fps_font = pygame.font.SysFont("monospace", 10, 1, 0)
@@ -26,6 +29,7 @@ class Game:
     def update_fpss(self, dt, events):
         self.fpss.append(dt)
         self.fpss = self.fpss[-100:]
+
 
     def draw_fps_font(self):
         avg_dt = sum(self.fpss)/len(self.fpss)
@@ -59,6 +63,18 @@ class Game:
             for tile in cell:
                 tile.load_sprite()
 
+    def spawn_enemies(self, layer):
+        enemies = 0
+        enemy_objects = []
+        for x, y in layer.cell_coordinates():
+            if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
+                enemy = Goomba()
+                enemy_objects.append(enemy)
+                layer.add_to_cell(enemy, x, y)
+                enemies += 1
+
+        return enemy_objects
+
     def main(self):
         clock = pygame.time.Clock()
         clock.tick(60)
@@ -66,6 +82,8 @@ class Game:
         map = self.generate_map()
         player = Player()
         map.add_to_cell(player, 2, 2, 0)
+        enemies = self.spawn_enemies(map.get_layer(0))
+        TurnManager.add_entities(player, *enemies)
 
         Camera.change_objects(objects=[player], weights=[1], mouse_weight=0.15)
 
@@ -74,6 +92,8 @@ class Game:
             events = pygame.event.get()
 
             self.screen.fill((0, 0, 0))
+
+            TurnManager.take_next_turn()
 
             for event in events:
                 if event.type == pygame.QUIT:

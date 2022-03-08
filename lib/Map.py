@@ -38,7 +38,6 @@ class Map:
         else:
             return Pose((int(x), int(y)), 0)
 
-
     def add_empty_layer(self, height=0):
         """
         Adds a new layer to the Map.
@@ -95,6 +94,12 @@ class Map:
         for layer in self.layers:
             layer.draw(surface, offset=offset)
 
+    def get_layer(self, key):
+        for layer in self.layers:
+            if layer.key == key:
+                return layer
+        return None
+
     class MapCell(list):
         # Making this its own class in case we wanted to add anything fancy to it later for pathfinding, etc.
         pass
@@ -132,7 +137,6 @@ class Map:
 
             coordinates = (x, y)
             game_object.add_to_layer(self, x, y)
-            from demo.Demo1 import Player
             if coordinates not in self._populated_cells:
                 self._populated_cells.add(coordinates)
 
@@ -169,7 +173,7 @@ class Map:
                 self._populated_cells.remove((x, y))
 
         def populated_cells(self):
-            for x, y in self._populated_cells:
+            for x, y in self._populated_cells.copy():
                 yield self.cells[y][x]
 
         def cell_coordinates(self):

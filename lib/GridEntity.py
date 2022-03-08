@@ -26,6 +26,10 @@ class GridEntity(GameObject):
         self.sprites = []
         self.grid_rules = []
         self.animations = []
+        self.taking_turn = False
+
+    def __repr__(self):
+        return f"{type(self)} at {self.position_on_grid}"
 
     def add_grid_rule(self, sprite, key=("@",), inverse=False, likelihood=1.0):
         """
@@ -217,6 +221,12 @@ class GridEntity(GameObject):
         self.require_grid()
         return self.move_to_grid_position(self.position_on_grid.x + x, self.position_on_grid.y + y)
 
+    def can_move(self, x=0, y=0):
+        self.require_grid()
+        x = x + self.position_on_grid.x
+        y = y + self.position_on_grid.y
+        return self.can_move_to_grid_position(x, y)
+
     def require_grid(self):
         """Requires the layer property to be populated. """
         assert self.layer is not None
@@ -226,6 +236,12 @@ class GridEntity(GameObject):
             if animation.blocking:
                 return True
         return False
+
+    def take_turn(self):
+        pass
+
+    def end_turn(self):
+        self.taking_turn = False
 
     def draw_highlight(self, surface, x, y, color, offset=(0, 0)):
         """

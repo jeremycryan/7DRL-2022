@@ -16,16 +16,23 @@ class Player(GridEntity):
 
     def update(self, dt, events):
         super().update(dt, events)
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w and not self.animating():
-                    self.move(y=-1)
-                if event.key == pygame.K_s and not self.animating():
-                    self.move(y=1)
-                if event.key == pygame.K_a and not self.animating():
-                    self.move(x=-1)
-                if event.key == pygame.K_d and not self.animating():
-                    self.move(x=1)
+        pressed = pygame.key.get_pressed()
+
+        if pressed[pygame.K_w] and self.can_make_turn_movement():
+            self.move(y=-1)
+            self.end_turn()
+        if pressed[pygame.K_s] and self.can_make_turn_movement():
+            self.move(y=1)
+            self.end_turn()
+        if pressed[pygame.K_a] and self.can_make_turn_movement():
+            self.move(x=-1)
+            self.end_turn()
+        if pressed[pygame.K_d] and self.can_make_turn_movement():
+            self.move(x=1)
+            self.end_turn()
+
+    def can_make_turn_movement(self):
+        return not self.animating() and self.taking_turn
 
     def draw(self, surface, offset=(0, 0)):
         super().draw(surface, offset=offset)
@@ -36,3 +43,6 @@ class Player(GridEntity):
                 color = (255, 0, 0)
             off = hovered - self.position_on_grid
             self.draw_highlight(surface, *off.get_position(), color, offset=offset)
+
+    def take_turn(self):
+        self.taking_turn = True
