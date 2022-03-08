@@ -1,9 +1,12 @@
 from lib.Settings import Settings
+from lib.Primitives import Pose
+from lib.Camera import Camera
+import pygame
 
 
 class Map:
-    TILE_WIDTH = 32
-    TILE_HEIGHT = 32
+    TILE_WIDTH = Settings.Static.TILE_SIZE
+    TILE_HEIGHT = Settings.Static.TILE_SIZE
     OUT_OF_FRAME_DISTANCE = TILE_WIDTH*2  # The distance outside the window frame we stop drawing objects
 
     def __init__(self, width, height):
@@ -16,6 +19,25 @@ class Map:
         self.height = height
 
         self.layers = []
+
+    def get_hovered_tile(self):
+        mpos = Pose(pygame.mouse.get_pos(), 0)
+        mpos -= Pose((Settings.Static.WINDOW_WIDTH//2, Settings.Static.WINDOW_HEIGHT//2), 0)
+        mpos.x *= Settings.Static.GAME_WIDTH/Settings.Static.WINDOW_WIDTH
+        mpos.y *= Settings.Static.GAME_HEIGHT/Settings.Static.WINDOW_HEIGHT
+        mpos += Camera.get_game_position() * -1
+        #mpos += Pose((Settings.Static.GAME_WIDTH//2, Settings.Static.GAME_HEIGHT//2), 0)
+        mpos += Pose((Settings.Static.TILE_SIZE//2, Settings.Static.TILE_SIZE//2), 0)  # Because tile centers are the position
+
+        x = mpos.x//Settings.Static.TILE_SIZE
+        y = mpos.y//Settings.Static.TILE_SIZE
+
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return None
+
+        else:
+            return Pose((int(x), int(y)), 0)
+
 
     def add_empty_layer(self, height=0):
         """

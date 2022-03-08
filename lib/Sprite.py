@@ -103,3 +103,14 @@ class StaticSprite(Sprite):
 
     def get_current_surface(self):
         return self._static_surface
+
+
+class InvisibleSprite(Sprite):
+    def __init__(self):
+        pass
+
+    def draw(self, surface, offset=(0, 0)):
+        pass
+
+    def update(self, dt, events):
+        pass

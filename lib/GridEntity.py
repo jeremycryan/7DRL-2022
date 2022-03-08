@@ -2,6 +2,8 @@ import random
 
 from lib.Primitives import GameObject, Pose
 from lib.Animation import MoveAnimation
+from lib.Settings import Settings
+import pygame
 
 
 class GridEntity(GameObject):
@@ -224,3 +226,15 @@ class GridEntity(GameObject):
             if animation.blocking:
                 return True
         return False
+
+    def draw_highlight(self, surface, x, y, color, offset=(0, 0)):
+        """
+        Highlights grid squares
+        :param x: The x position to draw the highlight at, in number of tiles to the entity's right (0 is on the entity)
+        :param y: The y position to draw the highlight, in number of tiles to the entity's south (0 is on the entity)
+        :param color: The color of the highlight
+        """
+        tile_size = Settings.Static.TILE_SIZE
+        center = (self.position_on_grid + Pose((x, y), 0))*tile_size + Pose(offset, 0)
+        rect = (center.x - tile_size//2, center.y - tile_size//2, tile_size, tile_size)
+        pygame.draw.rect(surface, color, rect, 2)

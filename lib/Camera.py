@@ -46,9 +46,14 @@ class Camera:
         average = Pose((0, 0), 0)
         for item, weight in zip(cls.center_objects, cls.weights):
             average += (item.position * weight)*(1/total_weight)
-        mouse_game_pos = Pose(pygame.mouse.get_pos(), 0)
+        mouse_game_pos = Pose(pygame.mouse.get_pos(), 0) \
+                         - Pose((Settings.Static.WINDOW_WIDTH//2, Settings.Static.WINDOW_HEIGHT//2), 0)
         mouse_game_pos.x *= Settings.Static.GAME_WIDTH/Settings.Static.WINDOW_WIDTH
         mouse_game_pos.y *= Settings.Static.GAME_HEIGHT/Settings.Static.WINDOW_HEIGHT
+        mouse_game_pos.y *= 1.2 # give a little more vertical scrollability since the aspect ratio is wide
+        mouse_game_pos.x *= 0.8
+        mouse_game_pos += cls.position
+
         average += mouse_game_pos * cls.mouse_weight * (1/total_weight)
         return average
 
