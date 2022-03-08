@@ -8,14 +8,13 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-.idea/
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-lib/
+#lib/
 lib64/
 parts/
 sdist/
@@ -129,5 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Profiling files
+# Ignore profiling
 *.prof
+
+# Ignore PyCharm idea folder
+.idea/
