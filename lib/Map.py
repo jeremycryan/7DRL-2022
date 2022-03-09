@@ -1,3 +1,4 @@
+from demo.Wall import Floor
 from lib.Settings import Settings
 from lib.Primitives import Pose
 from lib.Camera import Camera
@@ -99,6 +100,41 @@ class Map:
             if layer.key == key:
                 return layer
         return None
+
+    def raycast(self, start, end, blocking_types, offset=False):
+        """
+        Find first entity in a line
+        :param start: first square to check
+        :param end: final square to check
+        :param offset: if true, start on second square
+        :blocking_types: class or list of class of obstacles that stop the raycast
+        :return: last open square and the entity that was hit
+        """
+        diff = end - start
+        if not diff.magnitude():
+            return None, None
+        prev = None
+        if abs(diff.y) > abs(diff.x):
+            for dy in range(1 if offset else 0, abs(diff.y)+1):
+                scale = abs(dy / diff.y)
+                p = start + diff*scale
+                p.x = round(p.x)
+                p.y = round(p.y)
+                for item in self.get_all_at_position(p.x, p.y):
+                    if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
+                        return prev, item
+                prev = p
+        else:
+            for dx in range(1 if offset else 0, abs(diff.x)+1):
+                scale = abs(dx / diff.x)
+                p = start + diff*scale
+                p.x = round(p.x)
+                p.y = round(p.y)
+                for item in self.get_all_at_position(p.x, p.y):
+                    if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
+                        return prev, item
+                prev = p
+        return end, None
 
     class MapCell(list):
         # Making this its own class in case we wanted to add anything fancy to it later for pathfinding, etc.

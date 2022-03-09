@@ -2,6 +2,7 @@ from SpellEffect import SpellEffect, Damage
 from SpellArea import *
 import demo.Player as Player
 from demo.Enemy import Enemy
+from demo.Wall import Wall
 
 
 class Spell:
@@ -10,6 +11,9 @@ class Spell:
         self.effects = []
         self.areas = []
         self.delays = []
+
+    def caster_pos(self):
+        return self.caster.position_on_grid
 
     def clear_effects(self):
         self.effects = []
@@ -73,7 +77,16 @@ class Spell:
         """
         if not target:
             return target
-        # TODO: raycast
+        if pierce:
+            types = (Wall,)
+        else:
+            types = (Wall, Enemy)
+        target, entity = self.caster.layer.map.raycast(self.caster_pos(), self.caster_pos()+target, types, offset=True)
+        if not pierce and isinstance(entity, Enemy):
+            target = entity.position_on_grid
+        if not target:
+            return False
+        target -= self.caster_pos()
         if target.magnitude() < lower:
             return False
         return target
@@ -87,7 +100,7 @@ class Spell:
         """
         if not target:
             return target
-        tile = target + self.caster.position_on_grid
+        tile = target + self.caster_pos()
         for item in self.caster.layer.map.get_all_at_position(tile.x, tile.y):
             if isinstance(item, affected):
                 return target
@@ -138,6 +151,7 @@ class Zap(Spell):
 class Flare(Spell):
     def get_effects(self, target, crit=False):
         self.clear_effects()
+        target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=2, lower=0)
         if target:
             self.add_effect(SpellEffect(damage=1), Circle(target, radius=1.5 if crit else 1))
@@ -149,19 +163,31 @@ class Push(Spell):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
         if target:
-            self.add_effect(SpellEffect(move_radial=2), Circle(target, radius=1.5 if crit else 1))
+            self.add_effect(SpellEffect(move_radial=3), Circle(target, radius=1.5 if crit else 1))
         return self.effects, self.areas, self.delays
 
 
 class Bolt(Spell):
     def get_effects(self, target, crit=False):
         self.clear_effects()
-        target = self.snap_to_line(target)
+        # target = self.snap_to_line(target)
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=5, lower=1)
         target = self.snap_to_entity(target)
         if target:
             self.add_effect(SpellEffect(damage=2 if crit else 1), Point(target))
+        return self.effects, self.areas, self.delays
+
+
+class Beam(Spell):
+    def get_effects(self, target, crit=False):
+        self.clear_effects()
+        target *= 5
+        target = self.snap_to_line(target)
+        target = self.snap_to_visible(target, pierce=True)
+        target = self.snap_to_range(target, upper=5, lower=1)
+        if target:
+            self.add_effect(SpellEffect(damage=2 if crit else 1), Line(endpoint=target))
         return self.effects, self.areas, self.delays
 
 

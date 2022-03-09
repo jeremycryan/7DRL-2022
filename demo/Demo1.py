@@ -30,7 +30,6 @@ class Game:
         self.fpss.append(dt)
         self.fpss = self.fpss[-100:]
 
-
     def draw_fps_font(self):
         avg_dt = sum(self.fpss)/len(self.fpss)
         if avg_dt == 0:

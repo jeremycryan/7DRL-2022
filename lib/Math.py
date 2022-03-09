@@ -85,3 +85,22 @@ class PowerCurve(Curve):
         else:
             return 1 - (i_factor * ((1 - x)/self._decel_time)**self._power * self._max_speed * self._decel_time)
 
+
+def get_line(start, end):
+    squares = [start]
+    diff = end - start
+    if abs(diff.y) > abs(diff.x):
+        for dy in range(1, abs(diff.y) + 1):
+            scale = abs(dy / diff.y)
+            p = start + diff * scale
+            p.x = round(p.x)
+            p.y = round(p.y)
+            squares.append(p)
+    else:
+        for dx in range(1, abs(diff.x) + 1):
+            scale = abs(dx / diff.x)
+            p = start + diff * scale
+            p.x = round(p.x)
+            p.y = round(p.y)
+            squares.append(p)
+    return squares

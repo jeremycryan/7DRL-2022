@@ -34,6 +34,7 @@ class Player(GridEntity):
         self.spells[4] = Bolt(self)
         self.spells[5] = Jump(self)
         self.spells[6] = Recharge(self)
+        self.spells[7] = Beam(self)
 
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)

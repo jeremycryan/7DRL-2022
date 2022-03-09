@@ -1,3 +1,4 @@
+from demo.Wall import Floor
 from lib.Primitives import Pose
 import enum
 from demo.Enemy import Enemy
@@ -31,6 +32,8 @@ class SpellEffect:
         self.move_radial = move_radial
         self.teleport = teleport
         self.stun = stun
+        if not hasattr(affected, "__iter__"):
+            affected = (affected,)
         self.affected = affected
         self.action = action
         self.delayed_action = delayed_action
@@ -43,8 +46,11 @@ class SpellEffect:
         # TODO (low priority): sort squares by distance from origin to avoid collisions when pushing
         for square in target.squares:
             tile = square + caster.position_on_grid
-            for item in caster.layer.map.get_all_at_position(tile.x, tile.y):
-                if isinstance(item, self.affected):
+            items = caster.layer.map.get_all_at_position(tile.x, tile.y)
+            if not items:
+                continue
+            for item in items:
+                if isinstance(item, self.affected) and (Floor in self.affected or not type(item) is Floor):
                     if self.damage != 0:
                         item.damage(self.damage, self.damage_type)
                     if self.move_linear:

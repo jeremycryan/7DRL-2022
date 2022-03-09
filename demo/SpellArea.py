@@ -1,4 +1,5 @@
 from lib.Primitives import Pose
+from lib.Math import get_line
 
 
 class SpellArea:
@@ -29,7 +30,7 @@ class Line(SpellArea):
         super().__init__(origin)
         self.endpoint = endpoint
         self.line_of_sight = line_of_sight
-        self.squares = []  # TODO implement line
+        self.squares = get_line(origin, endpoint)  # TODO (low priority): check line of sight
 
 
 class Circle(SpellArea):
@@ -47,7 +48,7 @@ class Circle(SpellArea):
             for dy in range(-int(radius), int(radius) + 1):
                 p = Pose((dx, dy))
                 if p.magnitude() <= radius:
-                    self.squares.append(p + origin)  # TODO check line of sight
+                    self.squares.append(p + origin)  # TODO (low priority): check line of sight
 
 
 class Cone(SpellArea):
@@ -61,4 +62,4 @@ class Cone(SpellArea):
         super().__init__(origin)
         self.endpoint = endpoint
         self.line_of_sight = line_of_sight
-        self.squares = []  # TODO implement cone
+        self.squares = []  # TODO: implement cone

@@ -1,5 +1,8 @@
+import demo.Player as Player
+from demo.Wall import Wall
 from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
+from lib.Primitives import Pose
 from lib.Sprite import StaticSprite, InvisibleSprite
 
 import random
@@ -60,7 +63,15 @@ class Enemy(GridEntity):
             x = x//self.weight
             y = y//self.weight
         # TODO: raycast to avoid moving through walls
-        self.move(x, y)
+        if teleport:
+            self.move(x, y)
+        else:
+            target = Pose((x, y))
+            target, entity = self.layer.map.raycast(self.position_on_grid, self.position_on_grid + target,
+                                                    (Wall, Enemy, Player.Player), offset=True)
+            if target:
+                target -= self.position_on_grid
+                self.move(target.x, target.y)
         print(x,y)
 
 
