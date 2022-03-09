@@ -12,6 +12,8 @@ class Settings:
         Settings that should be loaded once as the application starts, then remain constant at runtime
         """
         TILE_SIZE = 32
+        ROOM_WIDTH = 15
+        ROOM_HEIGHT = 15
         WINDOW_WIDTH = 1280
         WINDOW_HEIGHT = 720
         GAME_WIDTH = 640
