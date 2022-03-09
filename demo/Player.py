@@ -27,6 +27,7 @@ class Player(GridEntity):
         self.spells = [None for i in range(10)]
         self.cooldown = [0 for i in range(10)]
         self.new_turn = True
+        self.solid = True
 
         self.spells[1] = Zap(self)
         self.spells[2] = Flare(self)

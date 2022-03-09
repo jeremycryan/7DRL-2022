@@ -1,6 +1,8 @@
 import pygame
 import sys
 import yaml
+
+from demo.SpellHUD import SpellHUD
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.GridEntity import GridEntity
@@ -145,6 +147,7 @@ class Game:
         map = self.generate_map()
         player = Player()
         map.add_to_cell(player, 2, 2, 0)
+        spell_hud = SpellHUD(player)
         enemies = self.spawn_enemies(map.get_layer(0))
         TurnManager.add_entities(player, *enemies)
 
@@ -170,6 +173,8 @@ class Game:
             map.update(dt, events)
             map.draw(self.screen, offset)
             self.draw_fps_font()
+
+            spell_hud.draw(self.screen, (10, 10))
 
             scaled = pygame.transform.scale2x(self.screen)
             self.true_screen.blit(scaled, (0, 0))
