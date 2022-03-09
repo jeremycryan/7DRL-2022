@@ -1,5 +1,6 @@
 import pygame
 import sys
+import yaml
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.GridEntity import GridEntity
@@ -40,20 +41,83 @@ class Game:
         surf = self.fps_font.render(f"FPS:{' '*max(0,6-len(fps))}{fps}", False, (255, 255, 255))
         self.screen.blit(surf, (10, 10))
 
+    def get_yaml_room(self, path):
+        """
+        Loads a room from a yaml file. Returns None if no path is found.
+        :param path: The file path
+        :return: The contents of the yaml file or None
+        """
+        try:
+            with open(path) as file:
+                return yaml.safe_load(file)
+        except:
+            return None
+
+    @staticmethod
+    def merge_room_onto_character_array(room, array, origin=(0, 0), closed_walls=""):
+        """
+        Copies the contents of the room onto the array, overwriting any prior contents
+        :param room: An object with property "tiles" that contains a list of strings
+        :param array: A list of strings
+        :param origin: The top left coordinate of the room, in room coordinates.
+        :param closed_walls: An iterable of characters that should be treated as walls when the room is merged. Probably
+            some combination of U, D, L, R for the temporary walls.
+        """
+        tiles = room["tiles"]
+        th = len(tiles)
+        tw = len(tiles[0])
+
+        origin = origin[0] * Settings.Static.ROOM_WIDTH, origin[1] * Settings.Static.ROOM_HEIGHT
+
+        for y, row in enumerate(array):
+            new_row = ""
+            for x, item in enumerate(row):
+                if 0 <= y - origin[1] < th and 0 <= x - origin[0] < tw:
+                    char = tiles[y - origin[1]][x - origin[0]]
+                    if char in closed_walls:
+                        char = "X"
+                    new_row += char
+                else:
+                    new_row += item
+            array[y] = new_row
+
     def generate_map(self):
-        map = Map(21, 14)
+        # TODO: Somehow determine a good height for the map, in tiles.
+        width = Settings.Static.ROOM_WIDTH * 2
+        height = Settings.Static.ROOM_HEIGHT * 2
+
+        # Don't change any of this
+        map = Map(width, height)
         _entity_layer = map.add_empty_layer(0)
         floor_layer = map.add_empty_layer(1)
         floor_layer.enable_updates(False)  # Don't waste time calling update on floor tiles
 
-        for x, y in floor_layer.cell_coordinates():
-            if random.random() < 0.4:
-                new_tile = Wall()
-            else:
-                new_tile = Floor()
-            floor_layer.add_to_cell(new_tile, x, y)
+        # Using rooms from yaml, assemble the map.
+        # TODO Daniel improve this section
+        wall = "X"
+        floor = "."
+        up, down, left, right = "U", "D", "L", "R"
+        rooms = [
+            self.get_yaml_room("rooms/room_1.yaml")
+        ]
+        tile_array = [wall * width for _ in range(height)]  # Make array of wall tiles the size of the map to add rooms into
+        for y in range(2):
+            for x in range(2):
+                room = random.choice(rooms)
+                self.merge_room_onto_character_array(room, tile_array, (x, y), closed_walls=[up])
 
+        # Turn our room array back into a map.
+        for y, row in enumerate(tile_array):
+            for x, item in enumerate(row):
+                if item is wall:
+                    new_tile = Wall()
+                else:
+                    new_tile = Floor()
+                floor_layer.add_to_cell(new_tile, x, y)
+
+        # Must do this to make sure tiles display right
         self.load_layer_sprites(floor_layer)
+
         return map
 
     def load_layer_sprites(self, layer):
