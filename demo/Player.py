@@ -5,6 +5,10 @@ import pygame
 
 
 class Player(GridEntity):
+
+    faction = GridEntity.FACTION_ALLY
+
+
     def __init__(self, position=(0, 0)):
         super().__init__(position)
         sprite = StaticSprite.from_path("images/pigeon.png")
