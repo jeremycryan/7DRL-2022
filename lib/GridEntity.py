@@ -8,6 +8,11 @@ import pygame
 
 class GridEntity(GameObject):
 
+    FACTION_NEUTRAL = 0
+    FACTION_HOSTILE = 1
+    FACTION_ALLY = 2
+    faction = FACTION_NEUTRAL
+
     SOLID_KEY = "S"
     ANY_KEY = "?"
     EMPTY_KEY = "."

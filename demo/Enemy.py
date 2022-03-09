@@ -13,6 +13,8 @@ class Enemy(GridEntity):
     invulnerabilities = []
     resistances = []
 
+    faction = GridEntity.FACTION_HOSTILE
+
     def __init__(self):
         super().__init__()
         self.add_sprite(self.load_sprite())
