@@ -15,7 +15,7 @@ class GameObject:
 
 
 class Pose:
-    def __init__(self, position, angle):
+    def __init__(self, position, angle=0):
         """ Initialize the Pose.
             position: two-length tuple (x, y)
             angle: angle, in degrees counterclockwise from right ->

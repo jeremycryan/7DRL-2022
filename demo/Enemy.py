@@ -4,14 +4,20 @@ from lib.Sprite import StaticSprite, InvisibleSprite
 
 import random
 
+
 class Enemy(GridEntity):
     name = "ENEMY"
     hit_points = 1
+    weight = 1
+    vulnerabilities = []
+    invulnerabilities = []
+    resistances = []
 
     def __init__(self):
         super().__init__()
         self.add_sprite(self.load_sprite())
         self.solid = True
+        self.health = self.hit_points
 
     def load_sprite(self):
         """
@@ -27,6 +33,33 @@ class Enemy(GridEntity):
         anything other than regular movement.
         """
         pass
+
+    def damage(self, hp, damage_type):
+        """
+        Apply damage or healing to this entity
+        :param hp: Amount of damage to deal; a negative number represents healing
+        :param damage_type: Type of damage dealt (SpellEffect.Damage), used to calculate resistance and vulnerability
+        """
+        if hp > 0 and damage_type in self.resistances:
+            hp = hp//2
+        elif hp > 0 and damage_type in self.vulnerabilities:
+            hp *= 2
+        elif hp > 0 and damage_type in self.invulnerabilities:
+            hp = 0
+        self.health -= hp
+        if self.health <= 0:
+            self.health = 0
+            # TODO: death animation
+            if self.position_on_grid is not None:
+                self.layer.remove_from_cell(*self.position_on_grid.get_position(), self)
+
+    def push(self, x=0, y=0, teleport=False):
+        if not teleport:
+            x = x//self.weight
+            y = y//self.weight
+        # TODO: raycast to avoid moving through walls
+        self.move(x, y)
+        print(x,y)
 
 
 class Goomba(Enemy):
