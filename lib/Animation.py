@@ -1,5 +1,6 @@
 from lib.Primitives import Pose
 from lib.Math import lerp, PowerCurve
+import pygame
 
 class Animation:
 
@@ -50,12 +51,15 @@ class MoveAnimation(Animation):
         super().update(dt, events)
         if self.destroyed:
             return
-        bounce_height = Pose((0, ((self.through() - 0.5)*2)**2 - 1), 0) * 12
+        bounce_height = Pose((0, ((self.through() - 0.5)*2)**2 - 1), 0) * 8
         curve = PowerCurve(power=1)
         x = lerp(self.start_position.x, self.end_position.x, self.through(), curve)
         y = lerp(self.start_position.y, self.end_position.y, self.through(), curve)
         self.current_position = Pose((x, y), 0) + bounce_height
         self.parent.position = self.current_position.copy()
+        for sprite in self.parent.sprites:
+            if sprite.blend_mode is not pygame.BLENDMODE_NONE:
+                sprite.position.y -= bounce_height.y
 
     def on_destroy(self):
         self.parent.position = self.end_position.copy()

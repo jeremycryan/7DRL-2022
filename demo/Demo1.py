@@ -91,6 +91,7 @@ class Game:
         # Don't change any of this
         map = Map(width, height)
         _entity_layer = map.add_empty_layer(0)
+        _pickup_layer = map.add_empty_layer(Settings.Static.PICKUP_LAYER)
         floor_layer = map.add_empty_layer(1)
         floor_layer.enable_updates(False)  # Don't waste time calling update on floor tiles
 

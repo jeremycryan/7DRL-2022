@@ -1,11 +1,14 @@
 import demo.Player as Player
+from demo.Pickup import Pickup, LetterTile
 from demo.Wall import Wall
 from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
 from lib.Primitives import Pose
+from lib.Settings import Settings
 from lib.Sprite import StaticSprite, InvisibleSprite
 
 import random
+import pygame
 
 
 class Enemy(GridEntity):
@@ -16,13 +19,21 @@ class Enemy(GridEntity):
     invulnerabilities = []
     resistances = []
 
+    name_font = None
+    name_letters = {}
+
     faction = GridEntity.FACTION_HOSTILE
 
     def __init__(self):
         super().__init__()
+        self.load_shadow()
         self.add_sprite(self.load_sprite())
         self.solid = True
         self.health = self.hit_points
+        if not Enemy.name_font:
+            Enemy.name_font = pygame.font.Font("fonts/smallest_pixel.ttf", 10)
+            Enemy.name_letters = {letter:Enemy.name_font.render(letter, True, (255, 255, 255)) for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ "}
+
 
     def load_sprite(self):
         """
@@ -30,6 +41,25 @@ class Enemy(GridEntity):
         :return:
         """
         return InvisibleSprite()
+
+    def draw(self, surface, offset=(0, 0)):
+        super().draw(surface, offset=offset)
+        self.draw_name(surface, offset=offset)
+
+    def draw_name(self, surface, offset=(0, 0)):
+        letters = [Enemy.name_letters[letter] for letter in self.name]
+        width = sum([letter.get_width() for letter in letters])
+        x = offset[0] - width//2 + self.position.x
+        y = offset[1] - letters[0].get_height()//2 + self.position.y + self.name_y_offset()
+        for letter in letters:
+            surface.blit(letter, (x, y))
+            x += letter.get_width()
+
+    def name_y_offset(self):
+        """
+        This might be bigger for larger enemies
+        """
+        return -16
 
     def take_turn(self):
         """
@@ -54,9 +84,15 @@ class Enemy(GridEntity):
         self.health -= hp
         if self.health <= 0:
             self.health = 0
-            # TODO: death animation
-            if self.position_on_grid is not None:
-                self.layer.remove_from_cell(*self.position_on_grid.get_position(), self)
+            self.destroy()
+
+    def on_destroy(self):
+        super().on_destroy()
+        if self.position_on_grid:
+            x, y = self.position_on_grid.get_position()
+            # TODO be smart about what letter I drop
+            self.layer.map.add_to_cell(LetterTile(random.choice(self.name)), x, y, Settings.Static.PICKUP_LAYER)
+        # TODO: death animation
 
     def push(self, x=0, y=0, teleport=False):
         if not teleport:
@@ -74,9 +110,18 @@ class Enemy(GridEntity):
                 self.move(target.x, target.y)
         print(x,y)
 
+    def move(self, x=0, y=0):
+        super().move(x, y)
+        if x < 0:
+            for sprite in self.sprites:
+                sprite.flipped_x = True
+        if x > 0:
+            for sprite in self.sprites:
+                sprite.flipped_x = False
+
 
 class Goomba(Enemy):
-    name = "GOOMBA"
+    name = "SPIDER"
     hit_points = 1
 
     def __init__(self):
@@ -87,7 +132,7 @@ class Goomba(Enemy):
         By default, return an invisible sprite.
         :return:
         """
-        sprite = StaticSprite.from_path("images/goomba.png")
+        sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
         sprite.set_colorkey((255, 0, 255))
         return sprite
 

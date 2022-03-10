@@ -4,6 +4,8 @@ from lib.Primitives import GameObject, Pose
 from lib.Animation import MoveAnimation
 from lib.Settings import Settings
 import pygame
+from lib.ImageHandler import ImageHandler
+from lib.Sprite import StaticSprite
 
 
 class GridEntity(GameObject):
@@ -17,6 +19,8 @@ class GridEntity(GameObject):
     ANY_KEY = "?"
     EMPTY_KEY = "."
     CURRENT_KEY = "@"
+
+    is_pickup = False  # Most things aren't pickups
 
     def __init__(self, position=(0, 0)):
         """
@@ -35,6 +39,9 @@ class GridEntity(GameObject):
 
     def __repr__(self):
         return f"{type(self)} at {self.position_on_grid}"
+
+    def load_shadow(self):
+        self.add_sprite(StaticSprite(ImageHandler.load("images/shadow.png"), blend_mode=pygame.BLEND_MULT))
 
     def add_grid_rule(self, sprite, key=("@",), inverse=False, likelihood=1.0):
         """
@@ -177,6 +184,7 @@ class GridEntity(GameObject):
         self.animations.append(MoveAnimation(self,
                                              self.position.copy(),
                                              self.layer.grid_to_world_pixel(*self.position_on_grid.get_position())))
+        self.check_for_pickups()
 
     def add_animation(self, animation):
         self.animations.append(animation)
@@ -259,3 +267,14 @@ class GridEntity(GameObject):
         center = (self.position_on_grid + Pose((x, y), 0))*tile_size + Pose(offset, 0)
         rect = (center.x - tile_size//2, center.y - tile_size//2, tile_size, tile_size)
         pygame.draw.rect(surface, color, rect, 2)
+
+    def destroy(self):
+        self.on_destroy()
+        if self.position_on_grid is not None:
+            self.layer.remove_from_cell(*self.position_on_grid.get_position(), self)
+
+    def on_destroy(self):
+        pass
+
+    def check_for_pickups(self):
+        pass

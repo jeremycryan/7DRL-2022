@@ -1,8 +1,11 @@
+from lib.Camera import Camera
 from lib.GridEntity import GridEntity
 from lib.Sprite import StaticSprite
 from demo.Spell import *
+from lib.ImageHandler import ImageHandler
 
 import pygame
+import math
 
 spellKeys = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
              pygame.K_8, pygame.K_9]
@@ -15,8 +18,11 @@ class Player(GridEntity):
 
     def __init__(self, position=(0, 0)):
         super().__init__(position)
-        sprite = StaticSprite.from_path("images/pigeon.png")
+        self.staff = ImageHandler.load_copy("images/staff.png")
+        self.staff.set_colorkey((255, 0, 255))
+        sprite = StaticSprite.from_path("images/pigeon.png", flippable=True)
         sprite.set_colorkey((255, 0, 255))
+        self.load_shadow()
         self.sprites.append(sprite)
         self.health = 1
         self.weight = 1
@@ -84,6 +90,15 @@ class Player(GridEntity):
         return not self.animating() and self.taking_turn
 
     def draw(self, surface, offset=(0, 0)):
+        pose_to_mouse = Camera.mouse_pos_game_coordinates() - self.position
+        should_flip = pose_to_mouse.x < 0
+        for sprite in self.sprites:
+                sprite.flipped_x = should_flip
+        angle = -math.atan2(pose_to_mouse.y, pose_to_mouse.x) * 180/math.pi
+        staff_rotated = pygame.transform.rotate(self.staff, angle - 90)
+        sx = self.position.x + offset[0] + (14 * (1 - 2*should_flip)) - staff_rotated.get_width()//2
+        sy = self.position.y + offset[1] - (5) - staff_rotated.get_height()//2
+        surface.blit(staff_rotated, (sx, sy))
         super().draw(surface, offset=offset)
         hovered = self.layer.map.get_hovered_tile()
         if hovered and self.get_spell():
@@ -146,3 +161,12 @@ class Player(GridEntity):
                 if charge == 1:
                     print(self.spells[i].get_name() + " is ready")
             self.cooldown[i] = max(0, self.cooldown[i] - 1)
+
+    def check_for_pickups(self):
+        if not self.position_on_grid:
+            return
+        for entity in self.layer.map.get_all_at_position(*self.position_on_grid.get_position()):
+            if entity is self:
+                pass
+            if entity.is_pickup:
+                entity.on_pickup(self)

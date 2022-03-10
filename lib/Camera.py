@@ -40,6 +40,15 @@ class Camera:
             raise ValueError("Camera must be initialized to call this method.")
 
     @classmethod
+    def mouse_pos_game_coordinates(cls):
+        mouse_game_pos = Pose(pygame.mouse.get_pos(), 0) \
+                         - Pose((Settings.Static.WINDOW_WIDTH//2, Settings.Static.WINDOW_HEIGHT//2), 0)
+        mouse_game_pos.x *= Settings.Static.GAME_WIDTH/Settings.Static.WINDOW_WIDTH
+        mouse_game_pos.y *= Settings.Static.GAME_HEIGHT/Settings.Static.WINDOW_HEIGHT
+        mouse_game_pos += cls.position
+        return mouse_game_pos
+
+    @classmethod
     def get_target_position(cls):
         cls.require_initialized()
         total_weight = sum(cls.weights) + cls.mouse_weight

@@ -2,6 +2,7 @@ from lib.Primitives import GameObject, Pose
 import pygame
 from lib.ImageHandler import ImageHandler
 import time
+from lib.Settings import Settings
 
 
 class Sprite(GameObject):
@@ -18,6 +19,8 @@ class Sprite(GameObject):
         self.alpha = 255
         self.tint = (255, 255, 255)  # Color to tint the surface multiplicitively
         self.colorkey = None  # Color key for transparent pixel
+        self.flipped_x = False
+        self.blend_mode = pygame.BLENDMODE_NONE
 
     def set_colorkey(self, color):
         self.colorkey = color
@@ -67,7 +70,7 @@ class Sprite(GameObject):
             rect = pygame.rect.Rect(0, 0, my_surface.get_width(), my_surface.get_height())
         x = self.position.x + offset[0] - rect.width//2
         y = self.position.y + offset[1] - rect.height//2
-        surf.blit(my_surface, (x, y), rect)
+        surf.blit(my_surface, (x, y), rect, special_flags=self.blend_mode)
 
     def align_with_grid_object(self, grid_object):
         if not grid_object.layer:
@@ -84,24 +87,42 @@ class Sprite(GameObject):
 
 
 class StaticSprite(Sprite):
-    def __init__(self, surface, alpha=255, colorkey=None, rect=None):
+    def __init__(self, surface, alpha=255, colorkey=None, rect=None, flippable = False, blend_mode = pygame.BLENDMODE_NONE):
         super().__init__()
+        self.blend_mode = blend_mode
         self._static_surface = surface
+        self.flippable = flippable
+        if flippable:
+            self._flipped_static_surface = pygame.transform.flip(self._static_surface, True, False)
         if not rect:
             self._static_rect = self._static_surface.get_rect()
         else:
             self._static_rect = rect
+            if type(self._static_rect) == tuple:
+                self._static_rect = pygame.rect.Rect(*self._static_rect)
+        if flippable:
+            self._flipped_static_rect = pygame.rect.Rect(
+                self._static_surface.get_width() - self._static_rect.width - self._static_rect.left,
+                self._static_surface.get_height() - self._static_rect.height - self._static_rect.top,
+                self._static_rect.width,
+                self._static_rect.height,
+            )
         self.set_colorkey(colorkey)
         self.set_alpha(alpha)
 
     @staticmethod
-    def from_path(path):
-        return StaticSprite(ImageHandler.load(path))
+    def from_path(path, flippable=False):
+        sprite = StaticSprite(ImageHandler.load(path), flippable=flippable)
+        return sprite
 
     def get_sprite_rect(self):
+        if self.flippable and self.flipped_x:
+            return self._flipped_static_rect
         return self._static_rect
 
     def get_current_surface(self):
+        if self.flippable and self.flipped_x:
+            return self._flipped_static_surface
         return self._static_surface
 
 

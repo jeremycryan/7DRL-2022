@@ -19,6 +19,8 @@ class Settings:
         GAME_WIDTH = 640
         GAME_HEIGHT = 360
 
+        PICKUP_LAYER = 0.8
+
     class Dynamic:
         """
         Settings that can change during runtime
