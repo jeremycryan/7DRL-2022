@@ -1,3 +1,4 @@
+from demo.TurnManager import TurnManager
 from demo.Wall import Floor
 from lib.Primitives import Pose
 import enum
@@ -13,7 +14,7 @@ class Damage(enum.Enum):
 
 class SpellEffect:
     def __init__(self, damage=0, damage_type=Damage.normal, move_linear=None, move_radial=None, teleport=False,
-                 stun=0, affected=Enemy, action=None, delayed_action=None, duration=0):
+                 stun=0, affected=Enemy, action=None, delayed_action=None, duration=0, summon=None, summon_args={}):
         """
         Define a spell effect to be applied to all valid targets in some area
         :param damage: Deal damage to target; negative value indicates healing
@@ -25,6 +26,8 @@ class SpellEffect:
         :param action: Custom function to be called on the target (e.g. reduce spell cooldowns)
         :param delayed_action: Custom function to be called on the target every turn after the first
         :param duration: Number of turns to continue calling the delayed_action function (-1 for infinite turns)
+        :param summon: Class of entity to summon
+        :param summon_args: Dictionary of keyword arguments for constructing summoned entity
         """
         self.damage = damage
         self.damage_type = damage_type
@@ -38,9 +41,9 @@ class SpellEffect:
         self.action = action
         self.delayed_action = delayed_action
         self.duration = duration
-        # TODO: add a "spawn new entity" effect
+        self.summon = summon
+        self.summon_args = summon_args
         # TODO: implement delayed action spells
-        # TODO: implement stun
 
     def apply(self, target, caster):
         # TODO (low priority): sort squares by distance from origin to avoid collisions when pushing
@@ -51,8 +54,8 @@ class SpellEffect:
                 continue
             for item in items:
                 if isinstance(item, self.affected) and (Floor in self.affected or not type(item) is Floor):
-                    if self.damage != 0:
-                        item.damage(self.damage, self.damage_type)
+                    if self.damage or self.stun:
+                        item.damage(hp=self.damage, damage_type=self.damage_type, stun=self.stun)
                     if self.move_linear:
                         item.push(self.move_linear.x, self.move_linear.y, teleport=self.teleport)
                     if self.move_radial:
@@ -60,5 +63,9 @@ class SpellEffect:
                         if move.magnitude():
                             move.scale_to(self.move_radial)
                             item.push(round(move.x), round(move.y), teleport=self.teleport)
+                    if self.summon:
+                        entity = self.summon(**self.summon_args)
+                        caster.layer.add_to_cell(entity, item.position_on_grid.x, item.position_on_grid.y)
+                        TurnManager.add_entities(entity)
                     if self.action:
                         self.action(self, item)

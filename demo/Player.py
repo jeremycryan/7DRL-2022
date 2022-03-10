@@ -25,6 +25,7 @@ class Player(GridEntity):
         self.load_shadow()
         self.sprites.append(sprite)
         self.health = 1
+        self.stun = 0
         self.weight = 1
         self.vulnerabilities = []
         self.invulnerabilities = []
@@ -42,6 +43,8 @@ class Player(GridEntity):
         self.spells[5] = Jump(self)
         self.spells[6] = Recharge(self)
         self.spells[7] = Beam(self)
+        self.spells[8] = Freeze(self)
+        self.spells[9] = Golem(self)
 
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)
@@ -129,21 +132,26 @@ class Player(GridEntity):
             return None
         return self.spells[self.prepared_spell]
 
-    def damage(self, hp, damage_type):
+    def damage(self, hp=0, damage_type=Damage.normal, stun=0):
         """
         Apply damage or healing to this entity
         :param hp: Amount of damage to deal; a negative number represents healing
         :param damage_type: Type of damage dealt (SpellEffect.Damage), used to calculate resistance and vulnerability
+        :param stun: number of turns to skip due to stun effect
         """
         if hp > 0 and damage_type in self.resistances:
-            hp = hp//2
+            hp = hp // 2
         elif hp > 0 and damage_type in self.vulnerabilities:
             hp *= 2
         elif hp > 0 and damage_type in self.invulnerabilities:
             hp = 0
+        if stun > 0 and damage_type in self.invulnerabilities:
+            stun = 0
+        self.stun = max(self.stun, stun)
         self.health -= hp
-        if self.health < 0:
+        if self.health <= 0:
             self.health = 0
+            self.destroy()
 
     def push(self, x=0, y=0, teleport=False):
         if not teleport:

@@ -1,8 +1,8 @@
 from SpellEffect import SpellEffect, Damage
 from SpellArea import *
 import demo.Player as Player
-from demo.Enemy import Enemy
-from demo.Wall import Wall
+from demo.Enemy import *
+from demo.Wall import Wall, Floor
 
 
 class Spell:
@@ -81,7 +81,7 @@ class Spell:
             types = (Wall,)
         else:
             types = (Wall, Enemy)
-        target, entity = self.caster.layer.map.raycast(self.caster_pos(), self.caster_pos()+target, types, offset=True)
+        target, entity = self.caster.layer.map.raycast(self.caster_pos(), self.caster_pos()+target, types, offset=False)
         if not pierce and isinstance(entity, Enemy):
             target = entity.position_on_grid
         if not target:
@@ -91,20 +91,32 @@ class Spell:
             return False
         return target
 
-    def snap_to_entity(self, target, affected=Enemy):
+    def snap_to_entity(self, target, affected=(), avoid=()):
         """
         Target an entity that can be affected by the spell
         :param target: the nominal target relative to the caster
-        :param affected: the min distance of the spell target from the caster
-        :return: the adjusted target, or False if target is invalid
+        :param affected: only select targets containing these types of entities
+        :param avoid: do not select squares containing these types of entities
+        :return: the target, or False if target is invalid
         """
+        if not hasattr(affected, "__iter__"):
+            affected = (affected,)
+
+        if not hasattr(avoid, "__iter__"):
+            avoid = (avoid,)
         if not target:
             return target
         tile = target + self.caster_pos()
+        valid = False
         for item in self.caster.layer.map.get_all_at_position(tile.x, tile.y):
-            if isinstance(item, affected):
-                return target
-        return False
+            if not len(affected) or (isinstance(item, affected) and (Floor in affected or not type(item) is Floor)):
+                valid = True
+            if isinstance(item, avoid) and (Floor in avoid or not type(item) is Floor):
+                return False
+        if valid:
+            return target
+        else:
+            return False
 
     def cast(self, target):
         """
@@ -137,6 +149,10 @@ class Spell:
 
     def __repr__(self):
         return self.get_name()
+
+
+def recharge(effect, entity):
+    entity.recharge(letters=1)
 
 
 class Zap(Spell):
@@ -173,7 +189,7 @@ class Bolt(Spell):
         # target = self.snap_to_line(target)
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=5, lower=1)
-        target = self.snap_to_entity(target)
+        target = self.snap_to_entity(target, affected=Enemy)
         if target:
             self.add_effect(SpellEffect(damage=2 if crit else 1), Point(target))
         return self.effects, self.areas, self.delays
@@ -195,6 +211,7 @@ class Jump(Spell):
     def get_effects(self, target, crit=False):
         self.clear_effects()
         target = self.snap_to_range(target, upper=2, lower=1)
+        target = self.snap_to_entity(target, avoid=(Wall, Enemy))
         if target:
             self.add_effect(SpellEffect(move_linear=target, affected=Player.Player, teleport=True), Point())
             self.add_effect(SpellEffect(), Point(target))
@@ -210,5 +227,22 @@ class Recharge(Spell):
         return self.effects, self.areas, self.delays
 
 
-def recharge(effect, entity):
-    entity.recharge(letters=1)
+class Freeze(Spell):
+    def get_effects(self, target, crit=False):
+        self.clear_effects()
+        target = self.snap_to_visible(target)
+        target = self.snap_to_range(target, upper=2, lower=0)
+        if target:
+            self.add_effect(SpellEffect(damage_type=Damage.ice, stun=3 if crit else 2), Circle(target, radius=2))
+        return self.effects, self.areas, self.delays
+
+
+class Golem(Spell):
+    def get_effects(self, target, crit=False):
+        self.clear_effects()
+        target = self.snap_to_visible(target)
+        target = self.snap_to_entity(target, affected=Floor, avoid=Enemy)
+        target = self.snap_to_range(target, upper=3, lower=1)
+        if target:
+            self.add_effect(SpellEffect(summon=Goomba, affected=Floor), Point(target))
+        return self.effects, self.areas, self.delays

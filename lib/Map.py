@@ -101,6 +101,9 @@ class Map:
                 return layer
         return None
 
+    def cell_in_range(self, x, y):
+        return 0 <= x <= self.width - 1 and 0 <= y <= self.height - 1
+
     def raycast(self, start, end, blocking_types, offset=False):
         """
         Find first entity in a line
@@ -112,7 +115,15 @@ class Map:
         """
         diff = end - start
         if not diff.magnitude():
-            return None, None
+            if offset:
+                return None, None
+            else:
+                if not self.cell_in_range(start.x, start.y):
+                    return None, None
+                for item in self.get_all_at_position(start.x, start.y):
+                    if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
+                        return None, item
+                return start, None
         prev = None
         if abs(diff.y) > abs(diff.x):
             for dy in range(1 if offset else 0, abs(diff.y)+1):
@@ -120,6 +131,8 @@ class Map:
                 p = start + diff*scale
                 p.x = round(p.x)
                 p.y = round(p.y)
+                if not self.cell_in_range(p.x, p.y):
+                    return prev, None
                 for item in self.get_all_at_position(p.x, p.y):
                     if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
                         return prev, item
@@ -130,6 +143,8 @@ class Map:
                 p = start + diff*scale
                 p.x = round(p.x)
                 p.y = round(p.y)
+                if not self.cell_in_range(p.x, p.y):
+                    return prev, None
                 for item in self.get_all_at_position(p.x, p.y):
                     if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
                         return prev, item

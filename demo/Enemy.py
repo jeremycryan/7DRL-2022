@@ -30,6 +30,7 @@ class Enemy(GridEntity):
         self.add_sprite(self.load_sprite())
         self.solid = True
         self.health = self.hit_points
+        self.stun = 0
         if not Enemy.name_font:
             Enemy.name_font = pygame.font.Font("fonts/smallest_pixel.ttf", 10)
             Enemy.name_letters = {letter:Enemy.name_font.render(letter, True, (255, 255, 255)) for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ "}
@@ -69,11 +70,12 @@ class Enemy(GridEntity):
         """
         pass
 
-    def damage(self, hp, damage_type):
+    def damage(self, hp, damage_type, stun=0):
         """
         Apply damage or healing to this entity
         :param hp: Amount of damage to deal; a negative number represents healing
         :param damage_type: Type of damage dealt (SpellEffect.Damage), used to calculate resistance and vulnerability
+        :param stun: number of turns to skip due to stun effect
         """
         if hp > 0 and damage_type in self.resistances:
             hp = hp//2
@@ -81,6 +83,9 @@ class Enemy(GridEntity):
             hp *= 2
         elif hp > 0 and damage_type in self.invulnerabilities:
             hp = 0
+        if stun > 0 and damage_type in self.invulnerabilities:
+            stun = 0
+        self.stun = max(self.stun, stun)
         self.health -= hp
         if self.health <= 0:
             self.health = 0
