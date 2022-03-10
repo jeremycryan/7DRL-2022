@@ -19,6 +19,7 @@ class TurnManager:
                 for entity in cls.entities[:]:
                     if entity.health <= 0:
                         cls.entities.remove(entity)
+            cls.take_next_turn()
 
     @classmethod
     def add_entities(cls, *args):

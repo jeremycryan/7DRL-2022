@@ -51,17 +51,17 @@ class Player(GridEntity):
         # Player input handling
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_w] and self.can_make_turn_movement():
-            self.move(y=-1)
-            self.end_turn()
+            if self.move(y=-1):
+                self.end_turn()
         if pressed[pygame.K_s] and self.can_make_turn_movement():
-            self.move(y=1)
-            self.end_turn()
+            if self.move(y=1):
+                self.end_turn()
         if pressed[pygame.K_a] and self.can_make_turn_movement():
-            self.move(x=-1)
-            self.end_turn()
+            if self.move(x=-1):
+                self.end_turn()
         if pressed[pygame.K_d] and self.can_make_turn_movement():
-            self.move(x=1)
-            self.end_turn()
+            if self.move(x=1):
+                self.end_turn()
         if self.can_make_turn_movement():
             for i, key in enumerate(spellKeys):
                 if pressed[key] and self.cooldown[i] == 0 and self.spells[i] and i != self.prepared_spell:
