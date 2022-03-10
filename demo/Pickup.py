@@ -18,4 +18,9 @@ class LetterTile(Pickup):
     def __init__(self, letter):
         super().__init__()
         self.letter = letter
-        self.add_sprite(StaticSprite(ImageHandler.load("images/big_tile.png"), colorkey=(255, 0, 255)))
+        self.add_sprite(StaticSprite(ImageHandler.load(f"images/letters/UI_LETTER_{letter}.png"), colorkey=(255, 0, 255)))
+
+    def on_pickup(self, pickupper):
+        super().destroy()
+        if hasattr(pickupper, "letter_tiles"):
+            pickupper.letter_tiles.append(self)

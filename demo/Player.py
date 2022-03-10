@@ -36,6 +36,8 @@ class Player(GridEntity):
         self.new_turn = True
         self.solid = True
 
+        self.letter_tiles = []
+
         self.spells[1] = Zap(self)
         self.spells[2] = Flare(self)
         self.spells[3] = Push(self)

@@ -12,7 +12,7 @@ from lib.Settings import Settings
 import random
 import time
 from demo.Player import Player
-from demo.Wall import Wall, Floor
+from demo.Wall import Wall, Floor, Decorator
 from demo.Enemy import Goomba
 from demo.TurnManager import TurnManager
 
@@ -120,8 +120,30 @@ class Game:
 
         # Must do this to make sure tiles display right
         self.load_layer_sprites(floor_layer)
+        self.add_decorators(map)
 
         return map
+
+    def add_decorators(self, map):
+        new_layer = map.add_empty_layer(Settings.Static.DECORATOR_LAYER)
+        floor_layer = map.get_layer(1)
+        for cell, x, y in floor_layer.populated_cells_and_coordinates():
+            for item in cell:
+                if type(item) == Floor:
+                    if random.random() < 0.03:
+                        self.add_decorator(new_layer, x, y, True)
+                    break
+                if type(item) == Wall:
+                    if new_layer.cell_in_range(x, y+1):
+                        for item in new_layer.peek_at_cell(x, y+1):
+                            if type(item) == Floor:
+                                if random.random() < 0.1:
+                                    self.add_decorator(new_layer, x, y, False)
+                                    break
+                    break
+
+    def add_decorator(self, layer, x, y, is_floor):
+        layer.add_to_cell(Decorator(is_floor), x, y)
 
     def load_layer_sprites(self, layer):
         # This is necessary to pick the right tile sprites after the map has been generated

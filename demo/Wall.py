@@ -89,3 +89,35 @@ class Floor(Wall):
 
     def draw(self, surface, offset=(0, 0)):
         super().draw(surface, offset)
+
+
+class Decorator(GridEntity):
+    def __init__(self, is_floor):
+        self.is_floor = is_floor
+        super().__init__()
+        self.solid = False
+        self.load_sprite()
+
+    def load_sprite(self):
+        if self.is_floor:
+            valid_paths = [
+                "Floor_Blood.png",
+                "Floor_Bones.png",
+                "Floor_Puddle.png",
+                "Floor_Rocks1.png",
+                "Floor_Rocks2.png",
+                #"Floor_Torch.png"
+            ]
+        else:
+            valid_paths = [
+                "Wall_Blood.png",
+                "Wall_Bones.png",
+                "Wall_Moss.png",
+                "Wall_Eyes.png",
+                "Wall_Torch.png"
+            ]
+        path = random.choice(valid_paths)
+        if path == "Floor_Torch.png":
+            self.solid = True
+        path = f"images/decorators/{path}"
+        self.add_sprite(StaticSprite(ImageHandler.load(path), rect=(0, 0, 32, 32), colorkey=(0, 0, 0)))

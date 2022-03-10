@@ -20,6 +20,7 @@ class Settings:
         GAME_HEIGHT = 360
 
         PICKUP_LAYER = 0.8
+        DECORATOR_LAYER = 0.9
 
     class Dynamic:
         """
