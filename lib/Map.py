@@ -239,12 +239,18 @@ class Map:
         def draw(self, surface, offset=(0, 0)):
             if not self._draws_enabled:
                 return
-            for cell, x, y in self.populated_cells_and_coordinates():
-                wx, wy = self.grid_to_world_pixel(x, y)
-                if not self.map.in_frame(wx+offset[0], wy+offset[1]):
-                    continue
-                for game_object in cell:
-                    game_object.draw(surface, offset=offset)
+            camera_position = Camera.position
+            top_left = camera_position - Pose((Settings.Static.GAME_WIDTH//2, Settings.Static.GAME_HEIGHT//2), 0)
+            bottom_right = camera_position + Pose((Settings.Static.GAME_WIDTH//2, Settings.Static.GAME_HEIGHT//2), 0)
+            x1, y1 = self.world_pixel_to_grid(*top_left.get_position())
+            x2, y2 = self.world_pixel_to_grid(*bottom_right.get_position())
+            for x in range(int(x1 - 2), int(x2+3)):
+                for y in range(int(y1 - 2), int(y2+3)):
+                    if self.map.cell_in_range(x, y):
+                        cell = self.peek_at_cell(x, y)
+                        for game_object in cell:
+                            game_object.draw(surface, offset=offset)
+
 
         def update(self, dt, events):
             if not self._updates_enabled:
@@ -264,6 +270,6 @@ class Map:
             return x, y
 
         def world_pixel_to_grid(self, x, y):
-            x = ((x/self.x_parallax) - self.x_offset)/Map.TILE_WIDTH
-            y = ((y/self.y_parallax) - self.y_offset)/Map.TILE_HEIGHT
+            x = ((x) - self.x_offset)/Map.TILE_WIDTH
+            y = ((y) - self.y_offset)/Map.TILE_HEIGHT
             return x, y
