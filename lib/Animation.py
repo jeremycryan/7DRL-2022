@@ -2,6 +2,7 @@ from lib.Primitives import Pose
 from lib.Math import lerp, PowerCurve
 import pygame
 
+
 class Animation:
 
     blocking = False

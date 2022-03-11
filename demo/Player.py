@@ -1,5 +1,4 @@
 from lib.Camera import Camera
-from lib.GridEntity import GridEntity
 from lib.Sprite import StaticSprite
 from demo.Spell import *
 from lib.ImageHandler import ImageHandler
@@ -41,16 +40,9 @@ class Player(GridEntity):
         self.letter_tiles = [LetterTile(letter) for letter in Settings.Static.STARTING_LETTERS]
         self.letters_in_use = self.letter_tiles.copy()
 
-        self.spells[1] = Zap(self)
-        self.spells[2] = Flare(self)
-        self.spells[3] = Push(self)
-        self.spells[4] = Bolt(self)
-        self.spells[5] = Jump(self)
-        self.spells[6] = Recharge(self)
-        self.spells[7] = Beam(self)
-        self.spells[8] = Freeze(self)
-        self.spells[9] = Golem(self)
-        self.spells[0] = Barrier(self)
+        starting_spells = ["zap", "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        for i, spell in enumerate(starting_spells):
+            self.spells[i] = get_spell(self, starting_spells[i])
 
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)
@@ -94,6 +86,7 @@ class Player(GridEntity):
                     hover = self.layer.map.get_hovered_tile()
                     if hover and self.get_spell().cast(hover - self.position_on_grid):
                         self.cooldown[self.prepared_spell] = len(self.get_spell().get_name()) + 1
+                        self.prepared_spell = None
                         self.end_turn()
                         break
 
@@ -123,7 +116,7 @@ class Player(GridEntity):
         pose_to_mouse = Camera.mouse_pos_game_coordinates() - self.position
         should_flip = pose_to_mouse.x < 0
         for sprite in self.sprites:
-                sprite.flipped_x = should_flip
+            sprite.flipped_x = should_flip
         angle = -math.atan2(pose_to_mouse.y, pose_to_mouse.x) * 180/math.pi
         staff_rotated = pygame.transform.rotate(self.staff, angle - 90)
         sx = self.position.x + offset[0] + (14 * (1 - 2*should_flip)) - staff_rotated.get_width()//2
@@ -151,7 +144,7 @@ class Player(GridEntity):
 
     def end_turn(self):
         GridEntity.end_turn(self)
-        self.prepared_spell = None
+        # self.prepared_spell = None
         self.new_turn = True
 
     def get_spell(self):

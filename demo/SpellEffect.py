@@ -1,6 +1,4 @@
-import demo.Player as Player
 from demo.TurnManager import TurnManager
-from demo.Wall import Floor
 from demo.Enemy import Enemy
 from lib.GridEntity import GridEntity
 
@@ -8,7 +6,7 @@ from lib.GridEntity import GridEntity
 class SpellEffect:
     def __init__(self, damage=0, damage_type=Enemy.DAMAGE_NORMAL, move_linear=None, move_radial=None, teleport=False,
                  stun=0, affected=(GridEntity.FACTION_ALLY, GridEntity.FACTION_HOSTILE, GridEntity.FACTION_NEUTRAL),
-                 action=None, delayed_action=None, duration=0, summon=None, summon_args={},
+                 action=None, delayed_action=None, duration=0, summon=None, summon_args=None,
                  density=GridEntity.DENSITY_CREATURE):
         """
         Define a spell effect to be applied to all valid targets in some area
@@ -38,6 +36,8 @@ class SpellEffect:
         self.delayed_action = delayed_action
         self.duration = duration
         self.summon = summon
+        if not summon_args:
+            summon_args = {}
         self.summon_args = summon_args
         if not hasattr(density, "__iter__"):
             density = (density,)
