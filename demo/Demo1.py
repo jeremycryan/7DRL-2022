@@ -3,14 +3,12 @@ import sys
 import yaml
 
 from demo.SpellHUD import SpellHUD
+from demo.CraftingMenu import CraftingMenu
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
-from lib.GridEntity import GridEntity
-from lib.Sprite import StaticSprite
 from lib.Camera import Camera
 from lib.Settings import Settings
 import random
-import time
 from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator
 from demo.Enemy import Goomba
@@ -171,6 +169,7 @@ class Game:
         player = Player()
         map.add_to_cell(player, 2, 2, 0)
         spell_hud = SpellHUD(player)
+        crafting_menu = CraftingMenu(player)
         enemies = self.spawn_enemies(map.get_layer(0))
         TurnManager.add_entities(player, *enemies)
 
@@ -194,9 +193,11 @@ class Game:
             self.update_fpss(dt, events)
             Camera.update(dt, events)
             map.update(dt, events)
+            crafting_menu.update(dt, events)
             map.draw(self.screen, offset)
             self.draw_fps_font()
 
+            crafting_menu.draw(self.screen, (0, 0))
             spell_hud.draw(self.screen, (10, 10))
 
             scaled = pygame.transform.scale2x(self.screen)
