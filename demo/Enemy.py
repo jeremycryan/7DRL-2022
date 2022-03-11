@@ -15,9 +15,10 @@ class Enemy(GridEntity):
     name = "ENEMY"
     hit_points = 1
     weight = 1
-    vulnerabilities = []
-    invulnerabilities = []
-    resistances = []
+    drop_letters = True
+    vulnerabilities = ()
+    invulnerabilities = ()
+    resistances = ()
 
     name_font = None
     name_letters = {}
@@ -34,7 +35,6 @@ class Enemy(GridEntity):
         if not Enemy.name_font:
             Enemy.name_font = pygame.font.Font("fonts/smallest_pixel.ttf", 10)
             Enemy.name_letters = {letter:Enemy.name_font.render(letter, True, (255, 255, 255)) for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ "}
-
 
     def load_sprite(self):
         """
@@ -70,7 +70,7 @@ class Enemy(GridEntity):
         """
         pass
 
-    def damage(self, hp, damage_type, stun=0):
+    def damage(self, hp=0, damage_type=GridEntity.DAMAGE_NORMAL, stun=0):
         """
         Apply damage or healing to this entity
         :param hp: Amount of damage to deal; a negative number represents healing
@@ -93,7 +93,7 @@ class Enemy(GridEntity):
 
     def on_destroy(self):
         super().on_destroy()
-        if self.position_on_grid:
+        if self.position_on_grid and self.drop_letters:
             x, y = self.position_on_grid.get_position()
             # TODO be smart about what letter I drop
             self.layer.map.add_to_cell(LetterTile(random.choice(self.name)), x, y, Settings.Static.PICKUP_LAYER)
@@ -154,3 +154,57 @@ class Goomba(Enemy):
                 self.move(*direction)
                 self.align_sprites()
                 break
+
+
+class GolemSummon(Enemy):
+    name = "GOLEM"
+    hit_points = 1
+    faction = GridEntity.FACTION_ALLY
+    drop_letters = False
+
+    def __init__(self):
+        super().__init__()
+
+    def load_sprite(self):
+        """
+        By default, return an invisible sprite.
+        :return:
+        """
+        sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def take_turn(self):
+        """
+        Code to run when the enemy takes its turn. Remember to set self.taking_turn to true if it needs to wait on
+        an animation, etc. to finish before other entities take their turns. This should probably be the case for
+        anything other than regular movement.
+        """
+        directions = [(1, 0), (0, 1), (0, -1), (-1, 0)]
+        random.shuffle(directions)
+        for direction in directions:
+            if self.can_move(*direction):
+                self.move(*direction)
+                self.align_sprites()
+                break
+
+
+class BarrierSummon(Enemy):
+    name = "BARRIER"
+    hit_points = 5
+    faction = GridEntity.FACTION_ALLY
+    drop_letters = False
+    invulnerabilities = (Enemy.DAMAGE_NORMAL,)
+
+    def __init__(self):
+        super().__init__()
+
+    def load_sprite(self):
+        surf = ImageHandler.load("images/tileset_engine.png")
+        tw = Settings.Static.TILE_SIZE  # tile width
+        sprite = StaticSprite(surf, rect=(0, 6*tw, tw, tw))
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def take_turn(self):
+        self.damage(1, damage_type=self.DAMAGE_OVERRIDE)

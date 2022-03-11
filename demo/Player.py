@@ -15,7 +15,6 @@ class Player(GridEntity):
 
     faction = GridEntity.FACTION_ALLY
 
-
     def __init__(self, position=(0, 0)):
         super().__init__(position)
 
@@ -51,6 +50,7 @@ class Player(GridEntity):
         self.spells[7] = Beam(self)
         self.spells[8] = Freeze(self)
         self.spells[9] = Golem(self)
+        self.spells[0] = Barrier(self)
 
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)
@@ -84,14 +84,13 @@ class Player(GridEntity):
             for i, key in enumerate(spellKeys):
                 if pressed[key] and self.cooldown[i] == 0 and self.spells[i] and i != self.prepared_spell:
                     self.prepared_spell = i
-                    print("Prepared " + str(self.spells[i]))
         if pressed[pygame.K_ESCAPE]:
             self.prepared_spell = None
 
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_presses = pygame.mouse.get_pressed()
-                if mouse_presses[0] and self.prepared_spell:
+                if mouse_presses[0] and not self.prepared_spell is None:
                     hover = self.layer.map.get_hovered_tile()
                     if hover and self.get_spell().cast(hover - self.position_on_grid):
                         self.cooldown[self.prepared_spell] = len(self.get_spell().get_name()) + 1
@@ -160,7 +159,7 @@ class Player(GridEntity):
             return None
         return self.spells[self.prepared_spell]
 
-    def damage(self, hp=0, damage_type=Damage.normal, stun=0):
+    def damage(self, hp=0, damage_type=GridEntity.DAMAGE_NORMAL, stun=0):
         """
         Apply damage or healing to this entity
         :param hp: Amount of damage to deal; a negative number represents healing
@@ -178,8 +177,9 @@ class Player(GridEntity):
         self.stun = max(self.stun, stun)
         self.health -= hp
         if self.health <= 0:
-            self.health = 0
-            self.destroy()
+            self.health = 1
+            # self.destroy()
+            print("Game Over")  # TODO: Game Over
 
     def push(self, x=0, y=0, teleport=False):
         if not teleport:
@@ -190,12 +190,6 @@ class Player(GridEntity):
 
     def recharge(self, letters=1):
         for i, charge in enumerate(self.cooldown):
-            if self.spells[i]:
-                n = len(self.spells[i].get_name())
-                if n >= charge > 1:
-                    print(self.spells[i].get_name()[:n - charge + 1])
-                if charge == 1:
-                    print(self.spells[i].get_name() + " is ready")
             self.cooldown[i] = max(0, self.cooldown[i] - 1)
 
     def check_for_pickups(self):

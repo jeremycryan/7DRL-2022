@@ -109,8 +109,8 @@ class Map:
         Find first entity in a line
         :param start: first square to check
         :param end: final square to check
+        :param blocking_types: densities of obstacles that stop the raycast
         :param offset: if true, start on second square
-        :blocking_types: class or list of class of obstacles that stop the raycast
         :return: last open square and the entity that was hit
         """
         diff = end - start
@@ -121,7 +121,7 @@ class Map:
                 if not self.cell_in_range(start.x, start.y):
                     return None, None
                 for item in self.get_all_at_position(start.x, start.y):
-                    if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
+                    if item.density in blocking_types:
                         return None, item
                 return start, None
         prev = None
@@ -134,7 +134,7 @@ class Map:
                 if not self.cell_in_range(p.x, p.y):
                     return prev, None
                 for item in self.get_all_at_position(p.x, p.y):
-                    if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
+                    if item.density in blocking_types:
                         return prev, item
                 prev = p
         else:
@@ -146,7 +146,7 @@ class Map:
                 if not self.cell_in_range(p.x, p.y):
                     return prev, None
                 for item in self.get_all_at_position(p.x, p.y):
-                    if isinstance(item, blocking_types) and (Floor in blocking_types or not type(item) is Floor):
+                    if item.density in blocking_types:
                         return prev, item
                 prev = p
         return end, None

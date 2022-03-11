@@ -1,4 +1,4 @@
-from SpellEffect import SpellEffect, Damage
+from SpellEffect import SpellEffect
 from SpellArea import *
 import demo.Player as Player
 from demo.Enemy import *
@@ -72,17 +72,18 @@ class Spell:
         Snap target to a square with a direct line of sight from caster
         :param target: the nominal target relative to the caster
         :param lower: the min distance of the spell target from the caster
-        :param pierce: if true, the targeting can pass through enemies
+        :param pierce: if true, the targeting can pass through creatures
         :return: the adjusted target, or False if target is invalid
         """
-        if not target:
+        if not target or target.magnitude() == 0:
             return target
         if pierce:
-            types = (Wall,)
+            types = (GridEntity.DENSITY_WALL,)
         else:
-            types = (Wall, Enemy)
-        target, entity = self.caster.layer.map.raycast(self.caster_pos(), self.caster_pos()+target, types, offset=False)
-        if not pierce and isinstance(entity, Enemy):
+            types = (GridEntity.DENSITY_WALL, GridEntity.DENSITY_CREATURE)
+        target, entity = self.caster.layer.map.raycast(self.caster_pos(), self.caster_pos()+target, types,
+                                                       offset=True)
+        if not pierce and entity and entity.density == Enemy.DENSITY_CREATURE:
             target = entity.position_on_grid
         if not target:
             return False
@@ -91,29 +92,36 @@ class Spell:
             return False
         return target
 
-    def snap_to_entity(self, target, affected=(), avoid=()):
+    def snap_to_entity(self, target, affected=(), avoid=(), density=()):
         """
         Target an entity that can be affected by the spell
         :param target: the nominal target relative to the caster
-        :param affected: only select targets containing these types of entities
-        :param avoid: do not select squares containing these types of entities
+        :param affected: only select targets containing these factions of entities
+        :param avoid: do not select squares containing these factions of entities
+        :param density: only select targets containing this densities of entities
         :return: the target, or False if target is invalid
         """
         if not hasattr(affected, "__iter__"):
             affected = (affected,)
-
         if not hasattr(avoid, "__iter__"):
             avoid = (avoid,)
+        if not hasattr(density, "__iter__"):
+            density = (density,)
         if not target:
             return target
         tile = target + self.caster_pos()
         valid = False
+        valid_density = False
         for item in self.caster.layer.map.get_all_at_position(tile.x, tile.y):
-            if not len(affected) or (isinstance(item, affected) and (Floor in affected or not type(item) is Floor)):
+            if not len(affected) or item.faction in affected:
                 valid = True
-            if isinstance(item, avoid) and (Floor in avoid or not type(item) is Floor):
+            if item.faction in avoid:
                 return False
-        if valid:
+            if not len(density) or item.density in density:
+                valid_density = True
+            if item.density != GridEntity.DENSITY_EMPTY and GridEntity.DENSITY_EMPTY in density:
+                return False
+        if valid and valid_density:
             return target
         else:
             return False
@@ -124,7 +132,6 @@ class Spell:
         :param target: The grid position of the target relative to the caster
         :return: True if spell was cast successfully
         """
-        print("Cast " + self.get_name())
         effects, areas, delays = self.get_effects(target)
         if not effects:
             return False
@@ -189,7 +196,7 @@ class Bolt(Spell):
         # target = self.snap_to_line(target)
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=5, lower=1)
-        target = self.snap_to_entity(target, affected=Enemy)
+        target = self.snap_to_entity(target, density=GridEntity.DENSITY_CREATURE)
         if target:
             self.add_effect(SpellEffect(damage=2 if crit else 1), Point(target))
         return self.effects, self.areas, self.delays
@@ -203,7 +210,7 @@ class Beam(Spell):
         target = self.snap_to_visible(target, pierce=True)
         target = self.snap_to_range(target, upper=5, lower=1)
         if target:
-            self.add_effect(SpellEffect(damage=2 if crit else 1), Line(endpoint=target))
+            self.add_effect(SpellEffect(damage=2 if crit else 1), Line(endpoint=target, offset=True))
         return self.effects, self.areas, self.delays
 
 
@@ -211,9 +218,9 @@ class Jump(Spell):
     def get_effects(self, target, crit=False):
         self.clear_effects()
         target = self.snap_to_range(target, upper=2, lower=1)
-        target = self.snap_to_entity(target, avoid=(Wall, Enemy))
+        target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         if target:
-            self.add_effect(SpellEffect(move_linear=target, affected=Player.Player, teleport=True), Point())
+            self.add_effect(SpellEffect(move_linear=target, teleport=True), Point())
             self.add_effect(SpellEffect(), Point(target))
         return self.effects, self.areas, self.delays
 
@@ -223,7 +230,7 @@ class Recharge(Spell):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
         if target:
-            self.add_effect(SpellEffect(affected=Player.Player, action=recharge), Point())
+            self.add_effect(SpellEffect(action=recharge), Point())
         return self.effects, self.areas, self.delays
 
 
@@ -233,7 +240,7 @@ class Freeze(Spell):
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=2, lower=0)
         if target:
-            self.add_effect(SpellEffect(damage_type=Damage.ice, stun=3 if crit else 2), Circle(target, radius=2))
+            self.add_effect(SpellEffect(damage_type=Enemy.DAMAGE_ICE, stun=3 if crit else 2), Circle(target, radius=2))
         return self.effects, self.areas, self.delays
 
 
@@ -241,8 +248,19 @@ class Golem(Spell):
     def get_effects(self, target, crit=False):
         self.clear_effects()
         target = self.snap_to_visible(target)
-        target = self.snap_to_entity(target, affected=Floor, avoid=Enemy)
+        target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         target = self.snap_to_range(target, upper=3, lower=1)
         if target:
-            self.add_effect(SpellEffect(summon=Goomba, affected=Floor), Point(target))
+            self.add_effect(SpellEffect(summon=GolemSummon, density=GridEntity.DENSITY_EMPTY), Point(target))
+        return self.effects, self.areas, self.delays
+
+
+class Barrier(Spell):
+    def get_effects(self, target, crit=False):
+        self.clear_effects()
+        target = self.snap_to_visible(target)
+        target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
+        target = self.snap_to_range(target, upper=3, lower=1)
+        if target:
+            self.add_effect(SpellEffect(summon=BarrierSummon, density=GridEntity.DENSITY_EMPTY), Point(target))
         return self.effects, self.areas, self.delays
