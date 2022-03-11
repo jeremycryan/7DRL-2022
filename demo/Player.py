@@ -18,6 +18,7 @@ class Player(GridEntity):
 
     def __init__(self, position=(0, 0)):
         super().__init__(position)
+
         self.staff = ImageHandler.load_copy("images/staff.png")
         self.staff.set_colorkey((255, 0, 255))
         sprite = StaticSprite.from_path("images/pigeon.png", flippable=True)
@@ -36,7 +37,10 @@ class Player(GridEntity):
         self.new_turn = True
         self.solid = True
 
-        self.letter_tiles = []
+        self.lockout_count = 0
+
+        self.letter_tiles = [LetterTile(letter) for letter in Settings.Static.STARTING_LETTERS]
+        self.letters_in_use = self.letter_tiles.copy()
 
         self.spells[1] = Zap(self)
         self.spells[2] = Flare(self)
@@ -58,6 +62,9 @@ class Player(GridEntity):
         if self.new_turn:
             self.new_turn = False
             self.recharge()
+
+        if self.locked_out():
+            return
 
         # Player input handling
         pressed = pygame.key.get_pressed()
@@ -94,6 +101,25 @@ class Player(GridEntity):
     def can_make_turn_movement(self):
         return not self.animating() and self.taking_turn
 
+    def locked_out(self):
+        """
+        Indicates the player shouldn't be able to do anything because something else is in control (e.g. a menu)
+        :return: True if the player is locked out
+        """
+        return self.lockout_count > 0
+
+    def lock(self):
+        """
+        Locks the player. Make sure to call unlock after.
+        """
+        self.lockout_count += 1
+
+    def unlock(self):
+        """
+        Unlocks the player. Only call after locking and only once per lock.
+        """
+        self.lockout_count -= 1
+
     def draw(self, surface, offset=(0, 0)):
         pose_to_mouse = Camera.mouse_pos_game_coordinates() - self.position
         should_flip = pose_to_mouse.x < 0
@@ -106,7 +132,7 @@ class Player(GridEntity):
         surface.blit(staff_rotated, (sx, sy))
         super().draw(surface, offset=offset)
         hovered = self.layer.map.get_hovered_tile()
-        if hovered and self.get_spell():
+        if hovered and self.get_spell() and not self.locked_out():
             effects, areas, delays = self.get_spell().get_effects(hovered - self.position_on_grid)
             for effect, area, delay in zip(effects, areas, delays):
                 if effect.damage > 0:
