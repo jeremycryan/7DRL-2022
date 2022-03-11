@@ -1,3 +1,6 @@
+from cProfile import label
+from re import A
+from turtle import goto
 import pygame
 import sys
 import yaml
@@ -84,9 +87,21 @@ class Game:
             array[y] = new_row
 
     def generate_map(self):
+
+        mapLength = 7
+        mapBossRoom = "rooms/boss_room_1.yaml"
+        mapBranchLength = 0
+        mapBranchChance = 0
+        roomAttemptLimit = 30
+        placementAttemptLimit = 30
+
+
         # TODO: Somehow determine a good height for the map, in tiles.
-        width = Settings.Static.ROOM_WIDTH * 2
-        height = Settings.Static.ROOM_HEIGHT * 2
+        mapWidth = Settings.Static.MAP_WIDTH
+        mapHeight = Settings.Static.MAP_HEIGHT
+
+        width = Settings.Static.ROOM_WIDTH * mapWidth
+        height = Settings.Static.ROOM_HEIGHT * mapHeight
 
         # Don't change any of this
         map = Map(width, height)
@@ -97,20 +112,100 @@ class Game:
 
         # Using rooms from yaml, assemble the map.
         # TODO Daniel improve this section
+        
         wall = "X"
         floor = "."
         up, down, left, right = "U", "D", "L", "R"
+
         rooms = [
             self.get_yaml_room("rooms/room_1.yaml")
         ]
-        tile_array = [wall * width for _ in range(height)]  # Make array of wall tiles the size of the map to add rooms into
-        for y in range(2):
-            for x in range(2):
+        
+        roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
+        centerX = mapWidth//2
+        centerY = mapHeight//2
+
+        # Make array of wall tiles the size of the map to add rooms into
+        stringMap = [wall * width for _ in range(height)] 
+
+        # Spawn Room
+        self.merge_room_onto_character_array(rooms[0], stringMap, (centerX, centerY), closed_walls=[])
+        roomGrid[centerX][centerY] = True
+
+        currentX = centerX
+        currentY = centerY
+        branchBaseX = centerX
+        branchBaseY = centerY
+
+        mapData = [] 
+
+        for stepCount in range(mapLength):
+            # DO NEXT STEP IN TO-BOSS PATH
+
+            for roomAttemptCount in range(roomAttemptLimit):
+                
+                # pick a room
                 room = random.choice(rooms)
-                self.merge_room_onto_character_array(room, tile_array, (x, y), closed_walls=[up])
+                roomWidth = room["width"]
+                roomHeight = room["height"]
+
+                #place attempt code
+                placementSucceded = False
+                for placeAttemptCount in range(placementAttemptLimit):
+
+                    attemptX = currentX + random.randrange(-roomWidth, roomWidth+1)
+                    attemptY = currentY + random.randrange(-roomHeight, roomHeight+1)
+                    
+                    # If same space or not connected due to angle
+                    if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomHeight and abs(attemptY) == roomHeight):
+                        continue
+
+                    # checking logic here
+                    
+                    placementAllowed = True
+                    for roomSpaceX in range(roomWidth):
+                        for roomSpaceY in range(roomHeight):
+
+                            if roomGrid[roomSpaceX][roomSpaceY]:
+                                placementAllowed = False
+
+                    if not placementAllowed:
+                        continue
+
+                    #place stuff time
+                    mapData.append([attemptX, attemptY, room])
+                    currentX = attemptX
+                    currentY = attemptY
+                    placementSucceded = True
+                    break
+
+                if not placementSucceded:
+                    continue
+
+                break
+
+            if random.random() < mapBranchChance:
+                # MAKE BRANCH
+                for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
+                    
+                    testX = random.choice(range(mapWidth))
+                    testY = random.choice(range(mapWidth))
+
+
+
+
+
+                    #x and y are in room coordinates
+                    #self.merge_room_onto_character_array(room, stringMap, (x, y), closed_walls=[up])
+
+        for roomToPlace in mapData:
+            self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), closed_walls=[])
+
+        #apply U D L R in tile_array into floors based on room coordinates
+        #searches based on room coordinate
 
         # Turn our room array back into a map.
-        for y, row in enumerate(tile_array):
+        for y, row in enumerate(stringMap):
             for x, item in enumerate(row):
                 if item is wall:
                     new_tile = Wall()
@@ -123,6 +218,9 @@ class Game:
         self.add_decorators(map)
 
         return map
+    
+    def tryPlaceRoom(self):
+        pass
 
     def add_decorators(self, map):
         new_layer = map.add_empty_layer(Settings.Static.DECORATOR_LAYER)
@@ -169,15 +267,15 @@ class Game:
 
         map = self.generate_map()
         player = Player()
-        map.add_to_cell(player, 2, 2, 0)
+        map.add_to_cell(player, Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         spell_hud = SpellHUD(player)
-        enemies = self.spawn_enemies(map.get_layer(0))
+        enemies = [] #self.spawn_enemies(map.get_layer(0))
         TurnManager.add_entities(player, *enemies)
 
         Camera.change_objects(objects=[player], weights=[1], mouse_weight=0.15)
 
         while True:
-            dt = clock.tick(60)/1000
+            dt = clock.tick(120)/1000
             events = pygame.event.get()
 
             self.screen.fill((0, 0, 0))
