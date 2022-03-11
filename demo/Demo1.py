@@ -157,7 +157,7 @@ class Game:
                     attemptY = currentY + random.randrange(-roomHeight, roomHeight+1)
                     
                     # If same space or not connected due to angle
-                    if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomHeight and abs(attemptY) == roomHeight):
+                    if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
                         continue
 
                     # checking logic here
