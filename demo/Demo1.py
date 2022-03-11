@@ -83,8 +83,8 @@ class Game:
 
     def generate_map(self):
         # TODO: Somehow determine a good height for the map, in tiles.
-        width = Settings.Static.ROOM_WIDTH * 2
-        height = Settings.Static.ROOM_HEIGHT * 2
+        width = Settings.Static.ROOM_WIDTH * 4
+        height = Settings.Static.ROOM_HEIGHT * 4
 
         # Don't change any of this
         map = Map(width, height)
@@ -102,8 +102,8 @@ class Game:
             self.get_yaml_room("rooms/room_1.yaml")
         ]
         tile_array = [wall * width for _ in range(height)]  # Make array of wall tiles the size of the map to add rooms into
-        for y in range(2):
-            for x in range(2):
+        for y in range(16):
+            for x in range(16):
                 room = random.choice(rooms)
                 self.merge_room_onto_character_array(room, tile_array, (x, y), closed_walls=[up])
 
