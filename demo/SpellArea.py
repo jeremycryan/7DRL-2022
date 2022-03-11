@@ -20,17 +20,18 @@ class Point(SpellArea):
 
 
 class Line(SpellArea):
-    def __init__(self, origin=Pose((0, 0)), endpoint=Pose((0, 0)), line_of_sight=False):
+    def __init__(self, origin=Pose((0, 0)), endpoint=Pose((0, 0)), offset=True, line_of_sight=False):
         """
         Target all squares in a line
         :param origin: source square
         :param endpoint: final square in line
+        :param offset: start at second square (e.g. to avoid caster)
         :param line_of_sight: if true, only squares with line of sight to origin are affected
         """
         super().__init__(origin)
         self.endpoint = endpoint
         self.line_of_sight = line_of_sight
-        self.squares = get_line(origin, endpoint)  # TODO (low priority): check line of sight
+        self.squares = get_line(origin, endpoint, offset=offset)  # TODO (low priority): check line of sight
 
 
 class Circle(SpellArea):

@@ -7,6 +7,8 @@ import random
 
 
 class Wall(GridEntity):
+    density = GridEntity.DENSITY_WALL
+
     def __init__(self, position=(0, 0)):
         super().__init__(position)
         self.solid = False
@@ -71,6 +73,8 @@ class Wall(GridEntity):
 
 
 class Floor(Wall):
+    density = GridEntity.DENSITY_EMPTY
+
     def __init__(self, position=(0, 0)):
         super().__init__(position)
         self.solid = False
@@ -92,6 +96,8 @@ class Floor(Wall):
 
 
 class Decorator(GridEntity):
+    density = GridEntity.DENSITY_EMPTY
+
     def __init__(self, is_floor):
         self.is_floor = is_floor
         super().__init__()

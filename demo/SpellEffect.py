@@ -1,20 +1,15 @@
+import demo.Player as Player
 from demo.TurnManager import TurnManager
 from demo.Wall import Floor
-from lib.Primitives import Pose
-import enum
 from demo.Enemy import Enemy
-
-
-class Damage(enum.Enum):
-    normal = 0
-    fire = 1
-    ice = 2
-    electric = 3
+from lib.GridEntity import GridEntity
 
 
 class SpellEffect:
-    def __init__(self, damage=0, damage_type=Damage.normal, move_linear=None, move_radial=None, teleport=False,
-                 stun=0, affected=Enemy, action=None, delayed_action=None, duration=0, summon=None, summon_args={}):
+    def __init__(self, damage=0, damage_type=Enemy.DAMAGE_NORMAL, move_linear=None, move_radial=None, teleport=False,
+                 stun=0, affected=(GridEntity.FACTION_ALLY, GridEntity.FACTION_HOSTILE, GridEntity.FACTION_NEUTRAL),
+                 action=None, delayed_action=None, duration=0, summon=None, summon_args={},
+                 density=GridEntity.DENSITY_CREATURE):
         """
         Define a spell effect to be applied to all valid targets in some area
         :param damage: Deal damage to target; negative value indicates healing
@@ -28,6 +23,7 @@ class SpellEffect:
         :param duration: Number of turns to continue calling the delayed_action function (-1 for infinite turns)
         :param summon: Class of entity to summon
         :param summon_args: Dictionary of keyword arguments for constructing summoned entity
+        :param density: Density of valid targets
         """
         self.damage = damage
         self.damage_type = damage_type
@@ -43,6 +39,9 @@ class SpellEffect:
         self.duration = duration
         self.summon = summon
         self.summon_args = summon_args
+        if not hasattr(density, "__iter__"):
+            density = (density,)
+        self.density = density
         # TODO: implement delayed action spells
 
     def apply(self, target, caster):
@@ -52,8 +51,9 @@ class SpellEffect:
             items = caster.layer.map.get_all_at_position(tile.x, tile.y)
             if not items:
                 continue
+            summoned = False
             for item in items:
-                if isinstance(item, self.affected) and (Floor in self.affected or not type(item) is Floor):
+                if item.faction in self.affected and item.density in self.density:
                     if self.damage or self.stun:
                         item.damage(hp=self.damage, damage_type=self.damage_type, stun=self.stun)
                     if self.move_linear:
@@ -62,10 +62,12 @@ class SpellEffect:
                         move = (item.position_on_grid - caster.position_on_grid - target.origin)
                         if move.magnitude():
                             move.scale_to(self.move_radial)
+                            print(item)
                             item.push(round(move.x), round(move.y), teleport=self.teleport)
-                    if self.summon:
+                    if self.summon and not summoned:
                         entity = self.summon(**self.summon_args)
                         caster.layer.add_to_cell(entity, item.position_on_grid.x, item.position_on_grid.y)
                         TurnManager.add_entities(entity)
+                        summoned = True
                     if self.action:
                         self.action(self, item)

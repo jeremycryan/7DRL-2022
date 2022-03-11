@@ -24,6 +24,8 @@ class Settings:
         PICKUP_LAYER = 0.8
         DECORATOR_LAYER = 0.9
 
+        STARTING_LETTERS = ["Z", "A", "P"]
+
     class Dynamic:
         """
         Settings that can change during runtime
