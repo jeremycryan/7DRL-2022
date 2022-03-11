@@ -139,9 +139,11 @@ class Game:
 
         mapData = [] 
 
+        generationSuceeded = True
         for stepCount in range(mapLength):
             # DO NEXT STEP IN TO-BOSS PATH
 
+            placementSucceded = False
             for roomAttemptCount in range(roomAttemptLimit):
                 
                 # pick a room
@@ -150,7 +152,6 @@ class Game:
                 roomHeight = room["height"]
 
                 #place attempt code
-                placementSucceded = False
                 for placeAttemptCount in range(placementAttemptLimit):
 
                     attemptX = currentX + random.randrange(-roomWidth, roomWidth+1)
@@ -184,12 +185,15 @@ class Game:
 
                 break
 
-            if random.random() < mapBranchChance:
-                # MAKE BRANCH
-                for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
-                    
-                    testX = random.choice(range(mapWidth))
-                    testY = random.choice(range(mapWidth))
+            if not placementSucceded:
+                generationSuceeded = False
+                break
+            #if random.random() < mapBranchChance:
+            #    # MAKE BRANCH
+            #    for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
+            #
+            #        testX = random.choice(range(mapWidth))
+            #        testY = random.choice(range(mapWidth))
 
 
 
@@ -198,8 +202,9 @@ class Game:
                     #x and y are in room coordinates
                     #self.merge_room_onto_character_array(room, stringMap, (x, y), closed_walls=[up])
 
-        for roomToPlace in mapData:
-            self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), closed_walls=[])
+        if generationSuceeded:
+            for roomToPlace in mapData:
+                self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), closed_walls=[])
 
         #apply U D L R in tile_array into floors based on room coordinates
         #searches based on room coordinate
@@ -267,7 +272,7 @@ class Game:
 
         map = self.generate_map()
         player = Player()
-        map.add_to_cell(player, Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
+        map.add_to_cell(player, 8 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 8 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         spell_hud = SpellHUD(player)
         enemies = [] #self.spawn_enemies(map.get_layer(0))
         TurnManager.add_entities(player, *enemies)
