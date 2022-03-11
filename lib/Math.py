@@ -86,8 +86,11 @@ class PowerCurve(Curve):
             return 1 - (i_factor * ((1 - x)/self._decel_time)**self._power * self._max_speed * self._decel_time)
 
 
-def get_line(start, end):
-    squares = [start]
+def get_line(start, end, offset=False):
+    if offset:
+        squares = []
+    else:
+        squares = [start]
     diff = end - start
     if abs(diff.y) > abs(diff.x):
         for dy in range(1, abs(diff.y) + 1):

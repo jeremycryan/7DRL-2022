@@ -15,6 +15,17 @@ class GridEntity(GameObject):
     FACTION_ALLY = 2
     faction = FACTION_NEUTRAL
 
+    DENSITY_EMPTY = 0
+    DENSITY_CREATURE = 1
+    DENSITY_WALL = 2
+    density = DENSITY_CREATURE
+
+    DAMAGE_NORMAL = 0
+    DAMAGE_FIRE = 1
+    DAMAGE_ICE = 2
+    DAMAGE_ELECTRIC = 3
+    DAMAGE_OVERRIDE = 4
+
     SOLID_KEY = "S"
     ANY_KEY = "?"
     EMPTY_KEY = "."
