@@ -11,7 +11,7 @@ class Wall(GridEntity):
 
     def __init__(self, position=(0, 0)):
         super().__init__(position)
-        self.solid = False
+        self.solid = True
 
     def load_sprite(self):
         surf = ImageHandler.load("images/tileset_engine.png")
