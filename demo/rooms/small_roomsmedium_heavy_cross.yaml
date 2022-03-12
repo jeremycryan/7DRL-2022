@@ -1,0 +1,18 @@
+height: 1
+tiles:
+- XXXXXXXUXXXXXXX
+- X.....XUX.....X
+- X.....XUX.....X
+- X.....XUX.....X
+- X.....XUX.....X
+- X.............X
+- XXXXX.XXX.XXXXX
+- LLLLL.XXX.RRRRR
+- XXXXX.XXX.XXXXX
+- X.............X
+- X.....XDX.....X
+- X.....XDX.....X
+- X.....XDX.....X
+- X.....XDX.....X
+- XXXXXXXDXXXXXXX
+width: 1
