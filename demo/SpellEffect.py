@@ -1,5 +1,5 @@
 from demo.TurnManager import TurnManager
-from lib.Animation import Fwoosh
+from lib.Animation import Fwoosh, Scratch
 from lib.GridEntity import GridEntity
 from lib.Settings import Settings
 
@@ -53,9 +53,11 @@ class SpellEffect:
             if not items:
                 continue
             summoned = False
-            if self.damage:
-                position = caster.position + square * Settings.Static.TILE_SIZE
-                caster.add_animation(Fwoosh(caster, 0.5, position.get_position()))
+            position = caster.position + square * Settings.Static.TILE_SIZE
+            if self.damage and self.damage_type == GridEntity.DAMAGE_PHYSICAL:
+                caster.add_animation(Scratch(caster, 0.3, position.get_position(), color=(255, 255, 255)))
+            elif self.damage and self.damage_type == GridEntity.DAMAGE_NORMAL:
+                caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (0, 0, 255)))
             for item in items:
                 if item.faction in self.affected and item.density in self.density:
                     if self.damage or self.stun:

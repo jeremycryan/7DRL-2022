@@ -73,11 +73,17 @@ class CircleParticle(Particle):
 
     def __init__(self, duration=0.5, position=(0, 0), radius=5, color=(255, 255, 255), velocity = (0, 0)):
         self.glow = ImageHandler.load_copy("images/glow.png")
+        if color != (255, 255, 255):
+            self.glow = self.glow.copy()
+            tint = pygame.Surface(self.glow.get_size())
+            tint.fill((color))
+            self.glow.blit(tint, (0, 0), special_flags=pygame.BLEND_MULT)
         super().__init__(duration=duration, position=position, velocity=velocity)
         self.radius = radius
         surface = pygame.Surface((2*radius, int(2*radius)))
-        surface.fill((255, 0, 255))
+        surface.fill((0, 0, 0))
         r = radius
+        color = tuple([(item + 255) //  2 for item in color])
         pygame.draw.circle(surface, color, (r, r), r)
         surface.set_colorkey((255, 0, 255))
         self.surface = surface
@@ -90,8 +96,8 @@ class CircleParticle(Particle):
         y = self.position.y - radius + offset[1]
         # self.surface.set_alpha(255 * (1 - self.through()))
         glow = pygame.transform.scale(self.glow, (int(4*radius), int(4*radius)))
-        surface.blit(pygame.transform.scale(self.surface, (int(2*radius), int(2*radius))), (x, y))
         surface.blit(glow, (self.position.x + offset[0] - glow.get_width()//2, self.position.y + offset[1] - glow.get_height()//2), special_flags=pygame.BLEND_ADD)
+        surface.blit(pygame.transform.scale(self.surface, (int(2*radius), int(2*radius))), (x, y), special_flags=pygame.BLEND_ADD)
 
     def update(self, dt, events):
         super().update(dt, events)
@@ -106,13 +112,10 @@ class FwooshParticle(Particle):
         self.width = 3
         self.height = 6
         surface = pygame.Surface((self.width, self.height))
-        r = 255 - int(20 * abs(offset.x)) - 50
-        g = r
-        b = 255
-        self.color = 255, 255, 255
+        self.color = color
         surface.fill((255, 0, 255))
         #self.color = color
-        pygame.draw.ellipse(surface, self.color, (surface.get_rect()))
+        pygame.draw.ellipse(surface, (255, 255, 255), (surface.get_rect()))
         surface.set_colorkey((255, 0, 255))
         self.surface = surface
 
@@ -127,3 +130,33 @@ class FwooshParticle(Particle):
 
     def on_destroy(self):
         ParticleHandler.add_particle(CircleParticle(0.6 * random.random() + 0.25, self.position.get_position(), 5, self.color, (random.random() * 120 - 60, random.random() * 120 - 60)))
+
+
+class SlashParticle(Particle):
+    def __init__(self, duration = 0.5, parent_position = (0, 0), color = (255, 255, 255), thickness = 6, length=8):
+        position = Pose((parent_position), 0) + Pose((12, -12), 0)
+        super().__init__(duration, position.get_position())
+        self.color = color
+        surf = pygame.Surface((thickness, length))
+        surf.fill((255, 0, 255))
+        surf.set_colorkey((255, 0, 255))
+        pygame.draw.ellipse(surf, (color), surf.get_rect())
+        self.surf = surf
+        self.velocity = Pose((-50, 20))
+        self.scale = 0
+
+    def update(self, dt, events):
+        self.velocity = Pose((-100 + 50*self.through(), 30 + 100*self.through())) * 2
+        self.scale = self.through() * (1 - self.through())**2 * 4
+        self.velocity *= (1 - self.through())
+        super().update(dt, events)
+
+    def draw(self, surface, offset=(0, 0)):
+        if self.scale <= 0:
+            return
+        my_surf = pygame.transform.scale(self.surf, (int(self.surf.get_height()*self.scale), int(self.surf.get_width()*self.scale)))
+        my_surf = pygame.transform.rotate(my_surf, math.atan2(self.velocity.y, self.velocity.x) * 180/math.pi + 90)
+        x = offset[0] + self.position.x - my_surf.get_width()//2
+        y = offset[1] + self.position.y - my_surf.get_height()//2
+        my_surf.set_alpha(255 * ((1 - self.through())**0.5))
+        surface.blit(my_surf, (x, y))

@@ -26,6 +26,7 @@ class GridEntity(GameObject):
     DAMAGE_ICE = 2
     DAMAGE_ELECTRIC = 3
     DAMAGE_OVERRIDE = 4
+    DAMAGE_PHYSICAL = 5
 
     SOLID_KEY = "S"
     ANY_KEY = "?"
@@ -197,7 +198,8 @@ class GridEntity(GameObject):
         """
         self.animations.append(MoveAnimation(self,
                                              self.position.copy(),
-                                             self.layer.grid_to_world_pixel(*self.position_on_grid.get_position())))
+                                             self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
+                                             squish_factor = 0.9))
         self.check_for_pickups()
 
     def add_animation(self, animation):
