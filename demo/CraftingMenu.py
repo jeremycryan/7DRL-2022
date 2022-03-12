@@ -80,6 +80,10 @@ class CraftingMenu(GameObject):
         if self.picked_up_tiles:
             return
         self.picked_up_tiles.append(tile)
+        if self.banner.hovered():
+            for banner_tile in self.banner.tiles[:]:
+                if tile.letter == banner_tile.letter:
+                    self.banner.tiles.remove(banner_tile)
         for player_tile in self.player.letter_tiles[:]:
             if tile.letter == player_tile.letter:
                 self.player.letter_tiles.remove(player_tile)
@@ -89,10 +93,10 @@ class CraftingMenu(GameObject):
     def drop_all(self):
         if self.picked_up_tiles:
             if self.banner.hovered():
-                new_tiles = [LetterTile(tile.letter) for tile in self.picked_up_tiles]
-                self.banner.tiles += new_tiles
+                new_tiles = self.picked_up_tiles
                 for tile in new_tiles:
-                    tile.position = self.picked_up_tiles[0].position.copy() + Pose((16, 16), 0)
+                    tile.position = self.picked_up_tiles[0].position.copy()
+                    self.banner.add_tile(tile)
             else:
                 self.player.letter_tiles += [LetterTile(tile.letter) for tile in self.picked_up_tiles]
             self.picked_up_tiles = []
@@ -116,8 +120,6 @@ class CraftingMenu(GameObject):
     def hide(self):
         self.hidden = True
         self.player.unlock()
-        if self.picked_up_tiles:
-            self.player.letter_tiles += self.picked_up_tiles
 
     def draw_grays(self, surf, offset=(0, 0)):
         for letter in self.gray_letters:
@@ -168,7 +170,7 @@ class CraftingMenu(GameObject):
                 if event.key == pygame.K_e:
                     self.toggle_hidden()
 
-        for tile in self.tiles:
+        for tile in self.tiles + self.picked_up_tiles:
             tile.update(dt, events)
 
         self.craft_button.update(dt, events)
@@ -179,6 +181,15 @@ class CraftingMenu(GameObject):
                 if event.button == 1:
                     self.drop_all()
 
+        if self.shown == 0 and self.banner.tiles:
+            self.player.letter_tiles += [LetterTile(tile.letter) for tile in self.banner.tiles]
+            self.banner.tiles = []
+        if self.shown == 0 and self.picked_up_tiles:
+            self.player.letter_tiles += [LetterTile(tile.letter) for tile in self.picked_up_tiles]
+            self.picked_up_tiles = []
+
+    def craft(self):
+        pass
 
 class UITile(GameObject):
     def __init__(self, letter, menu):
@@ -262,7 +273,7 @@ class Banner(GameObject):
         target_xs = self.get_target_x_positions()
         for i, tile in enumerate(self.tiles):
             target_x = target_xs[i]
-            diff = Pose((target_x, target_y), 0) - tile.position
+            diff = Pose((target_x, target_y), 0) - tile.position - Pose((16, 16), 0)
             if diff.magnitude() < 2:
                 tile.position += diff
             else:
@@ -279,13 +290,25 @@ class Banner(GameObject):
         return positions
 
     def add_tile(self, tile):
-        self.tiles.append(tile)
+        x_positions = self.get_target_x_positions()
+        index = 0
+        for x_position in x_positions:
+            if tile.position.x > x_position - 16:
+                index += 1
+        self.tiles = self.tiles[:index] + [tile] + self.tiles[index:]
 
     def hovered(self):
         mpos = Pose(pygame.mouse.get_pos(), 0)
         mpos.x *= Settings.Static.GAME_WIDTH/Settings.Static.WINDOW_WIDTH
         mpos.y *= Settings.Static.GAME_HEIGHT/Settings.Static.WINDOW_HEIGHT
         diff = mpos - self.sprite.position
-        if abs(diff.x) < 144 and abs(diff.y) < 24:
+        if abs(diff.x) < 160 and abs(diff.y) < 40:
             return True
+        return False
+
+    def get_word(self):
+        return "".join([tile.letter for tile in self.tiles])
+
+    def can_craft(self):
+        # TODO determine if current spelling is valid word
         return False

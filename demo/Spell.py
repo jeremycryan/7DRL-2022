@@ -1,8 +1,6 @@
 from SpellEffect import SpellEffect
 from SpellArea import *
-import demo.Player as Player
 from demo.Enemy import *
-from demo.Wall import Wall, Floor
 
 
 class Spell:
@@ -158,7 +156,31 @@ class Spell:
         return self.get_name()
 
 
-def recharge(effect, entity):
+def get_spell(caster, name):
+    """
+    Get a spell object from its name (case-insensitive)
+    """
+    if not name:
+        return None
+    name = name[0].upper() + name[1:].lower()
+    if name in globals():
+        spell = globals()[name](caster)
+        return spell
+    return None
+
+
+def list_spells():
+    """
+    Get a list of all existing spell names
+    """
+    spells = []
+    for key in globals().values():
+        if isinstance(key, type) and issubclass(key, Spell) and key is not Spell:
+            spells.append(key.__name__.upper())
+    return spells
+
+
+def recharge(_, entity):
     entity.recharge(letters=1)
 
 
