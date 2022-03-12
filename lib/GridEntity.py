@@ -14,6 +14,7 @@ class GridEntity(GameObject):
     FACTION_HOSTILE = 1
     FACTION_ALLY = 2
     faction = FACTION_NEUTRAL
+    allies = []
 
     DENSITY_EMPTY = 0
     DENSITY_CREATURE = 1
@@ -47,6 +48,8 @@ class GridEntity(GameObject):
         self.grid_rules = []
         self.animations = []
         self.taking_turn = False
+        if self.faction == self.FACTION_ALLY:
+            GridEntity.allies.append(self)
 
     def __repr__(self):
         return f"{type(self)} at {self.position_on_grid}"
@@ -283,6 +286,8 @@ class GridEntity(GameObject):
         self.on_destroy()
         if self.position_on_grid is not None:
             self.layer.remove_from_cell(*self.position_on_grid.get_position(), self)
+        if self in GridEntity.allies:
+            GridEntity.allies.remove(self)
 
     def on_destroy(self):
         pass

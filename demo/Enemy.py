@@ -139,7 +139,14 @@ class Goomba(Enemy):
         return sprite
 
     def take_turn(self):
-        wander(self)
+        target, entity = find(self, radius=3, visible=True)
+        if target:
+            destination = hunt(self, target)
+        else:
+            destination = wander(self)
+        if destination:
+            self.move(*destination.get_position())
+            self.align_sprites()
 
 
 class GolemSummon(Enemy):
