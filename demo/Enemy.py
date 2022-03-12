@@ -105,13 +105,12 @@ class Enemy(GridEntity):
         if not teleport:
             x = x//self.weight
             y = y//self.weight
-        # TODO: raycast to avoid moving through walls
         if teleport:
             self.move(x, y)
         else:
             target = Pose((x, y))
             target, entity = self.layer.map.raycast(self.position_on_grid, self.position_on_grid + target,
-                                                    (Wall, Enemy, Player.Player), offset=True)
+                                                    (GridEntity.DENSITY_WALL, GridEntity.DENSITY_CREATURE), offset=True)
             if target:
                 target -= self.position_on_grid
                 self.move(target.x, target.y)

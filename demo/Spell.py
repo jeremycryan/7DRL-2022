@@ -209,7 +209,7 @@ class Push(Spell):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
         if target:
-            self.add_effect(SpellEffect(move_radial=3), Area.Circle(target, radius=1.5 if crit else 1))
+            self.add_effect(SpellEffect(move_radial=3, stun=1), Area.Circle(target, radius=1.5 if crit else 1))
         return self.effects, self.areas, self.delays
 
 
