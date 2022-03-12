@@ -95,6 +95,16 @@ class Floor(Wall):
         super().draw(surface, offset)
 
 
+class Exit(Wall):
+
+    def open(self):
+        self.solid = False
+
+    def load_sprite(self):
+        surf = ImageHandler.load("images/Wall_Exit_Open.png")
+        self.add_sprite(StaticSprite(surf, rect=surf.get_rect()))
+
+
 class Decorator(GridEntity):
     density = GridEntity.DENSITY_EMPTY
 
@@ -126,4 +136,4 @@ class Decorator(GridEntity):
         if path == "Floor_Torch.png":
             self.solid = True
         path = f"images/decorators/{path}"
-        self.add_sprite(StaticSprite(ImageHandler.load(path), rect=(0, 0, 32, 32), colorkey=(0, 0, 0)))
+        self.add_sprite(StaticSprite(ImageHandler.load(path), rect=(0, 0, 32, 32), colorkey=(255, 0, 255)))
