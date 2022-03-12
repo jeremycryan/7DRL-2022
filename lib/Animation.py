@@ -34,6 +34,10 @@ class Animation:
         pass
 
 
+class DelayAnimation(Animation):
+    blocking = True
+
+
 class MoveAnimation(Animation):
 
     blocking = True

@@ -40,7 +40,7 @@ class Player(GridEntity):
         self.letter_tiles = [LetterTile(letter) for letter in Settings.Static.STARTING_LETTERS]
         self.letters_in_use = self.letter_tiles.copy()
 
-        starting_spells = ["zap", "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = get_spell(self, starting_spells[i])
 

@@ -6,7 +6,6 @@ import sys
 import yaml
 
 from demo.SpellHUD import SpellHUD
-from demo.CraftingMenu import CraftingMenu
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
@@ -16,6 +15,8 @@ from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator
 from demo.Enemy import Goomba
 from demo.TurnManager import TurnManager
+from demo.CraftingMenu import CraftingMenu
+from demo.ParticleHandler import ParticleHandler
 
 
 class Game:
@@ -24,6 +25,7 @@ class Game:
         ImageHandler.init()
         Camera.init()
         TurnManager.init()
+        ParticleHandler.init()
         self.screen = pygame.Surface((640, 360))
         self.true_screen = pygame.display.set_mode((1280, 720))
         self.fps_font = pygame.font.SysFont("monospace", 10, 1, 0)
@@ -311,12 +313,13 @@ class Game:
             map.update(dt, events)
             crafting_menu.update(dt, events)
             map.draw(self.screen, offset)
+            ParticleHandler.draw(self.screen, offset=offset)
             self.draw_fps_font()
 
             crafting_menu.draw(self.screen, (0, 0))
             spell_hud.draw(self.screen, (10, 10))
 
-            scaled = pygame.transform.scale2x(self.screen)
+            scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
             self.true_screen.blit(scaled, (0, 0))
 
             pygame.display.flip()

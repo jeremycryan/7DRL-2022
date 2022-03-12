@@ -177,6 +177,7 @@ def list_spells():
     for key in globals().values():
         if isinstance(key, type) and issubclass(key, Spell) and key is not Spell:
             spells.append(key.__name__.upper())
+    spells.sort()
     return spells
 
 
