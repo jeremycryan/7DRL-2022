@@ -14,6 +14,8 @@ class Settings:
         TILE_SIZE = 32
         ROOM_WIDTH = 15
         ROOM_HEIGHT = 15
+        MAP_WIDTH = 10
+        MAP_HEIGHT = 10
         WINDOW_WIDTH = 1280
         WINDOW_HEIGHT = 720
         GAME_WIDTH = 640
