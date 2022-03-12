@@ -8,6 +8,7 @@ from lib.ImageHandler import ImageHandler
 from lib.Primitives import Pose
 from lib.Settings import Settings
 from lib.Sprite import StaticSprite, InvisibleSprite
+import math
 
 import random
 import pygame
@@ -37,6 +38,14 @@ class Enemy(GridEntity):
         if not Enemy.name_font:
             Enemy.name_font = pygame.font.Font("fonts/smallest_pixel.ttf", 10)
             Enemy.name_letters = {letter:Enemy.name_font.render(letter, True, (255, 255, 255)) for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ "}
+        self.hearts = {
+            0: ImageHandler.load("images/ui/small_health_0pip.png"),
+            1: ImageHandler.load("images/ui/small_health_1pip.png"),
+            2: ImageHandler.load("images/ui/small_health_2pip.png"),
+            3: ImageHandler.load("images/ui/small_health_3pip.png")
+        }
+        for item in self.hearts.values():
+            item.set_colorkey((255, 0, 255))
 
     def load_sprite(self):
         """
@@ -57,6 +66,21 @@ class Enemy(GridEntity):
         for letter in letters:
             surface.blit(letter, (x, y))
             x += letter.get_width()
+        self.draw_health(surface, offset=offset)
+
+    def draw_health(self, surface, offset=(0, 0)):
+        number_of_containers = math.ceil(self.hit_points / 3)
+        spacing = 8
+        x = offset[0] + self.position.x - (spacing * (number_of_containers - 1))//2
+        y = offset[1] - 5 + self.position.y + self.name_y_offset()
+        health_remaining = self.health
+
+        for i in range(number_of_containers):
+            pips = min(health_remaining, 3)
+            health_remaining -= pips
+            surf = self.hearts[pips]
+            surface.blit(surf, (x - surf.get_width()//2, y - surf.get_width()//2))
+            x += spacing
 
     def name_y_offset(self):
         """
@@ -152,6 +176,33 @@ class Goomba(Enemy):
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
+
+class Bat(Goomba):
+    name = "BAT"
+    hit_points = 1
+
+    def load_sprite(self):
+        sprite = StaticSprite.from_path("images/rat.png", flippable=True)
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def name_y_offset(self):
+        return -20
+
+    def load_shadow(self):
+        self.add_sprite(StaticSprite(ImageHandler.load("images/small_shadow.png"), blend_mode=pygame.BLEND_MULT))
+
+class Wolf(Goomba):
+    name = "WOLF"
+    hit_points = 3
+
+    def load_sprite(self):
+        sprite = StaticSprite.from_path("images/dorg.png", flippable=True)
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def name_y_offset(self):
+        return -18
 
 
 class GolemSummon(Enemy):

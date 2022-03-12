@@ -13,7 +13,7 @@ from lib.Settings import Settings
 import random
 from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator
-from demo.Enemy import Goomba
+from demo.Enemy import Goomba, Bat, Wolf
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
@@ -272,7 +272,8 @@ class Game:
         enemy_objects = []
         for x, y in layer.cell_coordinates():
             if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
-                enemy = Goomba()
+                enemy_type = random.choice([Goomba, Bat, Wolf])
+                enemy = enemy_type()
                 enemy_objects.append(enemy)
                 layer.add_to_cell(enemy, x, y)
                 enemies += 1
