@@ -1,8 +1,14 @@
+import random
+
 from demo.ParticleHandler import ParticleHandler, CircleParticle
 from lib.Animation import Fwoosh
+from demo.Pickup import LetterTile
 from lib.Camera import Camera
+from lib.GridEntity import GridEntity
+from lib.Primitives import Pose
+from lib.Settings import Settings
 from lib.Sprite import StaticSprite
-from demo.Spell import *
+import demo.Spell as Spell
 from lib.ImageHandler import ImageHandler
 
 import pygame
@@ -10,7 +16,6 @@ import math
 
 spellKeys = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
              pygame.K_8, pygame.K_9]
-
 
 
 class Player(GridEntity):
@@ -45,7 +50,7 @@ class Player(GridEntity):
 
         starting_spells = [0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
-            self.spells[i] = get_spell(self, starting_spells[i])
+            self.spells[i] = Spell.get_spell(self, starting_spells[i])
 
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)

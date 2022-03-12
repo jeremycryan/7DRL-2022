@@ -1,12 +1,11 @@
 from demo.TurnManager import TurnManager
-from demo.Enemy import Enemy
 from lib.Animation import Fwoosh
 from lib.GridEntity import GridEntity
 from lib.Settings import Settings
 
 
 class SpellEffect:
-    def __init__(self, damage=0, damage_type=Enemy.DAMAGE_NORMAL, move_linear=None, move_radial=None, teleport=False,
+    def __init__(self, damage=0, damage_type=GridEntity.DAMAGE_NORMAL, move_linear=None, move_radial=None, teleport=False,
                  stun=0, affected=(GridEntity.FACTION_ALLY, GridEntity.FACTION_HOSTILE, GridEntity.FACTION_NEUTRAL),
                  action=None, delayed_action=None, duration=0, summon=None, summon_args=None,
                  density=GridEntity.DENSITY_CREATURE):
@@ -67,7 +66,6 @@ class SpellEffect:
                         move = (item.position_on_grid - caster.position_on_grid - target.origin)
                         if move.magnitude():
                             move.scale_to(self.move_radial)
-                            print(item)
                             item.push(round(move.x), round(move.y), teleport=self.teleport)
                     if self.summon and not summoned:
                         entity = self.summon(**self.summon_args)
