@@ -1,4 +1,5 @@
 from demo.Wall import Floor
+from lib.GridEntity import GridEntity
 from lib.Settings import Settings
 from lib.Primitives import Pose
 from lib.Camera import Camera
@@ -151,6 +152,22 @@ class Map:
                 prev = p
         return end, None
 
+    def get_entity(self, squares, origin=Pose((0, 0)), factions=None):
+        for square in squares:
+            p = square + origin
+            for item in self.get_all_at_position(p.x, p.y):
+                if not factions or item.faction in factions:
+                    return square, item
+        return None, None
+
+    def filter_line_of_sight(self, squares, origin, blocking_types=(GridEntity.DENSITY_WALL,)):
+        new_squares = []
+        for square in squares:
+            sq, item = self.raycast(origin, origin + square, blocking_types, offset=True)
+            if sq and (square + origin - sq).magnitude() == 0:
+                new_squares.append(square)
+        return new_squares
+
     class MapCell(list):
         # Making this its own class in case we wanted to add anything fancy to it later for pathfinding, etc.
         pass
@@ -200,6 +217,8 @@ class Map:
             return result
 
         def peek_at_cell(self, x, y):
+            if not self.cell_in_range(x, y):
+                return []
             return self.cells[y][x].copy()
 
         def cell_occupied(self, x, y):

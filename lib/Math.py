@@ -1,3 +1,6 @@
+from lib.Primitives import Pose
+
+
 def lerp(start, end, through, curve=None):
     """
     Interpolates between two values.
@@ -106,4 +109,16 @@ def get_line(start, end, offset=False):
             p.x = round(p.x)
             p.y = round(p.y)
             squares.append(p)
+    return squares
+
+
+def get_squares_in_range(radius, origin=Pose((0, 0)), no_origin=False):
+    """ Return list of squares in range, sorted by distance """
+    squares = []
+    for dx in range(-int(radius), int(radius) + 1):
+        for dy in range(-int(radius), int(radius) + 1):
+            p = Pose((dx, dy))
+            if p.magnitude() <= radius and (p.magnitude() > 0 or not no_origin):
+                squares.append(p + origin)
+    squares.sort(key=lambda s: (s-origin).magnitude())
     return squares
