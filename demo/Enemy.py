@@ -1,5 +1,6 @@
 import demo.Player as Player
-from demo.EnemyAI import *
+import demo.EnemyAI as Ai
+import demo.EnemySpells as Spell
 from demo.Pickup import Pickup, LetterTile
 from demo.Wall import Wall
 from lib.GridEntity import GridEntity
@@ -114,7 +115,6 @@ class Enemy(GridEntity):
             if target:
                 target -= self.position_on_grid
                 self.move(target.x, target.y)
-        print(x,y)
 
     def move(self, x=0, y=0):
         super().move(x, y)
@@ -132,6 +132,7 @@ class Goomba(Enemy):
 
     def __init__(self):
         super().__init__()
+        self.attacks = [Spell.SpiderAttack(self)]
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
@@ -139,11 +140,16 @@ class Goomba(Enemy):
         return sprite
 
     def take_turn(self):
-        target, entity = find(self, radius=3, visible=True)
-        if target:
-            destination = hunt(self, target)
+        squares = [e.position_on_grid - self.position_on_grid for e in GridEntity.allies]
+        attack_target, _ = Ai.find(self, radius=1, squares=squares)
+        if attack_target:
+            self.attacks[0].cast(attack_target)
+            return
+        hunt_target, _ = Ai.find(self, radius=4, visible=True, squares=squares)
+        if hunt_target:
+            destination = Ai.hunt(self, hunt_target)
         else:
-            destination = wander(self)
+            destination = Ai.wander(self)
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
@@ -151,12 +157,13 @@ class Goomba(Enemy):
 
 class GolemSummon(Enemy):
     name = "GOLEM"
-    hit_points = 1
+    hit_points = 3
     faction = GridEntity.FACTION_ALLY
     drop_letters = False
 
     def __init__(self):
         super().__init__()
+        self.attacks = [Spell.SpiderAttack(self)]
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
@@ -164,7 +171,18 @@ class GolemSummon(Enemy):
         return sprite
 
     def take_turn(self):
-        wander(self)
+        attack_target, _ = Ai.find(self, radius=1)
+        if attack_target:
+            self.attacks[0].cast(attack_target)
+            return
+        hunt_target = GridEntity.allies[0].position_on_grid - self.position_on_grid
+        if hunt_target and hunt_target.magnitude() > 3:
+            destination = Ai.hunt(self, hunt_target)
+        else:
+            destination = Ai.wander(self)
+        if destination:
+            self.move(*destination.get_position())
+            self.align_sprites()
 
 
 class BarrierSummon(Enemy):

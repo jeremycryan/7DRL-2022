@@ -1,6 +1,6 @@
 from SpellEffect import SpellEffect
-from SpellArea import *
-from demo.Enemy import *
+import SpellArea as Area
+from lib.GridEntity import GridEntity
 
 
 class Spell:
@@ -29,7 +29,7 @@ class Spell:
         if not target:
             return None, None, None
         self.clear_effects()
-        self.add_effect(SpellEffect(damage=2 if crit else 1), Point(target))
+        self.add_effect(SpellEffect(damage=2 if crit else 1), Area.Point(target))
         return self.effects, self.areas, self.delays
 
     def snap_to_line(self, target, diagonals=True):
@@ -81,7 +81,7 @@ class Spell:
             types = (GridEntity.DENSITY_WALL, GridEntity.DENSITY_CREATURE)
         target, entity = self.caster.layer.map.raycast(self.caster_pos(), self.caster_pos()+target, types,
                                                        offset=True)
-        if not pierce and entity and entity.density == Enemy.DENSITY_CREATURE:
+        if not pierce and entity and entity.density == GridEntity.DENSITY_CREATURE:
             target = entity.position_on_grid
         if not target:
             return False
@@ -190,7 +190,7 @@ class Zap(Spell):
         self.clear_effects()
         target = self.snap_to_range(target, upper=1, lower=1)
         if target:
-            self.add_effect(SpellEffect(damage=2 if crit else 1), Point(target))
+            self.add_effect(SpellEffect(damage=2 if crit else 1), Area.Point(target))
         return self.effects, self.areas, self.delays
 
 
@@ -200,7 +200,7 @@ class Flare(Spell):
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=2, lower=0)
         if target:
-            self.add_effect(SpellEffect(damage=1), Circle(target, radius=1.5 if crit else 1))
+            self.add_effect(SpellEffect(damage=1), Area.Circle(target, radius=1.5 if crit else 1))
         return self.effects, self.areas, self.delays
 
 
@@ -209,7 +209,7 @@ class Push(Spell):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
         if target:
-            self.add_effect(SpellEffect(move_radial=3), Circle(target, radius=1.5 if crit else 1))
+            self.add_effect(SpellEffect(move_radial=3), Area.Circle(target, radius=1.5 if crit else 1))
         return self.effects, self.areas, self.delays
 
 
@@ -221,7 +221,7 @@ class Bolt(Spell):
         target = self.snap_to_range(target, upper=5, lower=1)
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_CREATURE)
         if target:
-            self.add_effect(SpellEffect(damage=2 if crit else 1), Point(target))
+            self.add_effect(SpellEffect(damage=2 if crit else 1), Area.Point(target))
         return self.effects, self.areas, self.delays
 
 
@@ -233,7 +233,7 @@ class Beam(Spell):
         target = self.snap_to_visible(target, pierce=True)
         target = self.snap_to_range(target, upper=5, lower=1)
         if target:
-            self.add_effect(SpellEffect(damage=2 if crit else 1), Line(endpoint=target, offset=True))
+            self.add_effect(SpellEffect(damage=2 if crit else 1), Area.Line(endpoint=target, offset=True))
         return self.effects, self.areas, self.delays
 
 
@@ -243,8 +243,8 @@ class Jump(Spell):
         target = self.snap_to_range(target, upper=2, lower=1)
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         if target:
-            self.add_effect(SpellEffect(move_linear=target, teleport=True), Point())
-            self.add_effect(SpellEffect(), Point(target))
+            self.add_effect(SpellEffect(move_linear=target, teleport=True), Area.Point())
+            self.add_effect(SpellEffect(), Area.Point(target))
         return self.effects, self.areas, self.delays
 
 
@@ -253,7 +253,7 @@ class Recharge(Spell):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
         if target:
-            self.add_effect(SpellEffect(action=recharge), Point())
+            self.add_effect(SpellEffect(action=recharge), Area.Point())
         return self.effects, self.areas, self.delays
 
 
@@ -263,7 +263,8 @@ class Freeze(Spell):
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=2, lower=0)
         if target:
-            self.add_effect(SpellEffect(damage_type=Enemy.DAMAGE_ICE, stun=3 if crit else 2), Circle(target, radius=2))
+            self.add_effect(SpellEffect(damage_type=GridEntity.DAMAGE_ICE, stun=3 if crit else 2),
+                            Area.Circle(target, radius=2))
         return self.effects, self.areas, self.delays
 
 
@@ -274,7 +275,8 @@ class Golem(Spell):
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         target = self.snap_to_range(target, upper=3, lower=1)
         if target:
-            self.add_effect(SpellEffect(summon=GolemSummon, density=GridEntity.DENSITY_EMPTY), Point(target))
+            import demo.Enemy as Enemy
+            self.add_effect(SpellEffect(summon=Enemy.GolemSummon, density=GridEntity.DENSITY_EMPTY), Area.Point(target))
         return self.effects, self.areas, self.delays
 
 
@@ -285,5 +287,6 @@ class Barrier(Spell):
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         target = self.snap_to_range(target, upper=3, lower=1)
         if target:
-            self.add_effect(SpellEffect(summon=BarrierSummon, density=GridEntity.DENSITY_EMPTY), Point(target))
+            import demo.Enemy as Enemy
+            self.add_effect(SpellEffect(summon=Enemy.BarrierSummon, density=GridEntity.DENSITY_EMPTY), Area.Point(target))
         return self.effects, self.areas, self.delays
