@@ -86,7 +86,7 @@ class Game:
 
     def generate_map(self):
 
-        mapLength = 7
+        mapLength = 5
         mapBossRoom = "rooms/boss_room_1.yaml"
         mapBranchLength = 0
         mapBranchChance = 0
@@ -116,7 +116,9 @@ class Game:
         up, down, left, right = "U", "D", "L", "R"
 
         rooms = [
-            self.get_yaml_room("rooms/room_1.yaml")
+            self.get_yaml_room("rooms/room_1.yaml"),
+            self.get_yaml_room("rooms/room_2.yaml")
+
         ]
         
         roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
@@ -127,7 +129,7 @@ class Game:
         stringMap = [wall * width for _ in range(height)] 
 
         # Spawn Room
-        self.merge_room_onto_character_array(rooms[0], stringMap, (centerX, centerY), closed_walls=[])
+        self.merge_room_onto_character_array(self.get_yaml_room("rooms/spawn_room.yaml"), stringMap, (centerX, centerY), closed_walls=[])
         roomGrid[centerX][centerY] = True
 
         currentX = centerX
@@ -152,26 +154,35 @@ class Game:
                 #place attempt code
                 for placeAttemptCount in range(placementAttemptLimit):
 
-                    attemptX = currentX + random.randrange(-roomWidth, roomWidth+1)
-                    attemptY = currentY + random.randrange(-roomHeight, roomHeight+1)
+                    attemptX = random.randrange(-roomWidth, roomWidth+1)
+                    attemptY = random.randrange(-roomHeight, roomHeight+1)
                     
                     # If same space or not connected due to angle
                     if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
                         continue
 
+                    attemptX = currentX + attemptX
+                    attemptY = currentY + attemptY
+
                     # checking logic here
-                    
+
                     placementAllowed = True
                     for roomSpaceX in range(roomWidth):
                         for roomSpaceY in range(roomHeight):
-
-                            if roomGrid[roomSpaceX][roomSpaceY]:
+                            try:
+                                if roomGrid[roomSpaceX + attemptX][roomSpaceY + attemptY]:
+                                    placementAllowed = False
+                            except:
                                 placementAllowed = False
 
                     if not placementAllowed:
                         continue
 
                     #place stuff time
+                    for roomSpaceX in range(roomWidth):
+                        for roomSpaceY in range(roomHeight):
+                            roomGrid[roomSpaceX + attemptX][roomSpaceY +attemptY] = True
+
                     mapData.append([attemptX, attemptY, room])
                     currentX = attemptX
                     currentY = attemptY
@@ -211,6 +222,8 @@ class Game:
         for y, row in enumerate(stringMap):
             for x, item in enumerate(row):
                 if item is wall:
+                    new_tile = Wall()
+                elif item is wall:
                     new_tile = Wall()
                 else:
                     new_tile = Floor()
@@ -270,7 +283,7 @@ class Game:
 
         map = self.generate_map()
         player = Player()
-        map.add_to_cell(player, 8 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 8 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
+        map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         spell_hud = SpellHUD(player)
         crafting_menu = CraftingMenu(player)
         enemies = self.spawn_enemies(map.get_layer(0))
