@@ -83,14 +83,14 @@ class CraftingMenu(GameObject):
             return
         self.picked_up_tiles.append(tile)
         if self.banner.hovered():
-            for banner_tile in self.banner.tiles[:]:
-                if tile.letter == banner_tile.letter:
-                    self.banner.tiles.remove(banner_tile)
-        for player_tile in self.player.letter_tiles[:]:
-            if tile.letter == player_tile.letter:
-                self.player.letter_tiles.remove(player_tile)
-                self.recalculate_tiles()
-                break
+            if tile in self.banner.tiles[:]:
+                self.banner.tiles.remove(tile)
+        else:
+            for player_tile in self.player.letter_tiles[:]:
+                if tile.letter == player_tile.letter:
+                    self.player.letter_tiles.remove(player_tile)
+                    self.recalculate_tiles()
+                    break
 
     def drop_all(self):
         if self.picked_up_tiles:
