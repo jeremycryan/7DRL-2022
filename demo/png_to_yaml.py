@@ -1,8 +1,12 @@
 import pygame
 import yaml
+from lib.Settings import Settings
 
-PATH = "room_to_convert.png"
-OUTPUT_PATH = "rooms/new_room.yaml"
+PATHS = [
+    "rooms/room_images/room_to_convert.png",
+]
+
+OUTPUT_PATH_REL = "rooms/"
 
 COLORS_TO_CHARACTER = {
     (0, 0, 0): "X",
@@ -14,27 +18,30 @@ COLORS_TO_CHARACTER = {
 }
 
 if __name__=="__main__":
-    surf = pygame.image.load(PATH)
+    for path in PATHS:
+        surf = pygame.image.load(path)
 
-    yaml_contents = {
-        "tiles": [],
-    }
-    for y in range(surf.get_height()):
-        row = ""
-        for x in range(surf.get_width()):
-            pixel_value = surf.get_at((x, y))
-            r, g, b = pixel_value.r, pixel_value.g, pixel_value.b
-            if (r, g, b) in COLORS_TO_CHARACTER:
-                row += COLORS_TO_CHARACTER[(r, g, b)]
-            else:
-                row += "X"
-        yaml_contents["tiles"].append(row)
+        yaml_contents = {
+            "tiles": [],
+        }
+        for y in range(surf.get_height()):
+            row = ""
+            for x in range(surf.get_width()):
+                pixel_value = surf.get_at((x, y))
+                r, g, b = pixel_value.r, pixel_value.g, pixel_value.b
+                if (r, g, b) in COLORS_TO_CHARACTER:
+                    row += COLORS_TO_CHARACTER[(r, g, b)]
+                else:
+                    row += "X"
+            yaml_contents["tiles"].append(row)
 
-    yaml_contents["width"] = surf.get_width()
-    yaml_contents["height"] = surf.get_height()
+        yaml_contents["width"] = surf.get_width()//Settings.Static.ROOM_WIDTH
+        yaml_contents["height"] = surf.get_height()//Settings.Static.ROOM_HEIGHT
 
-    with open(OUTPUT_PATH, "w") as f:
-        yaml.safe_dump(yaml_contents, f)
+        file_name = path.split("/")[-1][:-4]
 
-    print(f"Your file has been generated at {OUTPUT_PATH}.")
+        with open(OUTPUT_PATH_REL + file_name + ".yaml", "w") as f:
+            yaml.safe_dump(yaml_contents, f)
+
+        print(f"Your file has been generated at {OUTPUT_PATH_REL}.")
     print("Thanks for choosing JarmWare (tm) for your PyGame needs!")
