@@ -1,12 +1,11 @@
 import pygame
 import yaml
 from lib.Settings import Settings
+import os
 
-PATHS = [
-    "rooms/room_images/room_to_convert.png",
-]
+PATHS = os.listdir("room_pngs/small_rooms")
 
-OUTPUT_PATH_REL = "rooms/"
+OUTPUT_PATH_REL = "rooms/small_rooms"
 
 COLORS_TO_CHARACTER = {
     (0, 0, 0): "X",
@@ -19,7 +18,7 @@ COLORS_TO_CHARACTER = {
 
 if __name__=="__main__":
     for path in PATHS:
-        surf = pygame.image.load(path)
+        surf = pygame.image.load("room_pngs/small_rooms/" + path)
 
         yaml_contents = {
             "tiles": [],

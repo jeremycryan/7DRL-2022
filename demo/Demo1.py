@@ -16,7 +16,7 @@ from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator
 from demo.Enemy import Goomba
 from demo.TurnManager import TurnManager
-
+import os
 
 class Game:
     def __init__(self):
@@ -86,7 +86,7 @@ class Game:
 
     def generate_map(self):
 
-        mapLength = 5
+        mapLength = 6
         mapBossRoom = "rooms/boss_room_1.yaml"
         mapBranchLength = 0
         mapBranchChance = 0
@@ -115,11 +115,11 @@ class Game:
         floor = "."
         up, down, left, right = "U", "D", "L", "R"
 
-        rooms = [
-            self.get_yaml_room("rooms/room_1.yaml"),
-            self.get_yaml_room("rooms/room_2.yaml")
+        PATHS = os.listdir("rooms/small_rooms")
 
-        ]
+        rooms = []
+        for path in PATHS:
+            rooms.append(self.get_yaml_room("rooms/small_rooms/" + path))
         
         roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
         centerX = mapWidth//2
@@ -129,7 +129,7 @@ class Game:
         stringMap = [wall * width for _ in range(height)] 
 
         # Spawn Room
-        self.merge_room_onto_character_array(self.get_yaml_room("rooms/spawn_room.yaml"), stringMap, (centerX, centerY), closed_walls=[])
+        self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/spawn_room.yaml"), stringMap, (centerX, centerY), closed_walls=[])
         roomGrid[centerX][centerY] = True
 
         currentX = centerX
