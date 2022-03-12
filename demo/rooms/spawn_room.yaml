@@ -1,0 +1,19 @@
+width: 1
+height: 1
+tiles: [
+  "XXXXXXXUXXXXXXX",
+  "XXXXXXUUUXXXXXX",
+  "XX...........XX",
+  "XX.XXX...XXX.XX",
+  "XX.XXX...XXX.XX",
+  "XX.XX.....XX.XX",
+  "XL...........RX",
+  "LL.....X.....RR",
+  "XL...........RX",
+  "XX.XX.....XX.XX",
+  "XX.XXX...XXX.XX",
+  "XX.XXX...XXX.XX",
+  "XX...........XX",
+  "XXXXXXDDDXXXXXX",
+  "XXXXXXXDXXXXXXX",
+]
