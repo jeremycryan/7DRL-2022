@@ -58,7 +58,7 @@ class Particle:
 
 class CircleParticle(Particle):
 
-    def __init__(self, duration=0.5, position=(0, 0), radius=5, color=(255, 255, 255)):
+    def __init__(self, duration=0.5, position=(0, 0), radius=5, color=(255, 255, 255), velocity = (0, 0)):
         super().__init__(duration=duration, position=position)
         self.radius = radius
         surface = pygame.Surface((2*radius, 2*radius))

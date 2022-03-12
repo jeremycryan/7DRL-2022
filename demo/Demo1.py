@@ -290,6 +290,7 @@ class Game:
         crafting_menu = CraftingMenu(player)
         enemies = self.spawn_enemies(map.get_layer(0))
         TurnManager.add_entities(player, *enemies)
+        vignette = ImageHandler.load("images/vignette.png")
 
         Camera.change_objects(objects=[player], weights=[1], mouse_weight=0.15)
 
@@ -313,7 +314,11 @@ class Game:
             map.update(dt, events)
             crafting_menu.update(dt, events)
             map.draw(self.screen, offset)
+            ParticleHandler.update(dt, events)
             ParticleHandler.draw(self.screen, offset=offset)
+
+            self.screen.blit(vignette, (0, 0), special_flags=pygame.BLEND_MULT)
+
             self.draw_fps_font()
 
             crafting_menu.draw(self.screen, (0, 0))
@@ -321,7 +326,6 @@ class Game:
 
             scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
             self.true_screen.blit(scaled, (0, 0))
-
             pygame.display.flip()
 
 
