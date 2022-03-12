@@ -1,7 +1,7 @@
 import random
 
 from demo.ParticleHandler import ParticleHandler, CircleParticle
-from lib.Animation import Fwoosh
+from lib.Animation import Fwoosh, Feint
 from demo.Pickup import LetterTile
 from lib.Camera import Camera
 from lib.GridEntity import GridEntity
@@ -73,17 +73,21 @@ class Player(GridEntity):
         # Player input handling
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_w] and self.can_make_turn_movement():
-            if self.move(y=-1):
-                self.end_turn()
+            if not self.move(y=-1):
+                self.add_animation(Feint(self, self.position, (0, -16), duration=0.2))
+            self.end_turn()
         if pressed[pygame.K_s] and self.can_make_turn_movement():
-            if self.move(y=1):
-                self.end_turn()
+            if not self.move(y=1):
+                self.add_animation(Feint(self, self.position, (0, 16), duration=0.2))
+            self.end_turn()
         if pressed[pygame.K_a] and self.can_make_turn_movement():
-            if self.move(x=-1):
-                self.end_turn()
+            if not self.move(x=-1):
+                self.add_animation(Feint(self, self.position, (-16, 0), duration=0.2))
+            self.end_turn()
         if pressed[pygame.K_d] and self.can_make_turn_movement():
-            if self.move(x=1):
-                self.end_turn()
+            if not self.move(x=1):
+                self.add_animation(Feint(self, self.position, (16, 0), duration=0.2))
+            self.end_turn()
         if self.can_make_turn_movement():
             for i, key in enumerate(spellKeys):
                 if pressed[key] and self.cooldown[i] == 0 and self.spells[i] and i != self.prepared_spell:

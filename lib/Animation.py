@@ -42,6 +42,54 @@ class DelayAnimation(Animation):
     blocking = True
 
 
+class Feint(Animation):
+    keep_turn = True
+
+    def __init__(self, parent, start_position, vector = (16, 0), duration=0.2, squish_factor = 0.8):
+        super().__init__(parent, duration=duration)
+        self.start_position = start_position
+        if type(self.start_position) is tuple:
+            self.start_position = Pose(self.start_position, 0)
+        self.end_position = self.start_position + Pose(vector, 0)
+        self.current_position = start_position.copy()
+        self.squish_factor = squish_factor
+
+    def update(self, dt, events):
+        super().update(dt, events)
+        if self.destroyed:
+            return
+        curve = PowerCurve(power=1)
+        squish_curve = PowerCurve(power=2, acceleration_time=0.5, deceleration_time=0.01)
+        diff = self.end_position - self.start_position
+        is_x = abs(diff.x) > abs(diff.y)
+        sx, sy = 1, 1
+        if self.through() < 0.5:
+            x = lerp(self.start_position.x, self.end_position.x, self.through() * 2, curve)
+            y = lerp(self.start_position.y, self.end_position.y, self.through() * 2, curve)
+            if is_x:
+                sx = lerp(1, self.squish_factor, self.through() * 2, squish_curve)
+                sy = 1/sx
+            else:
+                sy = lerp(1, self.squish_factor, self.through() * 2, squish_curve)
+                sx = 1/sy
+        else:
+            x = lerp(self.start_position.x, self.end_position.x, (2 - 2*self.through()), curve)
+            y = lerp(self.start_position.y, self.end_position.y, (2 - 2*self.through()), curve)
+            if is_x:
+                sx = lerp(1, self.squish_factor, (2 - 2*self.through()), squish_curve)
+                sy = 1/sx
+            else:
+                sy = lerp(1, self.squish_factor, (2 - 2*self.through()), squish_curve)
+                sx = 1/sy
+        self.current_position = Pose((x, y), 0)
+        self.parent.position = self.current_position.copy()
+        for sprite in self.parent.sprites:
+            sprite.distortion = Pose((sx, sy))
+
+    def on_destroy(self):
+        self.parent.position = self.start_position.copy()
+
+
 class MoveAnimation(Animation):
 
     blocking = True

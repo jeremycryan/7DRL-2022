@@ -63,11 +63,13 @@ class Sprite(GameObject):
             width = int(self.distortion.x * my_surface.get_width())
             height = int(self.distortion.y * my_surface.get_height())
             my_surface = pygame.transform.scale(my_surface, (width, height))
-        rect = self.get_sprite_rect()
-        if type(rect) == tuple:
-            rect = pygame.rect.Rect(*rect)
-        if not rect:
-            rect = pygame.rect.Rect(0, 0, my_surface.get_width(), my_surface.get_height())
+            rect = my_surface.get_rect()
+        else:
+            rect = self.get_sprite_rect()
+            if type(rect) == tuple:
+                rect = pygame.rect.Rect(*rect)
+            if not rect:
+                rect = pygame.rect.Rect(0, 0, my_surface.get_width(), my_surface.get_height())
         x = self.position.x + offset[0] - rect.width//2
         y = self.position.y + offset[1] - rect.height//2
         surf.blit(my_surface, (x, y), rect, special_flags=self.blend_mode)
