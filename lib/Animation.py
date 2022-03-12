@@ -1,11 +1,15 @@
 from lib.Primitives import Pose
 from lib.Math import lerp, PowerCurve
 import pygame
+import random
+from demo.ParticleHandler import ParticleHandler, FwooshParticle
+from lib.Primitives import GameObject
 
 
 class Animation:
 
     blocking = False
+    keep_turn = False
 
     def __init__(self, parent, duration=None):
         self.parent = parent
@@ -68,3 +72,33 @@ class MoveAnimation(Animation):
 
     def on_destroy(self):
         self.parent.position = self.end_position.copy()
+
+
+class Fwoosh(Animation):
+    blocking = True
+    keep_turn = True
+
+    def __init__(self, parent, duration=0.5, position=(0, 0)):
+        """
+        If position is specified, ignore position of parent.
+        """
+        super().__init__(parent, duration)
+        self.since_spawn = 0
+        self.position = Pose(position) if position else None
+
+    def update(self, dt, events):
+        super().update(dt, events)
+        if self.through() < 0.3:
+            self.since_spawn += dt
+        while self.since_spawn > 0.008:
+            self.since_spawn -= 0.008
+            if not self.position:
+                ParticleHandler.add_particle(FwooshParticle(0.2, (self.parent.position.x, self.parent.position.y - 16), (255, 255, 0)))
+            else:
+                ParticleHandler.add_particle(FwooshParticle(0.2, (self.position.x, self.position.y - 16), (255, 255, 0)))
+
+    @staticmethod
+    def no_parent(duration=0.5, position=(0, 0)):
+        parent = GameObject()
+        parent.position = Pose(position, 0)
+        return Fwoosh(parent, duration)

@@ -1,4 +1,5 @@
 from demo.ParticleHandler import ParticleHandler, CircleParticle
+from lib.Animation import Fwoosh
 from lib.Camera import Camera
 from lib.Sprite import StaticSprite
 from demo.Spell import *
@@ -49,6 +50,10 @@ class Player(GridEntity):
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)
 
+    def on_move_to_grid_position(self, x, y):
+        super().on_move_to_grid_position(x, y)
+        #self.animations.append(Fwoosh(self, 0.8))
+
     def update(self, dt, events):
         super().update(dt, events)
 
@@ -91,9 +96,6 @@ class Player(GridEntity):
                         self.prepared_spell = None
                         self.end_turn()
                         break
-
-        velocity = Pose((random.random() * 200, random.random() * 200), 0)
-        ParticleHandler.add_particle(CircleParticle(0.5, self.position.get_position(), 5, (255, 255, 255), velocity.get_position()))
 
     def can_make_turn_movement(self):
         return not self.animating() and self.taking_turn

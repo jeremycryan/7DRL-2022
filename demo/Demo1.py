@@ -296,6 +296,8 @@ class Game:
 
         while True:
             dt = clock.tick(120)/1000
+            if dt > 0.15:
+                dt = 0.15
             events = pygame.event.get()
 
             self.screen.fill((0, 0, 0))
