@@ -1,7 +1,7 @@
 import random
 
 from lib.Primitives import GameObject, Pose
-from lib.Animation import MoveAnimation
+from lib.Animation import MoveAnimation, Fwoosh
 from lib.Settings import Settings
 import pygame
 from lib.ImageHandler import ImageHandler
@@ -261,6 +261,12 @@ class GridEntity(GameObject):
     def animating(self):
         for animation in self.animations:
             if animation.blocking:
+                return True
+        return False
+
+    def keep_turn(self):
+        for animation in self.animations:
+            if animation.keep_turn:
                 return True
         return False
 

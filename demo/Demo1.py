@@ -296,6 +296,8 @@ class Game:
 
         while True:
             dt = clock.tick(120)/1000
+            if dt > 0.15:
+                dt = 0.15
             events = pygame.event.get()
 
             self.screen.fill((0, 0, 0))
@@ -327,7 +329,6 @@ class Game:
             scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
             self.true_screen.blit(scaled, (0, 0))
             pygame.display.flip()
-
 
 
 if __name__=="__main__":
