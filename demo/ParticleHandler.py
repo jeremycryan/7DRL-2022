@@ -1,3 +1,4 @@
+from lib.ImageHandler import ImageHandler
 from lib.Primitives import GameObject, Pose
 import pygame
 from lib.Settings import Settings
@@ -71,25 +72,30 @@ class Particle:
 class CircleParticle(Particle):
 
     def __init__(self, duration=0.5, position=(0, 0), radius=5, color=(255, 255, 255), velocity = (0, 0)):
+        self.glow = ImageHandler.load_copy("images/glow.png")
         super().__init__(duration=duration, position=position, velocity=velocity)
         self.radius = radius
-        surface = pygame.Surface((2*radius, int(1.5*radius)))
+        surface = pygame.Surface((2*radius, int(2*radius)))
         surface.fill((255, 0, 255))
         r = radius
         pygame.draw.circle(surface, color, (r, r), r)
         surface.set_colorkey((255, 0, 255))
-        angle = math.atan2(velocity[1], velocity[0])
-        surface = pygame.transform.rotate(surface, angle*180/math.pi)
         self.surface = surface
 
     def draw(self, surface, offset=(0, 0)):
         radius = self.radius * (1 - self.through())
         if radius < 1:
             return
-        x = self.position.x - radius//2 + offset[0]
-        y = self.position.y - radius//2 + offset[1]
+        x = self.position.x - radius + offset[0]
+        y = self.position.y - radius + offset[1]
         # self.surface.set_alpha(255 * (1 - self.through()))
+        glow = pygame.transform.scale(self.glow, (int(4*radius), int(4*radius)))
         surface.blit(pygame.transform.scale(self.surface, (int(2*radius), int(2*radius))), (x, y))
+        surface.blit(glow, (self.position.x + offset[0] - glow.get_width()//2, self.position.y + offset[1] - glow.get_height()//2), special_flags=pygame.BLEND_ADD)
+
+    def update(self, dt, events):
+        super().update(dt, events)
+        self.velocity *= 0.1**dt
 
 
 class FwooshParticle(Particle):
@@ -120,4 +126,4 @@ class FwooshParticle(Particle):
         surface.blit(pygame.transform.scale(self.surface, (width, height)), (x, y))
 
     def on_destroy(self):
-        ParticleHandler.add_particle(CircleParticle(0.25, self.position.get_position(), 5, self.color, (random.random() * 200 - 100, random.random() * 200 - 100)))
+        ParticleHandler.add_particle(CircleParticle(0.6 * random.random() + 0.25, self.position.get_position(), 5, self.color, (random.random() * 120 - 60, random.random() * 120 - 60)))
