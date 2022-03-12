@@ -197,8 +197,8 @@ class Zap(Spell):
 class Flare(Spell):
     def get_effects(self, target, crit=False):
         self.clear_effects()
-        target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=2, lower=0)
+        target = self.snap_to_visible(target)
         if target:
             self.add_effect(SpellEffect(damage=1), Area.Circle(target, radius=1.5 if crit else 1))
         return self.effects, self.areas, self.delays
@@ -209,7 +209,8 @@ class Push(Spell):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
         if target:
-            self.add_effect(SpellEffect(move_radial=3, stun=1), Area.Circle(target, radius=1.5 if crit else 1))
+            self.add_effect(SpellEffect(move_radial=3, stun=1),
+                            Area.Circle(target, radius=1.5 if crit else 1, include_origin=False))
         return self.effects, self.areas, self.delays
 
 
