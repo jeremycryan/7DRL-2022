@@ -89,7 +89,7 @@ class CircleParticle(Particle):
         x = self.position.x - radius//2 + offset[0]
         y = self.position.y - radius//2 + offset[1]
         # self.surface.set_alpha(255 * (1 - self.through()))
-        surface.blit(pygame.transform.scale(self.surface, (2*radius, 2*radius)), (x, y))
+        surface.blit(pygame.transform.scale(self.surface, (int(2*radius), int(2*radius))), (x, y))
 
 
 class FwooshParticle(Particle):
