@@ -13,6 +13,8 @@ import pygame
 from lib.Math import lerp, PowerCurve
 import math
 
+from demo.Spell import list_spells, get_spell
+
 
 class CraftingMenu(GameObject):
 
@@ -66,7 +68,7 @@ class CraftingMenu(GameObject):
         self.shown = 0
         craft_button_surf = ImageHandler.load("images/craft_button.png")
         craft_button_surf.set_colorkey((255, 0, 255))
-        self.craft_button = Button(craft_button_surf, (0, 0), hover_surf=craft_button_surf, enabled=False)
+        self.craft_button = Button(craft_button_surf, (0, 0), hover_surf=craft_button_surf, enabled=True, on_click=self.craft)
         self.banner = Banner()
 
         self.picked_up_tiles = []
@@ -189,7 +191,23 @@ class CraftingMenu(GameObject):
             self.picked_up_tiles = []
 
     def craft(self):
-        pass
+        if not self.banner.can_craft():
+            return False
+
+        idx = 0
+        for item in self.player.spells:
+            if item:
+                idx += 1
+            else:
+                break
+        if idx >= len(self.player.spells):
+            return False
+
+        spell_name = self.banner.get_word()
+        self.player.spells[idx] = get_spell(self.player, spell_name)
+        print(self.player.spells)
+        self.banner.tiles = []
+
 
 class UITile(GameObject):
     def __init__(self, letter, menu):
@@ -236,9 +254,9 @@ class GrayUITile(GameObject):
         self.letter = letter
         surface = ImageHandler.load_copy(f"images/letters/UI_Letter_{letter}.png")
         arr = PixelArray(surface)
-        arr.replace((93, 44, 40), (20, 20, 20))
-        arr.replace((138, 72, 54), (50, 50, 50))
-        arr.replace((191, 111, 74), (70, 70, 70))
+        arr.replace((93, 44, 40), (28, 18, 28))
+        arr.replace((138, 72, 54), (57, 31, 33))
+        arr.replace((191, 111, 74), (93, 44, 40))
         del arr
 
         self.sprite = StaticSprite(surface, colorkey=(255, 0, 255))
@@ -311,4 +329,4 @@ class Banner(GameObject):
 
     def can_craft(self):
         # TODO determine if current spelling is valid word
-        return False
+        return self.get_word() in list_spells()

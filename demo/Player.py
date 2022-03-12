@@ -1,3 +1,4 @@
+from demo.ParticleHandler import ParticleHandler, CircleParticle
 from lib.Camera import Camera
 from lib.Sprite import StaticSprite
 from demo.Spell import *
@@ -8,6 +9,7 @@ import math
 
 spellKeys = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
              pygame.K_8, pygame.K_9]
+
 
 
 class Player(GridEntity):
@@ -40,7 +42,7 @@ class Player(GridEntity):
         self.letter_tiles = [LetterTile(letter) for letter in Settings.Static.STARTING_LETTERS]
         self.letters_in_use = self.letter_tiles.copy()
 
-        starting_spells = ["zap", "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = get_spell(self, starting_spells[i])
 
@@ -89,6 +91,9 @@ class Player(GridEntity):
                         self.prepared_spell = None
                         self.end_turn()
                         break
+
+        velocity = Pose((random.random() * 200, random.random() * 200), 0)
+        ParticleHandler.add_particle(CircleParticle(0.5, self.position.get_position(), 5, (255, 255, 255), velocity.get_position()))
 
     def can_make_turn_movement(self):
         return not self.animating() and self.taking_turn

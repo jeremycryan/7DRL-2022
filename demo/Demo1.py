@@ -1,9 +1,11 @@
+from cProfile import label
+from re import A
+from turtle import goto
 import pygame
 import sys
 import yaml
 
 from demo.SpellHUD import SpellHUD
-from demo.CraftingMenu import CraftingMenu
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
@@ -13,7 +15,9 @@ from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator
 from demo.Enemy import Goomba
 from demo.TurnManager import TurnManager
-
+from demo.CraftingMenu import CraftingMenu
+from demo.ParticleHandler import ParticleHandler
+import os
 
 class Game:
     def __init__(self):
@@ -21,6 +25,7 @@ class Game:
         ImageHandler.init()
         Camera.init()
         TurnManager.init()
+        ParticleHandler.init()
         self.screen = pygame.Surface((640, 360))
         self.true_screen = pygame.display.set_mode((1280, 720))
         self.fps_font = pygame.font.SysFont("monospace", 10, 1, 0)
@@ -82,9 +87,21 @@ class Game:
             array[y] = new_row
 
     def generate_map(self):
+
+        mapLength = 6
+        mapBossRoom = "rooms/boss_room_1.yaml"
+        mapBranchLength = 0
+        mapBranchChance = 0
+        roomAttemptLimit = 30
+        placementAttemptLimit = 30
+
+
         # TODO: Somehow determine a good height for the map, in tiles.
-        width = Settings.Static.ROOM_WIDTH * 4
-        height = Settings.Static.ROOM_HEIGHT * 4
+        mapWidth = Settings.Static.MAP_WIDTH
+        mapHeight = Settings.Static.MAP_HEIGHT
+
+        width = Settings.Static.ROOM_WIDTH * mapWidth
+        height = Settings.Static.ROOM_HEIGHT * mapHeight
 
         # Don't change any of this
         map = Map(width, height)
@@ -95,22 +112,120 @@ class Game:
 
         # Using rooms from yaml, assemble the map.
         # TODO Daniel improve this section
+        
         wall = "X"
         floor = "."
         up, down, left, right = "U", "D", "L", "R"
-        rooms = [
-            self.get_yaml_room("rooms/room_1.yaml")
-        ]
-        tile_array = [wall * width for _ in range(height)]  # Make array of wall tiles the size of the map to add rooms into
-        for y in range(16):
-            for x in range(16):
+
+        PATHS = os.listdir("rooms/small_rooms")
+
+        rooms = []
+        for path in PATHS:
+            rooms.append(self.get_yaml_room("rooms/small_rooms/" + path))
+        
+        roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
+        centerX = mapWidth//2
+        centerY = mapHeight//2
+
+        # Make array of wall tiles the size of the map to add rooms into
+        stringMap = [wall * width for _ in range(height)] 
+
+        # Spawn Room
+        self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/spawn_room.yaml"), stringMap, (centerX, centerY), closed_walls=[])
+        roomGrid[centerX][centerY] = True
+
+        currentX = centerX
+        currentY = centerY
+        branchBaseX = centerX
+        branchBaseY = centerY
+
+        mapData = [] 
+
+        generationSuceeded = True
+        for stepCount in range(mapLength):
+            # DO NEXT STEP IN TO-BOSS PATH
+
+            placementSucceded = False
+            for roomAttemptCount in range(roomAttemptLimit):
+                
+                # pick a room
                 room = random.choice(rooms)
-                self.merge_room_onto_character_array(room, tile_array, (x, y), closed_walls=[up])
+                roomWidth = room["width"]
+                roomHeight = room["height"]
+
+                #place attempt code
+                for placeAttemptCount in range(placementAttemptLimit):
+
+                    attemptX = random.randrange(-roomWidth, roomWidth+1)
+                    attemptY = random.randrange(-roomHeight, roomHeight+1)
+                    
+                    # If same space or not connected due to angle
+                    if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
+                        continue
+
+                    attemptX = currentX + attemptX
+                    attemptY = currentY + attemptY
+
+                    # checking logic here
+
+                    placementAllowed = True
+                    for roomSpaceX in range(roomWidth):
+                        for roomSpaceY in range(roomHeight):
+                            try:
+                                if roomGrid[roomSpaceX + attemptX][roomSpaceY + attemptY]:
+                                    placementAllowed = False
+                            except:
+                                placementAllowed = False
+
+                    if not placementAllowed:
+                        continue
+
+                    #place stuff time
+                    for roomSpaceX in range(roomWidth):
+                        for roomSpaceY in range(roomHeight):
+                            roomGrid[roomSpaceX + attemptX][roomSpaceY +attemptY] = True
+
+                    mapData.append([attemptX, attemptY, room])
+                    currentX = attemptX
+                    currentY = attemptY
+                    placementSucceded = True
+                    break
+
+                if not placementSucceded:
+                    continue
+
+                break
+
+            if not placementSucceded:
+                generationSuceeded = False
+                break
+            #if random.random() < mapBranchChance:
+            #    # MAKE BRANCH
+            #    for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
+            #
+            #        testX = random.choice(range(mapWidth))
+            #        testY = random.choice(range(mapWidth))
+
+
+
+
+
+                    #x and y are in room coordinates
+                    #self.merge_room_onto_character_array(room, stringMap, (x, y), closed_walls=[up])
+
+        if generationSuceeded:
+            for roomToPlace in mapData:
+                self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), closed_walls=[])
+
+        #apply U D L R in tile_array into floors based on room coordinates
+        #searches based on room coordinate
 
         # Turn our room array back into a map.
-        for y, row in enumerate(tile_array):
+        for y, row in enumerate(stringMap):
             for x, item in enumerate(row):
                 if item is wall:
+                    new_tile = Wall()
+                elif item is wall:
                     new_tile = Wall()
                 else:
                     new_tile = Floor()
@@ -121,6 +236,9 @@ class Game:
         self.add_decorators(map)
 
         return map
+    
+    def tryPlaceRoom(self):
+        pass
 
     def add_decorators(self, map):
         new_layer = map.add_empty_layer(Settings.Static.DECORATOR_LAYER)
@@ -167,16 +285,17 @@ class Game:
 
         map = self.generate_map()
         player = Player()
-        map.add_to_cell(player, 2, 2, 0)
+        map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         spell_hud = SpellHUD(player)
         crafting_menu = CraftingMenu(player)
         enemies = self.spawn_enemies(map.get_layer(0))
         TurnManager.add_entities(player, *enemies)
+        vignette = ImageHandler.load("images/vignette.png")
 
         Camera.change_objects(objects=[player], weights=[1], mouse_weight=0.15)
 
         while True:
-            dt = clock.tick(60)/1000
+            dt = clock.tick(120)/1000
             events = pygame.event.get()
 
             self.screen.fill((0, 0, 0))
@@ -195,14 +314,18 @@ class Game:
             map.update(dt, events)
             crafting_menu.update(dt, events)
             map.draw(self.screen, offset)
+            ParticleHandler.update(dt, events)
+            ParticleHandler.draw(self.screen, offset=offset)
+
+            self.screen.blit(vignette, (0, 0), special_flags=pygame.BLEND_MULT)
+
             self.draw_fps_font()
 
             crafting_menu.draw(self.screen, (0, 0))
             spell_hud.draw(self.screen, (10, 10))
 
-            scaled = pygame.transform.scale2x(self.screen)
+            scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
             self.true_screen.blit(scaled, (0, 0))
-
             pygame.display.flip()
 
 
