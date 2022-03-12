@@ -3,6 +3,7 @@ import demo.EnemyAI as Ai
 import demo.EnemySpells as Spell
 from demo.Pickup import Pickup, LetterTile
 from demo.Wall import Wall
+from lib.Animation import MoveAnimation
 from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
 from lib.Primitives import Pose
@@ -203,6 +204,58 @@ class Wolf(Goomba):
 
     def name_y_offset(self):
         return -18
+
+class Orc(Goomba):
+    name = "ORC"
+    hit_points = 6
+
+    def load_sprite(self):
+        sprite = StaticSprite.from_path("images/orca.png", flippable=True)
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def name_y_offset(self):
+        return -34
+
+class Shade(Goomba):
+    name = "SHADE"
+    hit_points = 6
+
+    def load_sprite(self):
+        sprite = StaticSprite.from_path("images/shade.png", flippable=True)
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def name_y_offset(self):
+        return -26
+
+
+class Slime(Goomba):
+    name = "SLIME"
+    hit_points = 3
+
+    def load_sprite(self):
+        sprite = StaticSprite.from_path("images/slime.png", flippable=True)
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def name_y_offset(self):
+        return -26
+
+    def on_move_to_grid_position(self, x, y):
+        """
+        Called when the object it has moved to a new x, y bucket in the grid.
+
+        The object doesn't actually manipulate the grid in any way, it just is being told
+        it should update itself visually.
+        :param x: The new x position
+        :param y: The new y position
+        """
+        self.animations.append(MoveAnimation(self,
+                                             self.position.copy(),
+                                             self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
+                                             squish_factor = 0.7, bounce_height = 15))
+        self.check_for_pickups()
 
 
 class GolemSummon(Enemy):

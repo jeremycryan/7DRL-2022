@@ -13,7 +13,7 @@ from lib.Settings import Settings
 import random
 from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator
-from demo.Enemy import Goomba, Bat, Wolf
+from demo.Enemy import Goomba, Bat, Wolf, Slime, Orc, Shade
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
@@ -251,7 +251,8 @@ class Game:
                     break
                 if type(item) == Wall:
                     if new_layer.cell_in_range(x, y+1):
-                        for item in new_layer.peek_at_cell(x, y+1):
+                        cell = map.get_layer(1).peek_at_cell(x, y+1)
+                        for item in cell:
                             if type(item) == Floor:
                                 if random.random() < 0.1:
                                     self.add_decorator(new_layer, x, y, False)
@@ -272,7 +273,7 @@ class Game:
         enemy_objects = []
         for x, y in layer.cell_coordinates():
             if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
-                enemy_type = random.choice([Goomba, Bat, Wolf])
+                enemy_type = random.choice([Goomba, Bat, Wolf, Slime, Orc, Shade])
                 enemy = enemy_type()
                 enemy_objects.append(enemy)
                 layer.add_to_cell(enemy, x, y)

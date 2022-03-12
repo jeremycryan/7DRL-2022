@@ -94,7 +94,7 @@ class MoveAnimation(Animation):
 
     blocking = True
 
-    def __init__(self, parent, start_position, end_position, duration=0.2, squish_factor = 1):
+    def __init__(self, parent, start_position, end_position, duration=0.2, squish_factor = 1, bounce_height=8):
         super().__init__(parent, duration=duration)
         self.start_position = start_position
         if type(self.start_position) is tuple:
@@ -104,12 +104,13 @@ class MoveAnimation(Animation):
             self.end_position = Pose(self.end_position, 0)
         self.current_position = start_position.copy()
         self.squish_factor = squish_factor
+        self.bounce_height = bounce_height
 
     def update(self, dt, events):
         super().update(dt, events)
         if self.destroyed:
             return
-        total_bounce_height = 8
+        total_bounce_height = self.bounce_height
         bounce_height = Pose((0, ((self.through() - 0.5)*2)**2 - 1), 0) * total_bounce_height
         curve = PowerCurve(power=1)
         x = lerp(self.start_position.x, self.end_position.x, self.through(), curve)
