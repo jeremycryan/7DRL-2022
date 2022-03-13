@@ -23,6 +23,7 @@ class Enemy(GridEntity):
     vulnerabilities = ()
     invulnerabilities = ()
     resistances = ()
+    period = 1
 
     name_font = None
     name_letters = {}
@@ -179,6 +180,7 @@ class Goomba(Enemy):
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
+        self.stun += self.period - 1
 
 class Bat(Goomba):
     name = "BAT"
@@ -198,6 +200,7 @@ class Bat(Goomba):
 class Wolf(Goomba):
     name = "WOLF"
     hit_points = 3
+    period = 2
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/dorg.png", flippable=True)
