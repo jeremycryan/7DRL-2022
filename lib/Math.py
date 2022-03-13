@@ -122,3 +122,31 @@ def get_squares_in_range(radius, origin=Pose((0, 0)), no_origin=False):
                 squares.append(p + origin)
     squares.sort(key=lambda s: (s-origin).magnitude())
     return squares
+
+
+def get_squares(origin=Pose((0, 0)), linear=0, diagonal=0, radius=0, custom=0):
+    squares = []
+    if not hasattr(linear, "__iter__"):
+        linear = (linear,)
+    if not hasattr(diagonal, "__iter__"):
+        diagonal = (diagonal,)
+    if linear:  # Cardinal movement
+        for i in linear:
+            squares.append(origin+Pose((i, 0)))
+    if diagonal:  # Diagonal movement
+        for i in diagonal:
+            squares.append(origin+Pose((i, i)))
+    if radius:  # Arbitrary movement
+        squares += get_squares_in_range(radius, origin=origin, no_origin=True)
+    if custom == 1:  # Knight's move away
+        squares.append(origin+Pose((1, 2)))
+        squares.append(origin+Pose((2, 1)))
+
+    rotations = [((0, 1), (-1, 0)), ((-1, 0), (0, -1)), ((0, -1), (1, 0))]
+    for r in rotations:  # 4-way symmetry
+        for square in squares[:]:
+            square = square - origin
+            x = square.x*r[0][0] + square.y*r[0][1]
+            y = square.x*r[1][0] + square.y*r[1][1]
+            squares.append(origin+Pose((x, y)))
+    return squares

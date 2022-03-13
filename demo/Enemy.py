@@ -4,6 +4,7 @@ import demo.EnemySpells as Spell
 from demo.EnemyDropHandler import EnemyDropHandler
 from demo.Pickup import Pickup, LetterTile
 from demo.Wall import Wall
+from lib import Math
 from lib.Animation import MoveAnimation, Spawn, InstantMoveAnimation
 from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
@@ -38,6 +39,7 @@ class Enemy(GridEntity):
         self.solid = True
         self.health = self.hit_points
         self.stun = 0
+        self.menacing = []
         if not Enemy.name_font:
             Enemy.name_font = pygame.font.Font("fonts/smallest_pixel.ttf", 10)
             Enemy.name_letters = {letter:Enemy.name_font.render(letter, True, (255, 255, 255)) for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ "}
@@ -63,6 +65,9 @@ class Enemy(GridEntity):
         if self.name not in Settings.Dynamic.KNOWN_ENEMIES:
             Settings.Dynamic.KNOWN_ENEMIES.append(self.name)
             Settings.Dynamic.KNOWN_ENEMIES.sort()
+        color = (255, 0, 0)
+        for square in self.menacing:
+            self.draw_highlight(surface, *square.get_position(), color, offset=offset)
 
     def draw_name(self, surface, offset=(0, 0)):
         letters = [Enemy.name_letters[letter] for letter in self.name]
@@ -121,14 +126,14 @@ class Enemy(GridEntity):
         self.health -= hp
         if self.health <= 0:
             self.health = 0
-            self.destroy()
 
     def on_destroy(self):
         super().on_destroy()
         if self.position_on_grid and self.drop_letters:
             x, y = self.position_on_grid.get_position()
             drop = EnemyDropHandler.get_drop(self)
-            self.layer.map.add_to_cell(drop, x, y, Settings.Static.PICKUP_LAYER)
+            if drop:
+                self.layer.map.add_to_cell(drop, x, y, Settings.Static.PICKUP_LAYER)
         # TODO: death animation
 
     def push(self, x=0, y=0, teleport=False, instant=False):
@@ -159,7 +164,10 @@ class Bat(Enemy):
     name = "BAT"
     hit_points = 1
     strength = 1
+    can_melee = True
+    can_ranged = True
     spells = [Spell.BatAttack]
+    move_squares = Math.get_squares(linear=1)
 
     def __init__(self):
         super().__init__()
@@ -175,6 +183,7 @@ class Bat(Enemy):
         return sprite
 
     def take_turn(self):
+        self.menacing = []
         if self.spell_progress > 0:
             self.current_spell.cast(self.current_target, turn=self.spell_progress)
             self.spell_progress += 1
@@ -186,10 +195,9 @@ class Bat(Enemy):
             else:
                 self.combo = self.current_spell.combo
             return
-        move_squares = Ai.get_squares(self, linear=1)
         targets = [e.position_on_grid - self.position_on_grid for e in GridEntity.allies]
         for attack in self.attacks:
-            attack_target = Ai.check_spell(self, attack, targets)
+            attack_target = Ai.check_spell(self, attack, targets, can_melee=self.can_melee, can_ranged=self.can_ranged)
             if attack_target:
                 attack.cast(attack_target)
                 if attack.turns > 1:
@@ -202,9 +210,9 @@ class Bat(Enemy):
                 return
         hunt_target = Ai.select_target(self, targets=targets, radius=4, visible=True)
         if hunt_target:
-            destination = Ai.hunt(self, hunt_target, squares=move_squares)
+            destination = Ai.hunt(self, hunt_target, squares=self.move_squares)
         else:
-            destination = Ai.wander(self, move_squares)
+            destination = Ai.wander(self, self.move_squares)
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
@@ -261,6 +269,9 @@ class Orc(Bat):
 class Shade(Bat):
     name = "SHADE"
     hit_points = 6
+    spells = [Spell.ShadeAttack]
+    can_melee = False
+    move_squares = Math.get_squares(linear=1, custom=1)
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/shade.png", flippable=True)
@@ -318,7 +329,7 @@ class GolemSummon(Enemy):
         return sprite
 
     def take_turn(self):
-        move_squares = Ai.get_squares(self, linear=1)
+        move_squares = Math.get_squares(linear=1)
         attack_squares = move_squares
         attack_target, _ = Ai.find(self, squares=attack_squares)
         if attack_target:

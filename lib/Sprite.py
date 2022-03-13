@@ -10,17 +10,18 @@ class Sprite(GameObject):
     Class that holds one or more pygame surfaces for an object.
     """
 
+    colorkey = None
+    flipped_x = False
+    blend_mode = pygame.BLENDMODE_NONE
+    tint = (255, 255, 255)
+    alpha = 255
+
     def __init__(self):
         super().__init__()
 
         # Position in pixels
         self.position = Pose((0, 0), 0)
         self.distortion = Pose((1, 1), 0)
-        self.alpha = 255
-        self.tint = (255, 255, 255)  # Color to tint the surface multiplicitively
-        self.colorkey = None  # Color key for transparent pixel
-        self.flipped_x = False
-        self.blend_mode = pygame.BLENDMODE_NONE
 
     def set_colorkey(self, color):
         self.colorkey = color

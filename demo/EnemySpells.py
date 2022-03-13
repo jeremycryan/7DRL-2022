@@ -71,3 +71,19 @@ class OrcAttack(Spell):
                 self.add_effect(SpellEffect(move_linear=target), Area.Point())
                 self.combo = True
         return self.effects, self.areas, self.delays
+
+
+class ShadeAttack(Spell):
+    turns = 2
+
+    def get_effects(self, target, crit=False, turn=0):
+        self.clear_effects()
+        if target:
+            if turn == 0:
+                target = self.snap_to_range(target, upper=3, lower=1)
+                if target:
+                    self.add_effect(SpellEffect(menace=True), Area.Cross(origin=target))
+            else:
+                self.add_effect(SpellEffect(damage=self.caster.strength, damage_type=GridEntity.DAMAGE_FIRE),
+                                Area.Cross(origin=target))  # Used for AI logic only
+        return self.effects, self.areas, self.delays
