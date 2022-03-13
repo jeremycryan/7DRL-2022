@@ -24,6 +24,7 @@ from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
 import os
+from lib.Math import lerp
 
 class Game:
     def __init__(self):
@@ -153,12 +154,15 @@ class Game:
 
     def generate_map(self):
 
-        mapLength = 6
+        lerpAmount = (self.current_dungeon_level - 1)/6
+        mapLength = int(lerp(2,7, lerpAmount))
+
+        lerpAmount = (self.current_dungeon_level - 1) / 7
+        mapExtraRooms = int(lerp(0, 9, lerpAmount))
+
         mapBossRoom = "rooms/boss_room_1.yaml"
-        mapExtraRooms = 5
-        mapBranchChance = 0
-        roomAttemptLimit = 30
-        placementAttemptLimit = 30
+        roomAttemptLimit = 250
+        placementAttemptLimit = 250
 
 
         # TODO: Somehow determine a good height for the map, in tiles.
@@ -195,7 +199,6 @@ class Game:
         stringMap = [wall * width for _ in range(height)] 
 
         # Spawn Room
-        self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/spawn_room.yaml"), stringMap, (centerX, centerY), closed_walls=[])
 
         currentX = centerX
         currentY = centerY
@@ -219,7 +222,11 @@ class Game:
                 for roomAttemptCount in range(roomAttemptLimit):
 
                     # pick a room
-                    room = random.choice(rooms)
+                    if(stepCount == mapLength - 1):
+                        room = self.get_yaml_room("rooms/special_rooms/exit_room.yaml")
+                    else:
+                        room = random.choice(rooms)
+
                     roomWidth = room["width"]
                     roomHeight = room["height"]
 
@@ -346,9 +353,10 @@ class Game:
             #````````````````````````
 
         if generationSuceeded:
+
+            self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/spawn_room.yaml"), stringMap,(centerX, centerY), closed_walls=[])
+
             #PURGE U D L R
-            for mapRoom in mapData:
-                pass
 
             #PLACE ROOMS
             for roomToPlace in mapData:
@@ -357,34 +365,41 @@ class Game:
 
                 closed_walls = []
                 try:
-                    if roomGrid[roomToPlace[0] - 1][roomToPlace[1]]:
-                        closed_walls.append("L")
+                    for blep in range(roomToPlace[2]["height"]):
+                        if roomGrid[roomToPlace[0] - 1][roomToPlace[1]+blep]:
+                            closed_walls.append("L")
                 except:
                     pass
 
                 try:
-                    if roomGrid[roomToPlace[0] + roomToPlace[2]["width"]][roomToPlace[1]]:
-                        closed_walls.append("R")
+                    for blep in range(roomToPlace[2]["height"]):
+                        if roomGrid[roomToPlace[0] + roomToPlace[2]["width"]][roomToPlace[1] + blep]:
+                            closed_walls.append("R")
                 except:
                     pass
 
                 try:
-                    if roomGrid[roomToPlace[0]][roomToPlace[1] - 1]:
-                        closed_walls.append("U")
+                    for blep in range(roomToPlace[2]["width"]):
+                        if roomGrid[roomToPlace[0] + blep][roomToPlace[1] - 1]:
+                            closed_walls.append("U")
                 except:
                     pass
 
                 try:
-                    if roomGrid[roomToPlace[0]][roomToPlace[1] + roomToPlace[2]["height"]]:
-                        closed_walls.append("D")
+                    for blep in range(roomToPlace[2]["width"]):
+                        if roomGrid[roomToPlace[0] + blep][roomToPlace[1] + roomToPlace[2]["height"]]:
+                            closed_walls.append("D")
                 except:
                     pass
 
                 for char in closed_walls:
-                    valid_chars.remove(char)
+                    if(char in valid_chars):
+                        valid_chars.remove(char)
 
                 self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), valid_chars)
         else:
+            self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/backup.yaml"), stringMap,(centerX, centerY), closed_walls=[])
+
             pass
             #place special room with down stairs
 

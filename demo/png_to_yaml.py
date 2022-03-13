@@ -3,9 +3,9 @@ import yaml
 from lib.Settings import Settings
 import os
 
-PATHS = os.listdir("../room_pngs/medium_rooms")
+PATHS = os.listdir("../room_pngs/backup_levels/")
 
-OUTPUT_PATH_REL = "../rooms/small_rooms/"
+OUTPUT_PATH_REL = "../rooms/special_rooms/"
 
 COLORS_TO_CHARACTER = {
     (0, 0, 0): "X",
@@ -18,7 +18,7 @@ COLORS_TO_CHARACTER = {
 
 if __name__=="__main__":
     for path in PATHS:
-        surf = pygame.image.load("../room_pngs/medium_rooms/" + path)
+        surf = pygame.image.load("../room_pngs/backup_levels/" + path)
 
         yaml_contents = {
             "tiles": [],
