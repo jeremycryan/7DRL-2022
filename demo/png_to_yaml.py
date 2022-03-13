@@ -3,9 +3,9 @@ import yaml
 from lib.Settings import Settings
 import os
 
-PATHS = os.listdir("../room_pngs/small_rooms")
+PATHS = os.listdir("../room_pngs/medium_rooms")
 
-OUTPUT_PATH_REL = "../rooms/small_rooms"
+OUTPUT_PATH_REL = "../rooms/small_rooms/"
 
 COLORS_TO_CHARACTER = {
     (0, 0, 0): "X",
@@ -18,7 +18,7 @@ COLORS_TO_CHARACTER = {
 
 if __name__=="__main__":
     for path in PATHS:
-        surf = pygame.image.load("room_pngs/small_rooms/" + path)
+        surf = pygame.image.load("../room_pngs/medium_rooms/" + path)
 
         yaml_contents = {
             "tiles": [],
@@ -31,7 +31,7 @@ if __name__=="__main__":
                 if (r, g, b) in COLORS_TO_CHARACTER:
                     row += COLORS_TO_CHARACTER[(r, g, b)]
                 else:
-                    row += "X"
+                    row += "."
             yaml_contents["tiles"].append(row)
 
         yaml_contents["width"] = surf.get_width()//Settings.Static.ROOM_WIDTH

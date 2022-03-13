@@ -155,7 +155,7 @@ class Game:
 
         mapLength = 6
         mapBossRoom = "rooms/boss_room_1.yaml"
-        mapBranchLength = 0
+        mapExtraRooms = 5
         mapBranchChance = 0
         roomAttemptLimit = 30
         placementAttemptLimit = 30
@@ -188,7 +188,6 @@ class Game:
         for path in PATHS:
             rooms.append(self.get_yaml_room("rooms/small_rooms/" + path))
         
-        roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
         centerX = mapWidth//2
         centerY = mapHeight//2
 
@@ -197,35 +196,118 @@ class Game:
 
         # Spawn Room
         self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/spawn_room.yaml"), stringMap, (centerX, centerY), closed_walls=[])
-        roomGrid[centerX][centerY] = True
 
         currentX = centerX
         currentY = centerY
         branchBaseX = centerX
         branchBaseY = centerY
 
-        mapData = [] 
+        roomGrid = []
 
-        generationSuceeded = True
-        for stepCount in range(mapLength):
-            # DO NEXT STEP IN TO-BOSS PATH
+        #generate main path
+        for mapGenAttempt in range(200):
+
+            roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
+            roomGrid[centerX][centerY] = True
+
+            mapData = []
+            generationSuceeded = True
+            for stepCount in range(mapLength):
+                # DO NEXT STEP IN TO-BOSS PATH
+
+                placementSucceded = False
+                for roomAttemptCount in range(roomAttemptLimit):
+
+                    # pick a room
+                    room = random.choice(rooms)
+                    roomWidth = room["width"]
+                    roomHeight = room["height"]
+
+                    #place attempt code
+                    for placeAttemptCount in range(placementAttemptLimit):
+
+                        attemptX = random.randrange(-roomWidth, roomWidth+1)
+                        attemptY = random.randrange(-roomHeight, roomHeight+1)
+
+                        # If same space or not connected due to angle
+                        if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
+                            continue
+
+                        attemptX = currentX + attemptX
+                        attemptY = currentY + attemptY
+
+                        # checking logic here
+
+                        placementAllowed = True
+                        for roomSpaceX in range(roomWidth):
+                            for roomSpaceY in range(roomHeight):
+                                try:
+                                    if roomGrid[roomSpaceX + attemptX][roomSpaceY + attemptY]:
+                                        placementAllowed = False
+                                except:
+                                    placementAllowed = False
+
+                        if not placementAllowed:
+                            continue
+
+                        #place stuff time
+                        for roomSpaceX in range(roomWidth):
+                            for roomSpaceY in range(roomHeight):
+                                roomGrid[roomSpaceX + attemptX][roomSpaceY +attemptY] = True
+
+                        mapData.append([attemptX, attemptY, room])
+                        currentX = attemptX
+                        currentY = attemptY
+                        placementSucceded = True
+                        break
+
+                    if not placementSucceded:
+                        continue
+
+                    break
+
+                if not placementSucceded:
+                    generationSuceeded = False
+                    break
+                #if random.random() < mapBranchChance:
+                #    # MAKE BRANCH
+                #    for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
+                #
+                #        testX = random.choice(range(mapWidth))
+                #        testY = random.choice(range(mapWidth))
+            if generationSuceeded:
+                break
+
+
+
+
+                        #x and y are in room coordinates
+                        #self.merge_room_onto_character_array(room, stringMap, (x, y), closed_walls=[up])
+
+
+        #spam extra rooms
+        for extraRoomAttempts in range(mapExtraRooms):
+            randomRoomX = random.randrange(0,Settings.Static.MAP_WIDTH)
+            randomRoomY = random.randrange(0,Settings.Static.MAP_HEIGHT)
+            #``````````````````````````
 
             placementSucceded = False
-            for roomAttemptCount in range(roomAttemptLimit):
-                
+            for roomAttemptCount in range(50):
+
                 # pick a room
                 room = random.choice(rooms)
                 roomWidth = room["width"]
                 roomHeight = room["height"]
 
-                #place attempt code
+                # place attempt code
                 for placeAttemptCount in range(placementAttemptLimit):
 
-                    attemptX = random.randrange(-roomWidth, roomWidth+1)
-                    attemptY = random.randrange(-roomHeight, roomHeight+1)
-                    
+                    attemptX = random.randrange(-roomWidth, roomWidth + 1)
+                    attemptY = random.randrange(-roomHeight, roomHeight + 1)
+
                     # If same space or not connected due to angle
-                    if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
+                    if (attemptX == 0 and attemptY == 0) or (
+                            abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
                         continue
 
                     attemptX = currentX + attemptX
@@ -245,10 +327,10 @@ class Game:
                     if not placementAllowed:
                         continue
 
-                    #place stuff time
+                    # place stuff time
                     for roomSpaceX in range(roomWidth):
                         for roomSpaceY in range(roomHeight):
-                            roomGrid[roomSpaceX + attemptX][roomSpaceY +attemptY] = True
+                            roomGrid[roomSpaceX + attemptX][roomSpaceY + attemptY] = True
 
                     mapData.append([attemptX, attemptY, room])
                     currentX = attemptX
@@ -261,26 +343,50 @@ class Game:
 
                 break
 
-            if not placementSucceded:
-                generationSuceeded = False
-                break
-            #if random.random() < mapBranchChance:
-            #    # MAKE BRANCH
-            #    for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
-            #
-            #        testX = random.choice(range(mapWidth))
-            #        testY = random.choice(range(mapWidth))
-
-
-
-
-
-                    #x and y are in room coordinates
-                    #self.merge_room_onto_character_array(room, stringMap, (x, y), closed_walls=[up])
+            #````````````````````````
 
         if generationSuceeded:
+            #PURGE U D L R
+            for mapRoom in mapData:
+                pass
+
+            #PLACE ROOMS
             for roomToPlace in mapData:
-                self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), closed_walls=[])
+
+                valid_chars = ["U", "D", "L", "R"]
+
+                closed_walls = []
+                try:
+                    if roomGrid[roomToPlace[0] - 1][roomToPlace[1]]:
+                        closed_walls.append("L")
+                except:
+                    pass
+
+                try:
+                    if roomGrid[roomToPlace[0] + roomToPlace[2]["width"]][roomToPlace[1]]:
+                        closed_walls.append("R")
+                except:
+                    pass
+
+                try:
+                    if roomGrid[roomToPlace[0]][roomToPlace[1] - 1]:
+                        closed_walls.append("U")
+                except:
+                    pass
+
+                try:
+                    if roomGrid[roomToPlace[0]][roomToPlace[1] + roomToPlace[2]["height"]]:
+                        closed_walls.append("D")
+                except:
+                    pass
+
+                for char in closed_walls:
+                    valid_chars.remove(char)
+
+                self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), valid_chars)
+        else:
+            pass
+            #place special room with down stairs
 
         #apply U D L R in tile_array into floors based on room coordinates
         #searches based on room coordinate
@@ -342,6 +448,7 @@ class Game:
                 tile.load_sprite()
 
     def spawn_enemies(self, layer):
+        return []
         enemies = 0
         enemy_objects = []
         for x, y in layer.cell_coordinates():

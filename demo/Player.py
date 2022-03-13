@@ -24,6 +24,7 @@ class Player(GridEntity):
 
     faction = GridEntity.FACTION_ALLY
     hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS
+    is_player = True
 
     def __init__(self, position=(0, 0)):
         super().__init__(position)
@@ -53,6 +54,8 @@ class Player(GridEntity):
         self.letter_tiles = [LetterTile(letter) for letter in Settings.Static.STARTING_LETTERS]
         self.letters_in_use = self.letter_tiles.copy()
         self.add_starting_spells()
+
+        self.pressed_keys = []
 
     def add_starting_spells(self, list_of_spells=None):
         starting_spells = [0, "zap"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
@@ -85,22 +88,31 @@ class Player(GridEntity):
 
         # Player input handling
         pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_w] and self.can_make_turn_movement():
-            if not self.move(y=-1):
-                self.add_animation(Feint(self, self.position, (0, -16), duration=0.2))
-            self.end_turn()
-        if pressed[pygame.K_s] and self.can_make_turn_movement():
-            if not self.move(y=1):
-                self.add_animation(Feint(self, self.position, (0, 16), duration=0.2))
-            self.end_turn()
-        if pressed[pygame.K_a] and self.can_make_turn_movement():
-            if not self.move(x=-1):
-                self.add_animation(Feint(self, self.position, (-16, 0), duration=0.2))
-            self.end_turn()
-        if pressed[pygame.K_d] and self.can_make_turn_movement():
-            if not self.move(x=1):
-                self.add_animation(Feint(self, self.position, (16, 0), duration=0.2))
-            self.end_turn()
+
+        for key in [pygame.K_w, pygame.K_s, pygame.K_d, pygame.K_a]:
+            if pressed[key] and (key not in self.pressed_keys):
+                self.pressed_keys.append(key)
+            if not pressed[key] and (key in self.pressed_keys):
+                self.pressed_keys.remove(key)
+
+        for key in self.pressed_keys[::-1]:
+            if key == pygame.K_w and self.can_make_turn_movement():
+                if not self.move(y=-1):
+                    self.add_animation(Feint(self, self.position, (0, -16), duration=0.2))
+                self.end_turn()
+            if key == pygame.K_s and self.can_make_turn_movement():
+                if not self.move(y=1):
+                    self.add_animation(Feint(self, self.position, (0, 16), duration=0.2))
+                self.end_turn()
+            if key == pygame.K_a and self.can_make_turn_movement():
+                if not self.move(x=-1):
+                    self.add_animation(Feint(self, self.position, (-16, 0), duration=0.2))
+                self.end_turn()
+            if key == pygame.K_d and self.can_make_turn_movement():
+                if not self.move(x=1):
+                    self.add_animation(Feint(self, self.position, (16, 0), duration=0.2))
+                self.end_turn()
+
         if self.can_make_turn_movement():
             for i, key in enumerate(spellKeys):
                 if pressed[key] and self.cooldown[i] == 0 and self.spells[i] and i != self.prepared_spell:
