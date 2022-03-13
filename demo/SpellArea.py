@@ -35,7 +35,7 @@ class Line(SpellArea):
 
 
 class Circle(SpellArea):
-    def __init__(self, origin=Pose((0, 0)), radius=1, line_of_sight=False):
+    def __init__(self, origin=Pose((0, 0)), radius=1, include_origin=True, line_of_sight=False):
         """
         Target all squares in a line
         :param origin: center of circle
@@ -48,7 +48,7 @@ class Circle(SpellArea):
         for dx in range(-int(radius), int(radius) + 1):
             for dy in range(-int(radius), int(radius) + 1):
                 p = Pose((dx, dy))
-                if p.magnitude() <= radius:
+                if p.magnitude() <= radius and (include_origin or p.magnitude() > 0):
                     self.squares.append(p + origin)  # TODO (low priority): check line of sight
 
 

@@ -5,15 +5,25 @@ from lib.GridEntity import GridEntity
 from lib.Primitives import Pose
 
 
-def wander(self):
+def wander(self, squares):
     """ Move in a random direction """
-    directions = [(1, 0), (0, 1), (0, -1), (-1, 0)]
-    random.shuffle(directions)
-    for direction in directions:
-        if self.can_move(*direction):
-            self.move(*direction)
-            self.align_sprites()
+    random.shuffle(squares)
+    for square in squares:
+        if self.can_move(*square.get_position()):
+            return square
+    return None
+
+
+def select_target(self, targets, squares=None, radius=None, visible=False):
+    """ Return nearest square in targets, within radius, and in the given set of squares """
+    targets.sort(key=lambda s: s.magnitude())
+    for target in targets:
+        if radius and target.magnitude() > radius:
             break
+        if (not squares) or any([(target - square).magnitude() == 0 for square in squares]):
+            if not visible or self.layer.map.check_line_of_sight(target, self.position_on_grid):
+                return target
+    return None
 
 
 def find(self, radius=1, factions=None, visible=True, squares=None):
@@ -44,11 +54,6 @@ def hunt(self, target, squares=None):
     return squares[0]
 
 
-def attack(self, target, spell):
-    """ Cast spell at the target, or return False if out of range"""
-    return None
-
-
 def filter_moveable(self, squares):
     new_squares = []
     for square in squares:
@@ -63,3 +68,31 @@ def filter_radius(self, squares, radius):
         if square.magnitude() <= radius:
             new_squares.append(square)
     return new_squares
+
+
+def get_squares(self, linear=0, diagonal=0, radius=0, custom=0):
+    squares = []
+    if not hasattr(linear, "__iter__"):
+        linear = (linear,)
+    if not hasattr(diagonal, "__iter__"):
+        diagonal = (diagonal,)
+    if linear:  # Cardinal movement
+        for i in linear:
+            squares.append(Pose((i, 0)))
+    if diagonal:  # Diagonal movement
+        for i in diagonal:
+            squares.append(Pose((i, i)))
+    if radius:  # Arbitrary movement
+        squares += Math.get_squares_in_range(radius, no_origin=True)
+    if custom == 1:  # Knight's move away
+        squares.append(Pose((1, 2)))
+        squares.append(Pose((2, 1)))
+
+    rotations = [((0, 1), (-1, 0)), ((-1, 0), (0, -1)), ((0, -1), (1, 0))]
+    for r in rotations: # 4-way symmetry
+        for square in squares[:]:
+            x = square.x*r[0][0] + square.y*r[0][1]
+            y = square.x*r[1][0] + square.y*r[1][1]
+            squares.append(Pose((x, y)))
+    return squares
+

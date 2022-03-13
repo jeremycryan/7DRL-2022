@@ -168,16 +168,18 @@ class Goomba(Enemy):
         return sprite
 
     def take_turn(self):
-        squares = [e.position_on_grid - self.position_on_grid for e in GridEntity.allies]
-        attack_target, _ = Ai.find(self, radius=1, squares=squares)
+        move_squares = Ai.get_squares(self, linear=1)
+        attack_squares = move_squares
+        targets = [e.position_on_grid - self.position_on_grid for e in GridEntity.allies]
+        attack_target = Ai.select_target(self, targets=targets, squares=attack_squares)
         if attack_target:
             self.attacks[0].cast(attack_target)
             return
-        hunt_target, _ = Ai.find(self, radius=4, visible=True, squares=squares)
+        hunt_target = Ai.select_target(self, targets=targets, radius=4, visible=True)
         if hunt_target:
-            destination = Ai.hunt(self, hunt_target)
+            destination = Ai.hunt(self, hunt_target, squares=move_squares)
         else:
-            destination = Ai.wander(self)
+            destination = Ai.wander(self, move_squares)
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
@@ -278,7 +280,9 @@ class GolemSummon(Enemy):
         return sprite
 
     def take_turn(self):
-        attack_target, _ = Ai.find(self, radius=1)
+        move_squares = Ai.get_squares(self, linear=1)
+        attack_squares = move_squares
+        attack_target, _ = Ai.find(self, squares=attack_squares)
         if attack_target:
             self.attacks[0].cast(attack_target)
             return
@@ -286,7 +290,7 @@ class GolemSummon(Enemy):
         if hunt_target and hunt_target.magnitude() > 3:
             destination = Ai.hunt(self, hunt_target)
         else:
-            destination = Ai.wander(self)
+            destination = Ai.wander(self, move_squares)
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
@@ -295,7 +299,7 @@ class GolemSummon(Enemy):
 class BarrierSummon(Enemy):
     name = "BARRIER"
     hit_points = 5
-    faction = GridEntity.FACTION_ALLY
+    faction = GridEntity.FACTION_NEUTRAL
     drop_letters = False
     invulnerabilities = (Enemy.DAMAGE_NORMAL,)
 

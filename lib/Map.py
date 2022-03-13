@@ -168,6 +168,10 @@ class Map:
                 new_squares.append(square)
         return new_squares
 
+    def check_line_of_sight(self, square, origin, blocking_types=(GridEntity.DENSITY_WALL,)):
+        end, item = self.raycast(origin, origin + square, blocking_types, offset=True)
+        return end and (square + origin - end).magnitude() == 0
+
     class MapCell(list):
         # Making this its own class in case we wanted to add anything fancy to it later for pathfinding, etc.
         pass
