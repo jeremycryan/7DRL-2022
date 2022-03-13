@@ -97,7 +97,7 @@ class Enemy(GridEntity):
         """
         This might be bigger for larger enemies
         """
-        return -16
+        return -20
 
     def take_turn(self):
         """
@@ -230,7 +230,7 @@ class Spider(Bat):
         return sprite
 
     def name_y_offset(self):
-        return -20
+        return -16
 
     def load_shadow(self):
         self.add_sprite(StaticSprite(ImageHandler.load("images/small_shadow.png"), blend_mode=pygame.BLEND_MULT))
@@ -284,7 +284,9 @@ class Shade(Bat):
 
 class Slime(Bat):
     name = "SLIME"
-    hit_points = 3
+    hit_points = 4
+    period = 2
+    spells = [Spell.BatAttack]
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/slime.png", flippable=True)
@@ -295,21 +297,31 @@ class Slime(Bat):
         return -26
 
     def on_move_to_grid_position(self, x, y, keep_turn=False):
-        """
-        Called when the object it has moved to a new x, y bucket in the grid.
-
-        The object doesn't actually manipulate the grid in any way, it just is being told
-        it should update itself visually.
-        :param x: The new x position
-        :param y: The new y position
-        :param keep_turn: Finish animating move before allowing other entities to take turns
-        """
         animation = InstantMoveAnimation if keep_turn else MoveAnimation
         self.animations.append(animation(self,
                                          self.position.copy(),
                                          self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
                                          squish_factor=0.7, bounce_height=15))
         self.check_for_pickups()
+
+    def take_turn(self):
+        if self.health < self.hit_points:
+            random.shuffle(self.move_squares)
+            for square in self.move_squares:
+                if self.clone.cast(square):
+                    self.stun += self.period - 1
+                    self.hit_points = self.health
+                    return
+        super().take_turn()
+
+    def __init__(self, hit_points=None):
+        super().__init__()
+        if hit_points:
+            if hit_points < self.hit_points:
+                self.health = hit_points
+                self.hit_points = hit_points
+                self.drop_letters = False
+        self.clone = Spell.Clone(self)
 
 
 class GolemSummon(Enemy):
