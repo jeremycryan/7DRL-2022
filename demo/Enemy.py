@@ -128,7 +128,8 @@ class Enemy(GridEntity):
         if self.position_on_grid and self.drop_letters:
             x, y = self.position_on_grid.get_position()
             drop = EnemyDropHandler.get_drop(self)
-            self.layer.map.add_to_cell(drop, x, y, Settings.Static.PICKUP_LAYER)
+            if drop:
+                self.layer.map.add_to_cell(drop, x, y, Settings.Static.PICKUP_LAYER)
         # TODO: death animation
 
     def push(self, x=0, y=0, teleport=False, instant=False):

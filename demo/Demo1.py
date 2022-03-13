@@ -4,6 +4,8 @@ from turtle import goto
 import pygame
 import sys
 import yaml
+import math
+import time
 
 from demo.Callout import CalloutManager
 from demo.EnemyDropHandler import EnemyDropHandler
@@ -23,6 +25,7 @@ from demo.Enemy import Bat, Spider, Wolf, Slime, Orc, Shade
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
+import threading
 import os
 
 class Game:
@@ -342,18 +345,40 @@ class Game:
                 tile.load_sprite()
 
     def spawn_enemies(self, layer):
-        return []
         enemies = 0
         enemy_objects = []
         for x, y in layer.cell_coordinates():
             if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
-                enemy_type = random.choice([Bat, Spider, Wolf, Slime, Orc, Shade])
+                enemy_type = random.choice([Bat])#, Spider, Wolf, Slime, Orc, Shade])
                 enemy = enemy_type()
                 enemy_objects.append(enemy)
                 layer.add_to_cell(enemy, x, y)
                 enemies += 1
 
         return enemy_objects
+
+    def loading_anim(self):
+        font = pygame.font.Font("fonts/smallest_pixel.ttf", 10)
+        letters = [font.render(letter, 0, (255, 255, 255)) for letter in "LOADING"]
+        width = sum([letter.get_width() for letter in letters])
+        t = 0
+        clock = pygame.time.Clock()
+        while self.loading:
+            x, y = Settings.Static.GAME_WIDTH // 2, Settings.Static.GAME_HEIGHT // 2
+            i = 0
+            x -= width // 2
+            self.screen.fill((0, 0, 0))
+            for letter in letters:
+                i += 1
+                self.screen.blit(letter, (x, y + math.sin(t * 8 - i)*2))
+                x += letter.get_width()
+
+            t += clock.tick()/1000
+
+            scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
+            self.true_screen.blit(scaled, (0, 0))
+            pygame.display.flip()
+
 
     def main(self):
 
@@ -363,7 +388,12 @@ class Game:
         self.ending = False
         self.starting = True
 
+        self.loading = True
+        t = threading.Thread(target=self.loading_anim, daemon=True)
+        t.start()
         map = self.generate_map()
+        self.loading = False
+
         player = Player()
         player.add_starting_spells(self.stored_player_spells)
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
@@ -378,7 +408,7 @@ class Game:
         spell_hud = SpellHUD(player)
         crafting_menu = CraftingMenu(player)
         enemies = self.spawn_enemies(map.get_layer(0))
-        TurnManager.add_entities(player, *enemies)
+        TurnManager.add_entities(player)
         vignette = ImageHandler.load("images/vignette.png")
 
         Camera.change_objects(objects=[player], weights=[1], mouse_weight=0.15)
