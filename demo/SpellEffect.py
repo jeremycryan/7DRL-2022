@@ -7,7 +7,7 @@ from lib.Settings import Settings
 class SpellEffect:
     def __init__(self, damage=0, damage_type=GridEntity.DAMAGE_SPELL, move_linear=None, move_radial=None, teleport=False,
                  stun=0, affected=(GridEntity.FACTION_ALLY, GridEntity.FACTION_HOSTILE, GridEntity.FACTION_NEUTRAL),
-                 action=None, delayed_action=None, duration=0, summon=None, summon_args=None,
+                 action=None, delayed_action=None, duration=0, summon=None, summon_args=None, menace=None,
                  density=GridEntity.DENSITY_CREATURE):
         """
         Define a spell effect to be applied to all valid targets in some area
@@ -22,6 +22,7 @@ class SpellEffect:
         :param duration: Number of turns to continue calling the delayed_action function (-1 for infinite turns)
         :param summon: Class of entity to summon
         :param summon_args: Dictionary of keyword arguments for constructing summoned entity
+        :param menace: Whether to display targeting overlay on affected area
         :param density: Density of valid targets
         """
         self.damage = damage
@@ -43,6 +44,7 @@ class SpellEffect:
         if not hasattr(density, "__iter__"):
             density = (density,)
         self.density = density
+        self.menace = menace
         # TODO: implement delayed action spells
 
     def apply(self, target, caster):
@@ -58,6 +60,8 @@ class SpellEffect:
                 caster.add_animation(Scratch(caster, 0.3, position.get_position(), color=(255, 255, 255)))
             elif self.damage and self.damage_type == GridEntity.DAMAGE_SPELL:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (0, 0, 255)))
+            elif self.damage and self.damage_type == GridEntity.DAMAGE_FIRE:
+                caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (255, 0, 0)))
             elif self.damage and self.damage_type == GridEntity.DAMAGE_WEB:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (50, 50, 50)))
             elif self.damage_type:
@@ -80,3 +84,5 @@ class SpellEffect:
                         summoned = True
                     if self.action:
                         self.action(self, item)
+                    if self.menace:
+                        caster.menacing = target.squares

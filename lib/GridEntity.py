@@ -53,6 +53,7 @@ class GridEntity(GameObject):
         self.animations = []
         self.taking_turn = False
         self.combo = False
+        self.destroyed = False
         if self.faction == self.FACTION_ALLY:
             GridEntity.allies.append(self)
 
@@ -299,6 +300,9 @@ class GridEntity(GameObject):
         pygame.draw.rect(surface, color, rect, 2)
 
     def destroy(self):
+        if self.destroyed:
+            return
+        self.destroyed = True
         self.on_destroy()
         if self.position_on_grid is not None:
             self.layer.remove_from_cell(*self.position_on_grid.get_position(), self)
