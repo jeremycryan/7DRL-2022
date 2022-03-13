@@ -35,6 +35,7 @@ class GridEntity(GameObject):
     CURRENT_KEY = "@"
 
     is_pickup = False  # Most things aren't pickups
+    is_player = False
 
     def __init__(self, position=(0, 0)):
         """
@@ -42,6 +43,7 @@ class GridEntity(GameObject):
         :param position: Position, in GRID coordinates
         """
         super().__init__()
+        self.frozen = True
         self.position = Pose(position, 0)
         self.position_on_grid = None
         self.layer = None
