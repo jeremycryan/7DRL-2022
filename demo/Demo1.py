@@ -8,6 +8,7 @@ import yaml
 from demo.EnemyDropHandler import EnemyDropHandler
 from demo.SpellHUD import SpellHUD
 from lib.Animation import Spawn
+from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
@@ -16,7 +17,7 @@ from lib.Settings import Settings
 import random
 from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator, Exit
-from demo.Enemy import Goomba, Bat, Wolf, Slime, Orc, Shade
+from demo.Enemy import Bat, Spider, Wolf, Slime, Orc, Shade
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
@@ -286,7 +287,7 @@ class Game:
                     new_tile = Wall()
                 elif item is wall:
                     new_tile = Wall()
-                elif item is "E":
+                elif item == "E":
                     new_tile = Exit()
                     exits.append(new_tile)
                 else:
@@ -337,7 +338,7 @@ class Game:
         enemy_objects = []
         for x, y in layer.cell_coordinates():
             if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
-                enemy_type = random.choice([Goomba, Bat, Wolf, Slime, Orc, Shade])
+                enemy_type = random.choice([Bat, Spider, Wolf, Slime, Orc, Shade])
                 enemy = enemy_type()
                 enemy_objects.append(enemy)
                 layer.add_to_cell(enemy, x, y)
@@ -413,10 +414,11 @@ class Game:
             if player.advanced:
                 self.ending = True
             if self.proceed_to_next_level:
+                GridEntity.allies = []
                 break
 
         self.stored_player_spells = player.spells_as_names()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     Game()

@@ -20,7 +20,7 @@ def select_target(self, targets, squares=None, radius=None, visible=False):
     for target in targets:
         if radius and target.magnitude() > radius:
             break
-        if (not squares) or any([(target - square).magnitude() == 0 for square in squares]):
+        if (not squares) or target in squares:#any([(target - square).magnitude() == 0 for square in squares]):
             if not visible or self.layer.map.check_line_of_sight(target, self.position_on_grid):
                 return target
     return None
@@ -96,3 +96,16 @@ def get_squares(self, linear=0, diagonal=0, radius=0, custom=0):
             squares.append(Pose((x, y)))
     return squares
 
+
+def check_spell(self, spell, targets, squares=None):
+    if not squares:
+        squares = get_squares(self, linear=1)
+        random.shuffle(squares)
+        squares += targets[:]
+    for square in squares:
+        effects, areas, delays = spell.get_effects(square)
+        for effect, area, delay in zip(effects, areas, delays):
+            for target in targets:
+                if target in area.squares:
+                    return square
+    return None

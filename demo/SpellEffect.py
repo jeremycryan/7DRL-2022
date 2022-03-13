@@ -5,7 +5,7 @@ from lib.Settings import Settings
 
 
 class SpellEffect:
-    def __init__(self, damage=0, damage_type=GridEntity.DAMAGE_NORMAL, move_linear=None, move_radial=None, teleport=False,
+    def __init__(self, damage=0, damage_type=GridEntity.DAMAGE_SPELL, move_linear=None, move_radial=None, teleport=False,
                  stun=0, affected=(GridEntity.FACTION_ALLY, GridEntity.FACTION_HOSTILE, GridEntity.FACTION_NEUTRAL),
                  action=None, delayed_action=None, duration=0, summon=None, summon_args=None,
                  density=GridEntity.DENSITY_CREATURE):
@@ -56,7 +56,11 @@ class SpellEffect:
             position = caster.position + square * Settings.Static.TILE_SIZE
             if self.damage and self.damage_type == GridEntity.DAMAGE_PHYSICAL:
                 caster.add_animation(Scratch(caster, 0.3, position.get_position(), color=(255, 255, 255)))
-            elif self.damage and self.damage_type == GridEntity.DAMAGE_NORMAL:
+            elif self.damage and self.damage_type == GridEntity.DAMAGE_SPELL:
+                caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (0, 0, 255)))
+            elif self.damage and self.damage_type == GridEntity.DAMAGE_WEB:
+                caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (50, 50, 50)))
+            else:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (0, 0, 255)))
             for item in items:
                 if item.faction in self.affected and item.density in self.density:

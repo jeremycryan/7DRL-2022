@@ -24,6 +24,7 @@ class Enemy(GridEntity):
     vulnerabilities = ()
     invulnerabilities = ()
     resistances = ()
+    period = 1
 
     name_font = None
     name_letters = {}
@@ -101,7 +102,7 @@ class Enemy(GridEntity):
         """
         pass
 
-    def damage(self, hp=0, damage_type=GridEntity.DAMAGE_NORMAL, stun=0):
+    def damage(self, hp=0, damage_type=GridEntity.DAMAGE_SPELL, stun=0):
         """
         Apply damage or healing to this entity
         :param hp: Amount of damage to deal; a negative number represents healing
@@ -154,27 +155,31 @@ class Enemy(GridEntity):
                 sprite.flipped_x = False
 
 
-class Goomba(Enemy):
-    name = "SPIDER"
+class Bat(Enemy):
+    name = "BAT"
     hit_points = 1
+    strength = 1
+    spells = [Spell.BatAttack]
 
     def __init__(self):
         super().__init__()
-        self.attacks = [Spell.SpiderAttack(self)]
+        self.attacks = [spell(self) for spell in self.spells]
+        self.stun += int(random.random()*self.period)
 
     def load_sprite(self):
-        sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
+        sprite = StaticSprite.from_path("images/rat.png", flippable=True)
         sprite.set_colorkey((255, 0, 255))
         return sprite
 
     def take_turn(self):
         move_squares = Ai.get_squares(self, linear=1)
-        attack_squares = move_squares
         targets = [e.position_on_grid - self.position_on_grid for e in GridEntity.allies]
-        attack_target = Ai.select_target(self, targets=targets, squares=attack_squares)
-        if attack_target:
-            self.attacks[0].cast(attack_target)
-            return
+        for attack in self.attacks:
+            attack_target = Ai.check_spell(self, attack, targets)
+            if attack_target:
+                attack.cast(attack_target)
+                self.stun += self.period - 1
+                return
         hunt_target = Ai.select_target(self, targets=targets, radius=4, visible=True)
         if hunt_target:
             destination = Ai.hunt(self, hunt_target, squares=move_squares)
@@ -183,13 +188,16 @@ class Goomba(Enemy):
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
+        self.stun += self.period - 1
 
-class Bat(Goomba):
-    name = "BAT"
+
+class Spider(Bat):
+    name = "SPIDER"
     hit_points = 1
+    spells = [Spell.BatAttack, Spell.SpiderAttack]
 
     def load_sprite(self):
-        sprite = StaticSprite.from_path("images/rat.png", flippable=True)
+        sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
         sprite.set_colorkey((255, 0, 255))
         return sprite
 
@@ -199,9 +207,12 @@ class Bat(Goomba):
     def load_shadow(self):
         self.add_sprite(StaticSprite(ImageHandler.load("images/small_shadow.png"), blend_mode=pygame.BLEND_MULT))
 
-class Wolf(Goomba):
+
+class Wolf(Bat):
     name = "WOLF"
     hit_points = 3
+    period = 2
+    spells = [Spell.WolfAttack]
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/dorg.png", flippable=True)
@@ -211,9 +222,11 @@ class Wolf(Goomba):
     def name_y_offset(self):
         return -18
 
-class Orc(Goomba):
+
+class Orc(Bat):
     name = "ORC"
     hit_points = 6
+    period = 3
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/orca.png", flippable=True)
@@ -223,7 +236,8 @@ class Orc(Goomba):
     def name_y_offset(self):
         return -36
 
-class Shade(Goomba):
+
+class Shade(Bat):
     name = "SHADE"
     hit_points = 6
 
@@ -236,7 +250,7 @@ class Shade(Goomba):
         return -26
 
 
-class Slime(Goomba):
+class Slime(Bat):
     name = "SLIME"
     hit_points = 3
 
@@ -302,7 +316,7 @@ class BarrierSummon(Enemy):
     hit_points = 5
     faction = GridEntity.FACTION_NEUTRAL
     drop_letters = False
-    invulnerabilities = (Enemy.DAMAGE_NORMAL,)
+    invulnerabilities = (Enemy.DAMAGE_SPELL,)
 
     def __init__(self):
         super().__init__()
