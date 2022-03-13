@@ -170,7 +170,7 @@ class CraftingMenu(GameObject):
             tile.draw(surf, offset=offset)
 
     def toggle_hidden(self):
-        if self.hidden and self.player.taking_turn:
+        if self.hidden and self.player.can_make_turn_movement():
             self.show()
         else:
             self.hide()

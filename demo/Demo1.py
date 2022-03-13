@@ -7,7 +7,7 @@ import yaml
 
 from demo.Callout import CalloutManager
 from demo.EnemyDropHandler import EnemyDropHandler
-from demo.Pickup import LostPage
+from demo.Pickup import LostPage, HealthPickup
 from demo.SpellHUD import SpellHUD
 from lib.Animation import Spawn
 from lib.GridEntity import GridEntity
@@ -365,7 +365,9 @@ class Game:
         player.add_animation(Spawn(player))
 
         pickup = LostPage()
-        map.add_to_cell(pickup, player.position_on_grid.x - 2, player.position_on_grid.y, Settings.Static.PICKUP_LAYER)
+        map.add_to_cell(pickup, player.position_on_grid.x - 2, player.position_on_grid.y, 0)
+        pickup = HealthPickup()
+        map.add_to_cell(pickup, player.position_on_grid.x +2, player.position_on_grid.y, 0)
 
         Camera.position = player.position.copy()
         spell_hud = SpellHUD(player)
