@@ -249,3 +249,4 @@ class Player(GridEntity):
         # TODO update Settings.Static.KNOWN_SPELLS to include the new spell's name as a capitalized string
         # TODO call CalloutManager.post_message(CalloutManager.LOST_PAGE, <spell.get_name()>, <spell.description>)
         CalloutManager.post_message(CalloutManager.LOST_PAGE, "Freeze", "Magically freezes enemies in a large area for three turns")
+        unknown_spells = Spell.list_unknown_spells

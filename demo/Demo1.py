@@ -468,9 +468,22 @@ class Game:
     def spawn_enemies(self, layer):
         enemies = 0
         enemy_objects = []
+        frequency = 0.06
+        if self.current_dungeon_level == 1:
+            frequency = 0.02
+            enemy_types = [Bat, Bat, Bat, Spider, Spider, Wolf]
+        elif self.current_dungeon_level == 2:
+            frequency = 0.03
+            enemy_types = [Spider, Wolf, Slime, Shade, Wolf]
+        elif self.current_dungeon_level == 3:
+            frequency = 0.03
+            enemy_types = [Orc, Shade, Slime, Slime, Spider]
+        else:
+            frequency = 0.04
+            enemy_types = [Orc, Shade, Slime]
         for x, y in layer.cell_coordinates():
-            if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
-                enemy_type = random.choice([Bat, Spider, Wolf, Slime, Orc, Shade])
+            if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < frequency:
+                enemy_type = random.choice(enemy_types)
                 enemy = enemy_type()
                 enemy_objects.append(enemy)
                 layer.add_to_cell(enemy, x, y)
@@ -520,10 +533,11 @@ class Game:
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         player.add_animation(Spawn(player))
 
-        pickup = LostPage()
-        map.add_to_cell(pickup, player.position_on_grid.x - 2, player.position_on_grid.y, 0)
-        pickup = HealthPickup()
-        map.add_to_cell(pickup, player.position_on_grid.x +2, player.position_on_grid.y, 0)
+        if self.current_dungeon_level > 1:
+            pickup = LostPage()
+            map.add_to_cell(pickup, player.position_on_grid.x - 2, player.position_on_grid.y, 0)
+            pickup = HealthPickup()
+            map.add_to_cell(pickup, player.position_on_grid.x +2, player.position_on_grid.y, 0)
 
         Camera.position = player.position.copy()
         spell_hud = SpellHUD(player)
