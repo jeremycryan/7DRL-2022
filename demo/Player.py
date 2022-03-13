@@ -51,10 +51,15 @@ class Player(GridEntity):
 
         self.letter_tiles = [LetterTile(letter) for letter in Settings.Static.STARTING_LETTERS]
         self.letters_in_use = self.letter_tiles.copy()
+        self.add_starting_spells()
 
-        starting_spells = [0, "zap"]#[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+    def add_starting_spells(self, list_of_spells=None):
+        starting_spells = [0, "zap"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = Spell.get_spell(self, starting_spells[i])
+
+    def spells_as_names(self):
+        return [(spell.get_name() if spell else 0) for spell in self.spells]
 
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)
@@ -63,7 +68,7 @@ class Player(GridEntity):
         super().on_move_to_grid_position(x, y)
         for other in self.layer.map.get_all_at_position(x, y):
             if type(other) == Exit:
-                self.add_animation(ShrinkToNothing(self, 1))
+                self.add_animation(ShrinkToNothing(self, 0.6))
         #self.animations.append(Fwoosh(self, 0.8))
 
     def update(self, dt, events):
@@ -114,7 +119,7 @@ class Player(GridEntity):
                         break
 
     def can_make_turn_movement(self):
-        return not self.animating() and self.taking_turn
+        return not self.animating() and self.taking_turn and not self.advanced
 
     def locked_out(self):
         """

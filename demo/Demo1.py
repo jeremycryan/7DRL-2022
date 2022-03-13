@@ -41,6 +41,7 @@ class Game:
         self.starting = True
         self.ending = False
         self.proceed_to_next_level = False
+        self.stored_player_spells = []
 
         self.run_game_from_menu()
 
@@ -49,7 +50,7 @@ class Game:
 
     def update_shade(self, dt, events):
         if self.starting:
-            self.shade_shown -= dt * 3
+            self.shade_shown -= dt * 2
             self.shade_shown = max(0, self.shade_shown)
             if self.shade_shown <= 0:
                 self.starting = False
@@ -62,8 +63,16 @@ class Game:
 
     def run_game_from_menu(self):
         self.run_menu()
+        self.on_run_start()
         while True:
             self.main()
+
+    def on_run_start(self):
+        """
+        Run when you first start a run
+        """
+        EnemyDropHandler.init()  # Don't keep drop history from previous run
+        self.stored_player_spells = []  # Don't keep spells from previous run
 
     def run_menu(self):
         menu_scene = TitleScreen()
@@ -346,6 +355,7 @@ class Game:
 
         map = self.generate_map()
         player = Player()
+        player.add_starting_spells(self.stored_player_spells)
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         player.add_animation(Spawn(player))
         Camera.position = player.position.copy()
@@ -404,6 +414,8 @@ class Game:
                 self.ending = True
             if self.proceed_to_next_level:
                 break
+
+        self.stored_player_spells = player.spells_as_names()
 
 
 if __name__=="__main__":
