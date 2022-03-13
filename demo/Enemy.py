@@ -4,7 +4,7 @@ import demo.EnemySpells as Spell
 from demo.EnemyDropHandler import EnemyDropHandler
 from demo.Pickup import Pickup, LetterTile
 from demo.Wall import Wall
-from lib.Animation import MoveAnimation, Spawn
+from lib.Animation import MoveAnimation, Spawn, InstantMoveAnimation
 from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
 from lib.Primitives import Pose
@@ -131,22 +131,22 @@ class Enemy(GridEntity):
             self.layer.map.add_to_cell(drop, x, y, Settings.Static.PICKUP_LAYER)
         # TODO: death animation
 
-    def push(self, x=0, y=0, teleport=False):
+    def push(self, x=0, y=0, teleport=False, instant=False):
         if not teleport:
             x = x//self.weight
             y = y//self.weight
         if teleport:
-            self.move(x, y)
+            self.move(x, y, instant)
         else:
             target = Pose((x, y))
             target, entity = self.layer.map.raycast(self.position_on_grid, self.position_on_grid + target,
                                                     (GridEntity.DENSITY_WALL, GridEntity.DENSITY_CREATURE), offset=True)
             if target:
                 target -= self.position_on_grid
-                self.move(target.x, target.y)
+                self.move(target.x, target.y, instant)
 
-    def move(self, x=0, y=0):
-        super().move(x, y)
+    def move(self, x=0, y=0, keep_turn=False):
+        super().move(x, y, keep_turn)
         if x < 0:
             for sprite in self.sprites:
                 sprite.flipped_x = True
@@ -165,6 +165,9 @@ class Bat(Enemy):
         super().__init__()
         self.attacks = [spell(self) for spell in self.spells]
         self.stun += int(random.random()*self.period)
+        self.current_spell = None
+        self.current_target = None
+        self.spell_progress = 0
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/rat.png", flippable=True)
@@ -172,13 +175,30 @@ class Bat(Enemy):
         return sprite
 
     def take_turn(self):
+        if self.spell_progress > 0:
+            self.current_spell.cast(self.current_target, turn=self.spell_progress)
+            self.spell_progress += 1
+            if self.spell_progress + 1 > self.current_spell.turns:
+                self.current_spell = None
+                self.current_target = None
+                self.spell_progress = 0
+                self.stun += self.period - 1
+            else:
+                self.combo = self.current_spell.combo
+            return
         move_squares = Ai.get_squares(self, linear=1)
         targets = [e.position_on_grid - self.position_on_grid for e in GridEntity.allies]
         for attack in self.attacks:
             attack_target = Ai.check_spell(self, attack, targets)
             if attack_target:
                 attack.cast(attack_target)
-                self.stun += self.period - 1
+                if attack.turns > 1:
+                    self.current_spell = attack
+                    self.current_target = attack_target.copy()
+                    self.spell_progress = 1
+                    self.combo = attack.combo
+                else:
+                    self.stun += self.period - 1
                 return
         hunt_target = Ai.select_target(self, targets=targets, radius=4, visible=True)
         if hunt_target:
@@ -227,6 +247,7 @@ class Orc(Bat):
     name = "ORC"
     hit_points = 6
     period = 3
+    spells = [Spell.OrcAttack]
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/orca.png", flippable=True)
@@ -262,7 +283,7 @@ class Slime(Bat):
     def name_y_offset(self):
         return -26
 
-    def on_move_to_grid_position(self, x, y):
+    def on_move_to_grid_position(self, x, y, keep_turn=False):
         """
         Called when the object it has moved to a new x, y bucket in the grid.
 
@@ -270,11 +291,13 @@ class Slime(Bat):
         it should update itself visually.
         :param x: The new x position
         :param y: The new y position
+        :param keep_turn: Finish animating move before allowing other entities to take turns
         """
-        self.animations.append(MoveAnimation(self,
-                                             self.position.copy(),
-                                             self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
-                                             squish_factor = 0.7, bounce_height = 15))
+        animation = InstantMoveAnimation if keep_turn else MoveAnimation
+        self.animations.append(animation(self,
+                                         self.position.copy(),
+                                         self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
+                                         squish_factor=0.7, bounce_height=15))
         self.check_for_pickups()
 
 

@@ -64,8 +64,8 @@ class Player(GridEntity):
     def add_to_layer(self, layer, x, y):
         super().add_to_layer(layer, x, y)
 
-    def on_move_to_grid_position(self, x, y):
-        super().on_move_to_grid_position(x, y)
+    def on_move_to_grid_position(self, x, y, keep_turn=False):
+        super().on_move_to_grid_position(x, y, keep_turn)
         for other in self.layer.map.get_all_at_position(x, y):
             if type(other) == Exit:
                 self.add_animation(ShrinkToNothing(self, 0.6))

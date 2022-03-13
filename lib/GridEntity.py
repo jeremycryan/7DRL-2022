@@ -1,7 +1,7 @@
 import random
 
 from lib.Primitives import GameObject, Pose
-from lib.Animation import MoveAnimation, Fwoosh
+from lib.Animation import MoveAnimation, InstantMoveAnimation
 from lib.Settings import Settings
 import pygame
 from lib.ImageHandler import ImageHandler
@@ -50,6 +50,7 @@ class GridEntity(GameObject):
         self.grid_rules = []
         self.animations = []
         self.taking_turn = False
+        self.combo = False
         if self.faction == self.FACTION_ALLY:
             GridEntity.allies.append(self)
 
@@ -188,7 +189,7 @@ class GridEntity(GameObject):
             self.position = Pose(layer.grid_to_world_pixel(*self.position_on_grid.get_position()), 0)
             self.align_sprites_pixel()
 
-    def on_move_to_grid_position(self, x, y):
+    def on_move_to_grid_position(self, x, y, keep_turn=False):
         """
         Called when the object it has moved to a new x, y bucket in the grid.
 
@@ -196,11 +197,13 @@ class GridEntity(GameObject):
         it should update itself visually.
         :param x: The new x position
         :param y: The new y position
+        :param keep_turn: Finish animating move before allowing other entities to take turns
         """
-        self.animations.append(MoveAnimation(self,
-                                             self.position.copy(),
-                                             self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
-                                             squish_factor = 0.9))
+        animation = InstantMoveAnimation if keep_turn else MoveAnimation
+        self.animations.append(animation(self,
+                                         self.position.copy(),
+                                         self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
+                                         squish_factor=0.9))
         self.check_for_pickups()
 
     def add_animation(self, animation):
@@ -224,11 +227,12 @@ class GridEntity(GameObject):
                 return False
         return True
 
-    def move_to_grid_position(self, x, y):
+    def move_to_grid_position(self, x, y, keep_turn=False):
         """
         Moves the object to the new grid position.
         :param x: The new X position
         :param y: The new Y position
+        :param keep_turn: Finish animating move before allowing other entities to take turns
         :return: True if successfully moved
         """
         self.require_grid()
@@ -238,18 +242,19 @@ class GridEntity(GameObject):
             self.layer.remove_from_cell(*self.position_on_grid.get_position(), self)
         self.position_on_grid = Pose((x, y), 0)
         self.layer.add_to_cell(self, x, y)
-        self.on_move_to_grid_position(x, y)
+        self.on_move_to_grid_position(x, y, keep_turn)
         return True
 
-    def move(self, x=0, y=0):
+    def move(self, x=0, y=0, keep_turn=False):
         """
         Moves the object relative to its current position.
         :param x: The amount to move in the X direction, with positive numbers being right
         :param y: The amount to move in the Y direction, with positive numbers being down
+        :param keep_turn: Finish animating move before allowing other entities to take turns
         :return: True if successfully moved
         """
         self.require_grid()
-        return self.move_to_grid_position(self.position_on_grid.x + x, self.position_on_grid.y + y)
+        return self.move_to_grid_position(self.position_on_grid.x + x, self.position_on_grid.y + y, keep_turn)
 
     def can_move(self, x=0, y=0):
         self.require_grid()

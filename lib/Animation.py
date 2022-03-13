@@ -132,6 +132,10 @@ class MoveAnimation(Animation):
             sprite.distortion = Pose((1, 1), 0)
 
 
+class InstantMoveAnimation(MoveAnimation):
+    keep_turn = True
+
+
 class Fwoosh(Animation):
     blocking = True
     keep_turn = True
