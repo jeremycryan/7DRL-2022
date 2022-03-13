@@ -16,7 +16,10 @@ class TurnManager:
                     cls.entities[cls.next_entity_turn].stun -= 1
                 else:
                     cls.entities[cls.next_entity_turn].take_turn()
-            cls.next_entity_turn += 1
+            if cls.entities[cls.next_entity_turn].combo:
+                cls.entities[cls.next_entity_turn].combo = False
+            else:
+                cls.next_entity_turn += 1
             if cls.next_entity_turn >= len(cls.entities):
                 cls.next_entity_turn = 0
                 for entity in cls.entities[:]:

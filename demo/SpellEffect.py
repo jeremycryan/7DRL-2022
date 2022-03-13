@@ -60,14 +60,14 @@ class SpellEffect:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (0, 0, 255)))
             elif self.damage and self.damage_type == GridEntity.DAMAGE_WEB:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (50, 50, 50)))
-            else:
+            elif self.damage_type:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (0, 0, 255)))
             for item in items:
                 if item.faction in self.affected and item.density in self.density:
                     if self.damage or self.stun:
                         item.damage(hp=self.damage, damage_type=self.damage_type, stun=self.stun)
                     if self.move_linear:
-                        item.push(self.move_linear.x, self.move_linear.y, teleport=self.teleport)
+                        item.push(self.move_linear.x, self.move_linear.y, teleport=self.teleport, instant=True)
                     if self.move_radial:
                         move = (item.position_on_grid - caster.position_on_grid - target.origin)
                         if move.magnitude():
