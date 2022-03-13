@@ -176,7 +176,7 @@ class Player(GridEntity):
             return None
         return self.spells[self.prepared_spell]
 
-    def damage(self, hp=0, damage_type=GridEntity.DAMAGE_NORMAL, stun=0):
+    def damage(self, hp=0, damage_type=GridEntity.DAMAGE_SPELL, stun=0):
         """
         Apply damage or healing to this entity
         :param hp: Amount of damage to deal; a negative number represents healing

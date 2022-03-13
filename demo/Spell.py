@@ -42,13 +42,14 @@ class Spell:
         """
         if not target:
             return target
+        target = target.copy()
         m = max(abs(target.x), abs(target.y))
-        target.scale_to(1 if diagonals else 0.5)
+        target.scale_to(1 if diagonals else 0.7)
         target.x = round(target.x)
         target.y = round(target.y)
         return target * m
 
-    def snap_to_range(self, target, upper=1, lower=0):
+    def snap_to_range(self, target, upper=1.0, lower=0.0):
         """
         Snap target to within desired range
         :param target: the nominal target relative to the caster
@@ -58,11 +59,12 @@ class Spell:
         """
         if not target:
             return target
+        target = target.copy()
         if target.magnitude() > upper:
             target.scale_to(upper)
             target.x = round(target.x)
             target.y = round(target.y)
-        if target.magnitude() < lower:
+        if target.magnitude() > upper or target.magnitude() < lower:
             return False
         return target
 
@@ -192,7 +194,7 @@ def recharge(_, entity):
 class Zap(Spell):
     def get_effects(self, target, crit=False):
         self.clear_effects()
-        target = self.snap_to_range(target, upper=1, lower=1)
+        target = self.snap_to_range(target, upper=1.5, lower=1)
         if target:
             self.add_effect(SpellEffect(damage=2 if crit else 1), Area.Point(target))
         return self.effects, self.areas, self.delays

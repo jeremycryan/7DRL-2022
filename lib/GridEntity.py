@@ -21,12 +21,13 @@ class GridEntity(GameObject):
     DENSITY_WALL = 2
     density = DENSITY_CREATURE
 
-    DAMAGE_NORMAL = 0
+    DAMAGE_SPELL = 0
     DAMAGE_FIRE = 1
     DAMAGE_ICE = 2
     DAMAGE_ELECTRIC = 3
     DAMAGE_OVERRIDE = 4
     DAMAGE_PHYSICAL = 5
+    DAMAGE_WEB = 6
 
     SOLID_KEY = "S"
     ANY_KEY = "?"
