@@ -308,3 +308,8 @@ class GridEntity(GameObject):
 
     def check_for_pickups(self):
         pass
+
+    def heal(self, amt):
+        if hasattr(self, "health"):
+            if self.health + amt <= self.hit_points:
+                self.health += amt

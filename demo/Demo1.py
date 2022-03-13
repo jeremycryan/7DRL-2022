@@ -5,7 +5,9 @@ import pygame
 import sys
 import yaml
 
+from demo.Callout import CalloutManager
 from demo.EnemyDropHandler import EnemyDropHandler
+from demo.Pickup import LostPage, HealthPickup
 from demo.SpellHUD import SpellHUD
 from lib.Animation import Spawn
 from lib.GridEntity import GridEntity
@@ -28,6 +30,7 @@ class Game:
         pygame.init()
         EnemyDropHandler.init()
         ImageHandler.init()
+        CalloutManager.init()
         Camera.init()
 
         self.screen = pygame.Surface((640, 360))
@@ -74,6 +77,7 @@ class Game:
         """
         EnemyDropHandler.init()  # Don't keep drop history from previous run
         self.stored_player_spells = []  # Don't keep spells from previous run
+        Player.hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS  # in case we've gotten heart containers
 
     def run_menu(self):
         menu_scene = TitleScreen()
@@ -359,6 +363,12 @@ class Game:
         player.add_starting_spells(self.stored_player_spells)
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         player.add_animation(Spawn(player))
+
+        pickup = LostPage()
+        map.add_to_cell(pickup, player.position_on_grid.x - 2, player.position_on_grid.y, 0)
+        pickup = HealthPickup()
+        map.add_to_cell(pickup, player.position_on_grid.x +2, player.position_on_grid.y, 0)
+
         Camera.position = player.position.copy()
         spell_hud = SpellHUD(player)
         crafting_menu = CraftingMenu(player)
@@ -370,6 +380,8 @@ class Game:
 
         clock = pygame.time.Clock()
         clock.tick(60)
+
+        CalloutManager.post_message(CalloutManager.NEW_LEVEL, "Level 3", "Lost dungeons of Gargabundle")
 
         while True:
             dt = clock.tick(120)/1000
@@ -392,6 +404,7 @@ class Game:
             self.update_shade(dt, events)
             spell_hud.update(dt, events)
             Camera.update(dt, events)
+            CalloutManager.update(dt, events)
             map.update(dt, events)
             crafting_menu.update(dt, events)
             map.draw(self.screen, offset)
@@ -404,6 +417,7 @@ class Game:
 
             crafting_menu.draw(self.screen, (0, 0))
             spell_hud.draw(self.screen, (10, 10))
+            CalloutManager.draw(self.screen)
             if self.shade_shown > 0:
                 self.screen.blit(self.black, (0, 0))
 

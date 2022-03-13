@@ -1,5 +1,6 @@
 import random
 
+from demo.Callout import CalloutManager
 from demo.ParticleHandler import ParticleHandler, CircleParticle
 from demo.Wall import Exit
 from lib.Animation import Fwoosh, Feint, ShrinkToNothing, Spawn
@@ -22,7 +23,7 @@ spellKeys = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.
 class Player(GridEntity):
 
     faction = GridEntity.FACTION_ALLY
-    hit_points = 9
+    hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS
 
     def __init__(self, position=(0, 0)):
         super().__init__(position)
@@ -119,7 +120,7 @@ class Player(GridEntity):
                         break
 
     def can_make_turn_movement(self):
-        return not self.animating() and self.taking_turn and not self.advanced
+        return not self.animating() and self.taking_turn and not self.advanced and not CalloutManager.current_message()
 
     def locked_out(self):
         """
@@ -230,3 +231,9 @@ class Player(GridEntity):
                 pass
             if entity.is_pickup:
                 entity.on_pickup(self)
+
+    def learn_spell(self):
+        # TODO randomly pick an unknown spell
+        # TODO update Settings.Static.KNOWN_SPELLS to include the new spell's name as a capitalized string
+        # TODO call CalloutManager.post_message(CalloutManager.LOST_PAGE, <spell.get_name()>, <spell.description>)
+        CalloutManager.post_message(CalloutManager.LOST_PAGE, "Freeze", "Magically freezes enemies in a large area for three turns")

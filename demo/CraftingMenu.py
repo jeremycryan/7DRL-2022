@@ -170,7 +170,7 @@ class CraftingMenu(GameObject):
             tile.draw(surf, offset=offset)
 
     def toggle_hidden(self):
-        if self.hidden:
+        if self.hidden and self.player.can_make_turn_movement():
             self.show()
         else:
             self.hide()
@@ -488,6 +488,7 @@ class InfoBook(GameObject):
         self.mode = self.ENEMY_MODE
 
     def draw(self, surf, offset=(0, 0)):
+        offset = int(offset[1] * 0.5), offset[0]
         x, y = (self.position + Pose(offset) - Pose(self.surf.get_size())*0.5).get_position()
         surf.blit(self.surf, (int(x), int(y)))
         self.spell_button.draw(surf, *offset)

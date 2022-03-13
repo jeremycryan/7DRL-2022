@@ -25,6 +25,7 @@ class Settings:
         GAME_WIDTH = 640
         GAME_HEIGHT = 360
 
+        PLAYER_STARTING_HIT_POINTS = 9
         WINDOW_CAPTION = "Spellcraft"
 
         PICKUP_LAYER = 0.8
