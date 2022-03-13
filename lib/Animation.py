@@ -179,6 +179,8 @@ class ShrinkToNothing(Animation):
 
     def on_destroy(self):
         self.parent.advanced = True
+        if self.parent.is_pickup:
+            self.parent.destroy()
 
 class Spawn(Animation):
     blocking = True

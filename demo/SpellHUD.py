@@ -34,7 +34,7 @@ class SpellHUD:
         button_surf.set_colorkey((255, 0, 255))
         button_clicked.set_colorkey((255, 0, 255))
         self.uncraft_buttons = [
-            Button(button_surf.copy(), (0, 0), on_click=self.uncraft, hover_surf=button_hover.copy(), click_surf=button_clicked.copy()) for _ in range(10)
+            Button(button_surf.copy(), (0, 0), on_click=self.uncraft, hover_surf=button_hover.copy(), click_surf=button_clicked.copy(), grow_percent=0) for _ in range(10)
         ]
 
         self.scroll = ImageHandler.load("images/ui/scroll.png")

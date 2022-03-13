@@ -5,6 +5,8 @@ from lib.Settings import Settings
 
 
 class Spell:
+    description = "All knowledge of this spell has been lost."
+
     def __init__(self, caster):
         self.caster = caster
         self.effects = []
