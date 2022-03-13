@@ -1,3 +1,5 @@
+from demo.Enemy import Enemy
+from demo.TurnManager import TurnManager
 from demo.Wall import Floor
 from lib.GridEntity import GridEntity
 from lib.Settings import Settings
@@ -274,18 +276,35 @@ class Map:
                         for game_object in cell:
                             game_object.draw(surface, offset=offset)
 
-
         def update(self, dt, events):
             if not self._updates_enabled:
                 return
             updated_objects = set()
-            for cell in self.populated_cells():
-                for game_object in cell:
-                    if game_object in updated_objects:
-                        continue
-                    else:
-                        updated_objects.add(game_object)
-                        game_object.update(dt, events)
+            camera_position = Camera.position
+            top_left = camera_position - Pose((Settings.Static.GAME_WIDTH//2, Settings.Static.GAME_HEIGHT//2), 0)
+            bottom_right = camera_position + Pose((Settings.Static.GAME_WIDTH//2, Settings.Static.GAME_HEIGHT//2), 0)
+            x1, y1 = self.world_pixel_to_grid(*top_left.get_position())
+            x2, y2 = self.world_pixel_to_grid(*bottom_right.get_position())
+            turn_entities = set(TurnManager.entities)
+            for x in range(int(x1 - 2), int(x2+3)):
+                for y in range(int(y1 - 2), int(y2+3)):
+                    if self.map.cell_in_range(x, y):
+                        cell = self.peek_at_cell(x, y)
+                        for game_object in cell:
+                            if game_object in updated_objects:
+                                continue
+                            else:
+                                if game_object not in turn_entities:
+                                    if game_object.is_player or isinstance(game_object, Enemy):
+                                        TurnManager.add_entities(game_object)
+                                        turn_entities.add(game_object)
+                                updated_objects.add(game_object)
+                                game_object.update(dt, events)
+
+            for game_object in updated_objects:
+                if game_object not in turn_entities:
+                    TurnManager.remove_entities(game_object)
+
 
         def grid_to_world_pixel(self, x, y):
             x = ((x * Map.TILE_WIDTH) + self.x_offset) * self.x_parallax
