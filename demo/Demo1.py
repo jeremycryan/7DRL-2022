@@ -448,7 +448,7 @@ class Game:
                 tile.load_sprite()
 
     def spawn_enemies(self, layer):
-        return []
+        # return []
         enemies = 0
         enemy_objects = []
         for x, y in layer.cell_coordinates():

@@ -87,3 +87,18 @@ class ShadeAttack(Spell):
                 self.add_effect(SpellEffect(damage=self.caster.strength, damage_type=GridEntity.DAMAGE_FIRE),
                                 Area.Cross(origin=target))  # Used for AI logic only
         return self.effects, self.areas, self.delays
+
+
+class Clone(Spell):
+
+    def get_effects(self, target, crit=False, turn=0):
+        self.clear_effects()
+        target = self.snap_to_range(target, upper=1, lower=1)
+        target = self.snap_to_visible(target)
+        if target:
+            self.add_effect(SpellEffect(move_linear=target), Area.Point())
+            self.add_effect(SpellEffect(summon=self.caster.__class__,
+                                        summon_args={"hit_points": self.caster.health},
+                                        density=GridEntity.DENSITY_EMPTY),
+                            Area.Point(origin=target*-1))
+        return self.effects, self.areas, self.delays
