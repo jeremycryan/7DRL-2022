@@ -18,7 +18,7 @@ from lib.Scene import TitleScreen
 from lib.Settings import Settings
 import random
 from demo.Player import Player
-from demo.Wall import Wall, Floor, Decorator, Exit
+from demo.Wall import Wall, Floor, Decorator, Exit, Stair
 from demo.Enemy import Bat, Spider, Wolf, Slime, Orc, Shade
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
@@ -78,6 +78,8 @@ class Game:
         EnemyDropHandler.init()  # Don't keep drop history from previous run
         self.stored_player_spells = []  # Don't keep spells from previous run
         Player.hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS  # in case we've gotten heart containers
+        self.current_dungeon_level = 1
+
 
     def run_menu(self):
         menu_scene = TitleScreen()
@@ -294,6 +296,8 @@ class Game:
                 elif item == "E":
                     new_tile = Exit()
                     exits.append(new_tile)
+                elif item == "S":
+                    new_tile = Stair()
                 else:
                     new_tile = Floor()
                 floor_layer.add_to_cell(new_tile, x, y)
@@ -301,7 +305,7 @@ class Game:
         # Must do this to make sure tiles display right
         self.load_layer_sprites(floor_layer)
         for exit in exits:
-            exit.solid = False  # must do after load_layer_sprites because of tileset rules
+            exit.open()  # must do after load_layer_sprites because of tileset rules
         self.add_decorators(map)
 
         return map
@@ -381,7 +385,7 @@ class Game:
         clock = pygame.time.Clock()
         clock.tick(60)
 
-        CalloutManager.post_message(CalloutManager.NEW_LEVEL, "Level 3", "Lost dungeons of Gargabundle")
+        CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
 
         while True:
             dt = clock.tick(120)/1000
@@ -432,6 +436,7 @@ class Game:
                 break
 
         self.stored_player_spells = player.spells_as_names()
+        self.current_dungeon_level += 1
 
 
 if __name__ == "__main__":

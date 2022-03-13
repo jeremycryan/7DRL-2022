@@ -1,5 +1,5 @@
-from SpellEffect import SpellEffect
-import SpellArea as Area
+from demo.SpellEffect import SpellEffect
+import demo.SpellArea as Area
 from lib.GridEntity import GridEntity
 from lib.Settings import Settings
 

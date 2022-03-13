@@ -3,9 +3,9 @@ import yaml
 from lib.Settings import Settings
 import os
 
-PATHS = os.listdir("room_pngs/small_rooms")
+PATHS = os.listdir("../room_pngs/small_rooms")
 
-OUTPUT_PATH_REL = "rooms/small_rooms"
+OUTPUT_PATH_REL = "../rooms/small_rooms"
 
 COLORS_TO_CHARACTER = {
     (0, 0, 0): "X",

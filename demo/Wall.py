@@ -104,6 +104,12 @@ class Exit(Wall):
         surf = ImageHandler.load("images/Wall_Exit_Open.png")
         self.add_sprite(StaticSprite(surf, rect=surf.get_rect()))
 
+class Stair(Wall):
+
+    def load_sprite(self):
+        surf = ImageHandler.load("images/Wall_Entrance.png")
+        self.add_sprite(StaticSprite(surf, rect=surf.get_rect()))
+
 
 class Decorator(GridEntity):
     density = GridEntity.DENSITY_EMPTY
