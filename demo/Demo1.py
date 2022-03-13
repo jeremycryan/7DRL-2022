@@ -12,6 +12,7 @@ from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
+from lib.Scene import TitleScreen
 from lib.Settings import Settings
 import random
 from demo.Player import Player
@@ -33,8 +34,53 @@ class Game:
         self.true_screen = pygame.display.set_mode((1280, 720))
         self.fps_font = pygame.font.SysFont("monospace", 10, 1, 0)
         self.fpss = []
+        pygame.display.set_caption(Settings.Static.WINDOW_CAPTION)
+
+        self.black = pygame.Surface((Settings.Static.GAME_WIDTH, Settings.Static.GAME_HEIGHT))
+        self.black.fill((0, 0, 0))
+        self.shade_shown = 1
+        self.starting = True
+        self.ending = False
+        self.proceed_to_next_level = False
+
+        self.run_game_from_menu()
+
+    def end_level(self):
+        self.proceed_to_next_level = True
+
+    def update_shade(self, dt, events):
+        if self.starting:
+            self.shade_shown -= dt * 3
+            self.shade_shown = max(0, self.shade_shown)
+            if self.shade_shown <= 0:
+                self.starting = False
+        if self.ending:
+            self.shade_shown += dt * 3
+            self.shade_shown = min(1, self.shade_shown)
+            if self.shade_shown >= 1:
+                self.end_level()
+        self.black.set_alpha(self.shade_shown * 255)
+
+    def run_game_from_menu(self):
+        self.run_menu()
         while True:
             self.main()
+
+    def run_menu(self):
+        menu_scene = TitleScreen()
+        clock = pygame.time.Clock()
+        clock.tick(60)
+        while not menu_scene.is_over():
+            events = pygame.event.get()
+            dt = clock.tick(60)/1000
+            menu_scene.update(dt, events)
+            menu_scene.draw(self.screen, (0, 0))
+
+            scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
+            self.true_screen.blit(scaled, (0, 0))
+            pygame.display.flip()
+
+            pygame.display.flip()
 
     def update_fpss(self, dt, events):
         self.fpss.append(dt)
@@ -48,7 +94,7 @@ class Game:
             fps = str(int(len(self.fpss)/sum(self.fpss)))
 
         surf = self.fps_font.render(f"FPS:{' '*max(0,6-len(fps))}{fps}", False, (255, 255, 255))
-        self.screen.blit(surf, (10, 10))
+        self.screen.blit(surf, (10, 340))
 
     def get_yaml_room(self, path):
         """
@@ -292,11 +338,12 @@ class Game:
         return enemy_objects
 
     def main(self):
-        clock = pygame.time.Clock()
-        clock.tick(60)
 
         TurnManager.init()
         ParticleHandler.init()
+        self.proceed_to_next_level = False
+        self.ending = False
+        self.starting = True
 
         map = self.generate_map()
         player = Player()
@@ -310,6 +357,9 @@ class Game:
         vignette = ImageHandler.load("images/vignette.png")
 
         Camera.change_objects(objects=[player], weights=[1], mouse_weight=0.15)
+
+        clock = pygame.time.Clock()
+        clock.tick(60)
 
         while True:
             dt = clock.tick(120)/1000
@@ -329,6 +379,7 @@ class Game:
             offset = Camera.get_game_offset().get_position()
 
             self.update_fpss(dt, events)
+            self.update_shade(dt, events)
             spell_hud.update(dt, events)
             Camera.update(dt, events)
             map.update(dt, events)
@@ -343,15 +394,19 @@ class Game:
 
             crafting_menu.draw(self.screen, (0, 0))
             spell_hud.draw(self.screen, (10, 10))
+            if self.shade_shown > 0:
+                self.screen.blit(self.black, (0, 0))
 
             scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
             self.true_screen.blit(scaled, (0, 0))
             pygame.display.flip()
 
             if player.advanced:
+                self.ending = True
+            if self.proceed_to_next_level:
                 GridEntity.allies = []
                 break
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     Game()

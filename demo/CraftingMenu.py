@@ -48,14 +48,18 @@ class CraftingMenu(GameObject):
         (387, 198),
     )
 
+    LETTER_POSITIONS_ADJUSTED = False
+
     LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     LETTER_POSITIONS_DICT = None
 
     def __init__(self, player):
         super().__init__()
-        CraftingMenu.LETTER_POSITIONS = [(i[0] + 8, i[1]) for i in CraftingMenu.LETTER_POSITIONS]
-        CraftingMenu.LETTER_POSITIONS_DICT = {self.LETTERS[i]: self.LETTER_POSITIONS[i] for i in range(len(self.LETTERS))}
+        if not CraftingMenu.LETTER_POSITIONS_ADJUSTED:
+            CraftingMenu.LETTER_POSITIONS_ADJUSTED = True
+            CraftingMenu.LETTER_POSITIONS = [(i[0] + 8, i[1]) for i in CraftingMenu.LETTER_POSITIONS]
+            CraftingMenu.LETTER_POSITIONS_DICT = {self.LETTERS[i]: self.LETTER_POSITIONS[i] for i in range(len(self.LETTERS))}
         self.picked_up_tiles = []
         self.count_font = pygame.font.Font("fonts/alagard.ttf", 16)
         self.player = player

@@ -25,9 +25,10 @@ class Settings:
         GAME_WIDTH = 640
         GAME_HEIGHT = 360
 
+        WINDOW_CAPTION = "Spellcraft"
+
         PICKUP_LAYER = 0.8
         DECORATOR_LAYER = 0.9
-
         STARTING_LETTERS = [letter for letter in "ABCDEFGHIJLKMNOPQRSTUVWXYZ"] * 3
 
     class Dynamic:
