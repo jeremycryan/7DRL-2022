@@ -1,3 +1,6 @@
+from lib.Animation import DelayAnimation
+
+
 class TurnManager:
 
     entities = None
@@ -14,6 +17,8 @@ class TurnManager:
             if cls.entities[cls.next_entity_turn].health > 0:
                 if cls.entities[cls.next_entity_turn].stun > 0:
                     cls.entities[cls.next_entity_turn].stun -= 1
+                    if cls.entities[cls.next_entity_turn].is_player:
+                        cls.entities[cls.next_entity_turn].add_animation(DelayAnimation(cls.entities[cls.next_entity_turn], 0.3))
                 else:
                     cls.entities[cls.next_entity_turn].take_turn()
             if cls.entities[cls.next_entity_turn].combo:
