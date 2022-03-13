@@ -7,6 +7,10 @@ class Settings:
         # TODO load these and arbitrary others from YAML
         pass
 
+    def save(self):
+        # TODO save these to YAML
+        pass
+
     class Static:
         """
         Settings that should be loaded once as the application starts, then remain constant at runtime
@@ -31,6 +35,6 @@ class Settings:
         Settings that can change during runtime
         """
         SHOW_FPS_COUNTER = True
-        KNOWN_SPELLS = ["ZAP", "FLARE", "BOLT", "STAB"]
+        KNOWN_SPELLS = ["ZAP", "FLARE", "BOLT", "STAB", "GOLEM"]
         KNOWN_ENEMIES = []
         MENU_SHOWN = 0  # Amount of shown between 0 and 1

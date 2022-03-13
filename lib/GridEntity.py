@@ -160,11 +160,11 @@ class GridEntity(GameObject):
             sprite.align_with_grid_object_pixel(self)
 
     def update(self, dt, events):
-        self.align_sprites_pixel()
         for animation in self.animations[:]:
             animation.update(dt, events)
             if animation.destroyed:
                 self.animations.remove(animation)
+        self.align_sprites_pixel()
         for sprite in self.sprites:
             sprite.update(dt, events)
 

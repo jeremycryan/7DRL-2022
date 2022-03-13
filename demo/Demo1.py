@@ -7,13 +7,14 @@ import yaml
 
 from demo.EnemyDropHandler import EnemyDropHandler
 from demo.SpellHUD import SpellHUD
+from lib.Animation import Spawn
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
 from lib.Settings import Settings
 import random
 from demo.Player import Player
-from demo.Wall import Wall, Floor, Decorator
+from demo.Wall import Wall, Floor, Decorator, Exit
 from demo.Enemy import Goomba, Bat, Wolf, Slime, Orc, Shade
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
@@ -26,13 +27,13 @@ class Game:
         EnemyDropHandler.init()
         ImageHandler.init()
         Camera.init()
-        TurnManager.init()
-        ParticleHandler.init()
+
         self.screen = pygame.Surface((640, 360))
         self.true_screen = pygame.display.set_mode((1280, 720))
         self.fps_font = pygame.font.SysFont("monospace", 10, 1, 0)
         self.fpss = []
-        self.main()
+        while True:
+            self.main()
 
     def update_fpss(self, dt, events):
         self.fpss.append(dt)
@@ -223,18 +224,24 @@ class Game:
         #searches based on room coordinate
 
         # Turn our room array back into a map.
+        exits = []
         for y, row in enumerate(stringMap):
             for x, item in enumerate(row):
                 if item is wall:
                     new_tile = Wall()
                 elif item is wall:
                     new_tile = Wall()
+                elif item is "E":
+                    new_tile = Exit()
+                    exits.append(new_tile)
                 else:
                     new_tile = Floor()
                 floor_layer.add_to_cell(new_tile, x, y)
 
         # Must do this to make sure tiles display right
         self.load_layer_sprites(floor_layer)
+        for exit in exits:
+            exit.solid = False  # must do after load_layer_sprites because of tileset rules
         self.add_decorators(map)
 
         return map
@@ -287,9 +294,14 @@ class Game:
         clock = pygame.time.Clock()
         clock.tick(60)
 
+        TurnManager.init()
+        ParticleHandler.init()
+
         map = self.generate_map()
         player = Player()
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
+        player.add_animation(Spawn(player))
+        Camera.position = player.position.copy()
         spell_hud = SpellHUD(player)
         crafting_menu = CraftingMenu(player)
         enemies = self.spawn_enemies(map.get_layer(0))
@@ -334,6 +346,9 @@ class Game:
             scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
             self.true_screen.blit(scaled, (0, 0))
             pygame.display.flip()
+
+            if player.advanced:
+                break
 
 
 if __name__=="__main__":

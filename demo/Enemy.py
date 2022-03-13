@@ -4,7 +4,7 @@ import demo.EnemySpells as Spell
 from demo.EnemyDropHandler import EnemyDropHandler
 from demo.Pickup import Pickup, LetterTile
 from demo.Wall import Wall
-from lib.Animation import MoveAnimation
+from lib.Animation import MoveAnimation, Spawn
 from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
 from lib.Primitives import Pose
@@ -273,6 +273,7 @@ class GolemSummon(Enemy):
     def __init__(self):
         super().__init__()
         self.attacks = [Spell.SpiderAttack(self)]
+        self.add_animation(Spawn(self))
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/goomba.png", flippable=True)

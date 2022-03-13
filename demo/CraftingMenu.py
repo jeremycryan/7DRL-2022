@@ -186,6 +186,10 @@ class CraftingMenu(GameObject):
                 if event.key == pygame.K_e:
                     self.toggle_hidden()
 
+        if self.shown > 0:
+            self.recalculate_tiles()
+            self.info_book.refresh()
+
         for tile in self.tiles + self.picked_up_tiles:
             tile.update(dt, events)
 

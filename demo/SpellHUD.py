@@ -1,6 +1,7 @@
 import pygame
 
 from demo.Button import Button
+from demo.Pickup import LetterTile
 from lib.ImageHandler import ImageHandler
 import math
 import time
@@ -51,7 +52,10 @@ class SpellHUD:
                 break
 
     def uncraft_spell(self, idx):
-        pass
+        spell = self.player.spells[idx]
+        self.player.letter_tiles += [LetterTile(letter.upper()) for letter in spell.get_name()]
+        self.player.spells[idx] = None
+        self.player.cooldown[idx] = None
 
     def get_spells(self):
         return self.player.spells
