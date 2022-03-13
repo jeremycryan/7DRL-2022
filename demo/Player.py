@@ -22,6 +22,7 @@ spellKeys = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.
 class Player(GridEntity):
 
     faction = GridEntity.FACTION_ALLY
+    hit_points = 9
 
     def __init__(self, position=(0, 0)):
         super().__init__(position)
@@ -34,7 +35,7 @@ class Player(GridEntity):
         sprite.set_colorkey((255, 0, 255))
         self.load_shadow()
         self.sprites.append(sprite)
-        self.health = 1
+        self.health = self.hit_points
         self.stun = 0
         self.weight = 1
         self.vulnerabilities = []

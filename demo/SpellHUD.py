@@ -41,6 +41,29 @@ class SpellHUD:
         self.scroll.set_colorkey((255, 0, 255))
         self.glow = ImageHandler.load("images/ui/scroll_glow.png")
 
+        self.hearts = {
+            0: ImageHandler.load("images/ui/UI_Health_0Pip.png"),
+            1: ImageHandler.load("images/ui/UI_Health_1Pip.png"),
+            2: ImageHandler.load("images/ui/UI_Health_2Pip.png"),
+            3: ImageHandler.load("images/ui/UI_Health_3Pip.png")
+        }
+        for heart in self.hearts.values():
+            heart.set_colorkey((255, 0, 255))
+
+    def draw_player_health(self, surface, offset=(0, 0)):
+        number_of_containers = math.ceil(self.player.hit_points / 3)
+        spacing = 17
+        x = offset[0] + 20
+        y = offset[1] + 14
+        health_remaining = self.player.health
+
+        for i in range(number_of_containers):
+            pips = min(health_remaining, 3)
+            health_remaining -= pips
+            surf = self.hearts[pips]
+            surface.blit(surf, (x - surf.get_width()//2, y - surf.get_width()//2))
+            x += spacing
+
     def update(self, dt, events):
         for button in self.uncraft_buttons:
             button.update(dt, events)
@@ -110,11 +133,10 @@ class SpellHUD:
             surface.blit(letter, (x, y + 2 + (cooldown == 0) * math.sin(time.time() * 10 - x) * 1))
             x += letter.get_width()
 
-        if spell is self.player.get_spell():
-            pygame.draw.rect(surface, (255, 255, 255), (x0 - 3, y - 3, x -x0 + 6, letter.get_height() + 4), 1)
 
     def draw(self, surface, offset=(0, 0)):
         x, y = offset[0], offset[1] - 12
         for spell, cooldown in zip(self.get_spells(), self.get_cooldowns()):
             self.draw_spell(surface, spell, cooldown, (x, y))
             y += 35
+        self.draw_player_health(surface, offset=(0, 0))
