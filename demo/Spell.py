@@ -1,6 +1,7 @@
 from SpellEffect import SpellEffect
 import SpellArea as Area
 from lib.GridEntity import GridEntity
+from lib.Settings import Settings
 
 
 class Spell:
@@ -168,6 +169,9 @@ def get_spell(caster, name):
         return spell
     return None
 
+def list_known_spells():
+    spells = [spell for spell in list_spells() if spell in Settings.Dynamic.KNOWN_SPELLS]
+    return spells
 
 def list_spells():
     """

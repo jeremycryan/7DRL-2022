@@ -1,7 +1,8 @@
 import random
 
 from demo.ParticleHandler import ParticleHandler, CircleParticle
-from lib.Animation import Fwoosh, Feint
+from demo.Wall import Exit
+from lib.Animation import Fwoosh, Feint, ShrinkToNothing, Spawn
 from demo.Pickup import LetterTile
 from lib.Camera import Camera
 from lib.GridEntity import GridEntity
@@ -24,6 +25,8 @@ class Player(GridEntity):
 
     def __init__(self, position=(0, 0)):
         super().__init__(position)
+        self.shrinking = False
+        self.advanced = False
 
         self.staff = ImageHandler.load_copy("images/staff.png")
         self.staff.set_colorkey((255, 0, 255))
@@ -48,7 +51,7 @@ class Player(GridEntity):
         self.letter_tiles = [LetterTile(letter) for letter in Settings.Static.STARTING_LETTERS]
         self.letters_in_use = self.letter_tiles.copy()
 
-        starting_spells = [0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "zap"]#[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = Spell.get_spell(self, starting_spells[i])
 
@@ -57,6 +60,9 @@ class Player(GridEntity):
 
     def on_move_to_grid_position(self, x, y):
         super().on_move_to_grid_position(x, y)
+        for other in self.layer.map.get_all_at_position(x, y):
+            if type(other) == Exit:
+                self.add_animation(ShrinkToNothing(self, 1))
         #self.animations.append(Fwoosh(self, 0.8))
 
     def update(self, dt, events):
@@ -137,7 +143,8 @@ class Player(GridEntity):
         staff_rotated = pygame.transform.rotate(self.staff, angle - 90)
         sx = self.position.x + offset[0] + (14 * (1 - 2*should_flip)) - staff_rotated.get_width()//2
         sy = self.position.y + offset[1] - (5) - staff_rotated.get_height()//2
-        surface.blit(staff_rotated, (sx, sy))
+        if not self.shrinking:
+            surface.blit(staff_rotated, (sx, sy))
         super().draw(surface, offset=offset)
         hovered = self.layer.map.get_hovered_tile()
         if hovered and self.get_spell() and not self.locked_out():
@@ -159,9 +166,10 @@ class Player(GridEntity):
         self.taking_turn = True
 
     def end_turn(self):
-        GridEntity.end_turn(self)
-        # self.prepared_spell = None
-        self.new_turn = True
+        if not self.shrinking:
+            GridEntity.end_turn(self)
+            # self.prepared_spell = None
+            self.new_turn = True
 
     def get_spell(self):
         if self.prepared_spell is None:

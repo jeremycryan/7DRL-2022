@@ -40,6 +40,7 @@ class Animation:
 
 class DelayAnimation(Animation):
     blocking = True
+    keep_turn = True
 
 
 class Feint(Animation):
@@ -160,6 +161,56 @@ class Fwoosh(Animation):
         parent = GameObject()
         parent.position = Pose(position, 0)
         return Fwoosh(parent, duration)
+
+
+class ShrinkToNothing(Animation):
+    blocking = True
+    keep_turn = True
+
+    def __init__(self, parent, duration=2):
+        super().__init__(parent, duration)
+        parent.shrinking = True
+
+    def update(self, dt, events):
+        super().update(dt, events)
+        for sprite in self.parent.sprites:
+            sprite.distortion = Pose((1 - self.through(), 1 - self.through()))
+            self.parent.position.y -= (6*dt)/self.duration
+
+    def on_destroy(self):
+        self.parent.advanced = True
+
+class Spawn(Animation):
+    blocking = True
+    keep_turn = True
+
+    def __init__(self, parent, duration=0.3):
+        super().__init__(parent, duration)
+        self.start_position = None
+        self.curve = PowerCurve(0.9, 0.001, 1)
+        for sprite in self.parent.sprites:
+
+            sprite.set_alpha(0)
+
+    def update(self, dt, events):
+        if not self.start_position:
+            self.start_position = self.parent.position.copy()
+        super().update(dt, events)
+        through = lerp(0, 1, self.through(), self.curve)
+        for sprite in self.parent.sprites:
+            sprite.distortion.x = through * 0.4 + 0.6
+            sprite.distortion.y = 1/sprite.distortion.x
+            sprite.set_alpha(255 * self.through()**2)
+        self.parent.position = self.start_position + Pose((0, ((1 - through) * -64)))
+
+    def on_destroy(self):
+        super().on_destroy()
+        self.parent.position = self.start_position
+        for sprite in self.parent.sprites:
+            sprite.distortion.x = 1
+            sprite.distortion.y = 1
+            sprite.set_alpha(255)
+        self.parent.add_animation(DelayAnimation(self.parent, 0.2))
 
 
 class Scratch(Animation):
