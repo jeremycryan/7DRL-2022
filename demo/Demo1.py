@@ -455,7 +455,7 @@ class Game:
         enemy_objects = []
         for x, y in layer.cell_coordinates():
             if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
-                enemy_type = random.choice([Bat])#, Spider, Wolf, Slime, Orc, Shade])
+                enemy_type = random.choice([Bat, Spider, Wolf, Slime, Orc, Shade])
                 enemy = enemy_type()
                 enemy_objects.append(enemy)
                 layer.add_to_cell(enemy, x, y)
