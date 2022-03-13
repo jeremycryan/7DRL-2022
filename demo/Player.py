@@ -205,7 +205,7 @@ class Player(GridEntity):
             # self.destroy()
             print("Game Over")  # TODO: Game Over
 
-    def push(self, x=0, y=0, teleport=False):
+    def push(self, x=0, y=0, teleport=False, instant=False):
         if not teleport:
             x = x//self.weight
             y = y//self.weight

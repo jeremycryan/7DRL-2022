@@ -65,6 +65,7 @@ class OrcAttack(Spell):
                     end = target + Pose((-1, 0))
                 self.add_effect(SpellEffect(damage=self.caster.strength, damage_type=GridEntity.DAMAGE_PHYSICAL),
                                 Area.Line(start, end, offset=False))
+                self.add_effect(SpellEffect(move_linear=target), Area.Point(target))
                 self.combo = True
             if turn == 1 or turn == 3:  # Charge forward
                 self.add_effect(SpellEffect(move_linear=target), Area.Point())
