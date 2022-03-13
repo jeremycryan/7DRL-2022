@@ -1,3 +1,4 @@
+from lib import Math
 from lib.Primitives import Pose
 from lib.Math import get_line
 
@@ -32,6 +33,20 @@ class Line(SpellArea):
         self.endpoint = endpoint
         self.line_of_sight = line_of_sight
         self.squares = get_line(origin, endpoint, offset=offset)  # TODO (low priority): check line of sight
+
+
+class Cross(SpellArea):
+    def __init__(self, origin=Pose((0, 0)), radius=1, no_origin=False):
+        """
+        Target all squares in a line
+        :param origin: source square
+        :param radius: size of cross
+        :param no_origin: true if origin is not included
+        """
+        super().__init__(origin)
+        self.squares = Math.get_squares(diagonal=radius, origin=origin)
+        if not no_origin:
+            self.squares.append(origin)
 
 
 class Circle(SpellArea):

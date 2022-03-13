@@ -70,38 +70,14 @@ def filter_radius(self, squares, radius):
     return new_squares
 
 
-def get_squares(self, linear=0, diagonal=0, radius=0, custom=0):
-    squares = []
-    if not hasattr(linear, "__iter__"):
-        linear = (linear,)
-    if not hasattr(diagonal, "__iter__"):
-        diagonal = (diagonal,)
-    if linear:  # Cardinal movement
-        for i in linear:
-            squares.append(Pose((i, 0)))
-    if diagonal:  # Diagonal movement
-        for i in diagonal:
-            squares.append(Pose((i, i)))
-    if radius:  # Arbitrary movement
-        squares += Math.get_squares_in_range(radius, no_origin=True)
-    if custom == 1:  # Knight's move away
-        squares.append(Pose((1, 2)))
-        squares.append(Pose((2, 1)))
-
-    rotations = [((0, 1), (-1, 0)), ((-1, 0), (0, -1)), ((0, -1), (1, 0))]
-    for r in rotations: # 4-way symmetry
-        for square in squares[:]:
-            x = square.x*r[0][0] + square.y*r[0][1]
-            y = square.x*r[1][0] + square.y*r[1][1]
-            squares.append(Pose((x, y)))
-    return squares
-
-
-def check_spell(self, spell, targets, squares=None):
+def check_spell(self, spell, targets, squares=None, can_melee=True, can_ranged=True):
     if not squares:
-        squares = get_squares(self, linear=1)
-        random.shuffle(squares)
-        squares += targets[:]
+        squares = []
+        if can_melee:
+            squares += Math.get_squares(linear=1)
+            random.shuffle(squares)
+        if can_ranged:
+            squares += targets[:]
     for square in squares:
         effects, areas, delays = spell.get_effects(square)
         for effect, area, delay in zip(effects, areas, delays):
