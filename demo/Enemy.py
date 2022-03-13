@@ -1,6 +1,7 @@
 import demo.Player as Player
 import demo.EnemyAI as Ai
 import demo.EnemySpells as Spell
+from demo.EnemyDropHandler import EnemyDropHandler
 from demo.Pickup import Pickup, LetterTile
 from demo.Wall import Wall
 from lib.Animation import MoveAnimation
@@ -58,6 +59,9 @@ class Enemy(GridEntity):
     def draw(self, surface, offset=(0, 0)):
         super().draw(surface, offset=offset)
         self.draw_name(surface, offset=offset)
+        if self.name not in Settings.Dynamic.KNOWN_ENEMIES:
+            Settings.Dynamic.KNOWN_ENEMIES.append(self.name)
+            Settings.Dynamic.KNOWN_ENEMIES.sort()
 
     def draw_name(self, surface, offset=(0, 0)):
         letters = [Enemy.name_letters[letter] for letter in self.name]
@@ -122,8 +126,8 @@ class Enemy(GridEntity):
         super().on_destroy()
         if self.position_on_grid and self.drop_letters:
             x, y = self.position_on_grid.get_position()
-            # TODO be smart about what letter I drop
-            self.layer.map.add_to_cell(LetterTile(random.choice(self.name)), x, y, Settings.Static.PICKUP_LAYER)
+            drop = EnemyDropHandler.get_drop(self)
+            self.layer.map.add_to_cell(drop, x, y, Settings.Static.PICKUP_LAYER)
         # TODO: death animation
 
     def push(self, x=0, y=0, teleport=False):
@@ -215,7 +219,7 @@ class Orc(Goomba):
         return sprite
 
     def name_y_offset(self):
-        return -34
+        return -36
 
 class Shade(Goomba):
     name = "SHADE"

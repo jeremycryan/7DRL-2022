@@ -24,10 +24,13 @@ class Settings:
         PICKUP_LAYER = 0.8
         DECORATOR_LAYER = 0.9
 
-        STARTING_LETTERS = ["Z", "A", "P"]
+        STARTING_LETTERS = [letter for letter in "ABCDEFGHIJLKMNOPQRSTUVWXYZ"] * 3
 
     class Dynamic:
         """
         Settings that can change during runtime
         """
         SHOW_FPS_COUNTER = True
+        KNOWN_SPELLS = ["ZAP", "FLARE", "BOLT", "STAB"]
+        KNOWN_ENEMIES = []
+        MENU_SHOWN = 0  # Amount of shown between 0 and 1

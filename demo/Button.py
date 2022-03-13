@@ -17,7 +17,8 @@ class Button:
                  click_surf=None,
                  disabled_surf=None,
                  enabled=True,
-                 grow_percent=5):
+                 grow_percent=5,
+                 pulse=True):
 
         self.x, self.y = pos
         self.width, self.height = surf.get_width(), surf.get_height()
@@ -32,6 +33,7 @@ class Button:
         self.grow_percent = grow_percent
         self.scale = 1.0
         self.target_scale = 1.0
+        self.pulse = pulse
 
     def click(self):
         self.clicked = False
@@ -99,7 +101,7 @@ class Button:
 
         if self.is_hovered() and self.enabled:
             self.target_scale = 1.0 + self.grow_percent/100
-        elif self.enabled:
+        elif self.enabled and self.pulse:
             self.target_scale = 0.97 + 0.03*math.sin(time.time()*6)
         else:
             self.target_scale = 1.0

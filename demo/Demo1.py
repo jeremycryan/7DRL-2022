@@ -5,6 +5,7 @@ import pygame
 import sys
 import yaml
 
+from demo.EnemyDropHandler import EnemyDropHandler
 from demo.SpellHUD import SpellHUD
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
@@ -22,6 +23,7 @@ import os
 class Game:
     def __init__(self):
         pygame.init()
+        EnemyDropHandler.init()
         ImageHandler.init()
         Camera.init()
         TurnManager.init()
@@ -314,6 +316,7 @@ class Game:
             offset = Camera.get_game_offset().get_position()
 
             self.update_fpss(dt, events)
+            spell_hud.update(dt, events)
             Camera.update(dt, events)
             map.update(dt, events)
             crafting_menu.update(dt, events)
