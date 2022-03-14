@@ -19,6 +19,7 @@ class GridEntity(GameObject):
     DENSITY_EMPTY = 0
     DENSITY_CREATURE = 1
     DENSITY_WALL = 2
+    DENSITY_PICKUP = 3
     density = DENSITY_CREATURE
 
     DAMAGE_SPELL = 0
@@ -155,6 +156,9 @@ class GridEntity(GameObject):
     def draw(self, surface, offset=(0, 0)):
         for sprite in self.sprites:
             sprite.draw(surface, offset=offset)
+
+    def draw_targets(self, surface, offset=(0, 0)):
+        pass
 
     def align_sprites(self):
         for sprite in self.sprites:
@@ -298,6 +302,15 @@ class GridEntity(GameObject):
         center = (self.position_on_grid + Pose((x, y), 0))*tile_size + Pose(offset, 0)
         rect = (center.x - tile_size//2, center.y - tile_size//2, tile_size, tile_size)
         pygame.draw.rect(surface, color, rect, 2)
+        if color == 1:
+            image = ImageHandler.load("images/player_target_indicator.png")
+        elif color == 2:
+            image = ImageHandler.load("images/player_damage_indicator.png")
+        elif color == 3:
+            image = ImageHandler.load("images/enemy_damage_indicator.png")
+        else:
+            image = ImageHandler.load("images/enemy_damage_indicator.png")
+        surface.blit(image, rect)
 
     def destroy(self):
         if self.destroyed:

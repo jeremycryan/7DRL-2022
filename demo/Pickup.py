@@ -12,7 +12,7 @@ from lib.Animation import ShrinkToNothing
 class Pickup(GridEntity):
 
     is_pickup = True
-    density = GridEntity.DENSITY_EMPTY
+    density = GridEntity.DENSITY_PICKUP
 
     def __init__(self):
         super().__init__()
