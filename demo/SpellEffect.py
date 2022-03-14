@@ -62,6 +62,8 @@ class SpellEffect:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (0, 0, 255)))
             elif self.damage and self.damage_type == GridEntity.DAMAGE_FIRE:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (255, 0, 0)))
+            elif self.damage and self.damage_type == GridEntity.DAMAGE_DEMON:
+                caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (100, 0, 0)))
             elif self.damage and self.damage_type == GridEntity.DAMAGE_WEB:
                 caster.add_animation(Fwoosh(caster, 0.5, position.get_position(), (50, 50, 50)))
             elif self.damage_type:

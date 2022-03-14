@@ -1,6 +1,7 @@
 from demo.Spell import Spell
 import demo.SpellArea as Area
 from demo.SpellEffect import SpellEffect
+from lib import Math
 from lib.GridEntity import GridEntity
 from lib.Primitives import Pose
 
@@ -137,6 +138,30 @@ class DragonBreath(Spell):
                 if c2:
                     self.add_effect(SpellEffect(menace=True),
                                     Area.Line(origin=c, endpoint=c2 - p, offset=False))
+        return self.effects, self.areas, self.delays
+
+
+class DemonSpell(Spell):
+    turns = 5
+
+    def get_effects(self, target, crit=False, turn=0):
+        self.clear_effects()
+        if target:
+            area0 = Area.SpellArea(squares=Math.get_squares(diagonal=1, linear=1))
+            area1 = Area.SpellArea(squares=Math.get_squares(custom=1, linear=2, diagonal=2))
+            area2 = Area.SpellArea(squares=Math.get_squares(linear=(1,2,3), diagonal=(1,2,3)))
+            area3 = Area.SpellArea(squares=Math.get_squares(diagonal=(1, 2), linear=2))
+            if turn == 0:
+                self.add_effect(SpellEffect(menace=True), area1)
+                self.add_effect(SpellEffect(damage=self.caster.strength, damage_type=GridEntity.DAMAGE_FIRE), area0)
+            if turn == 1:
+                self.add_effect(SpellEffect(menace=True), area2)
+                self.add_effect(SpellEffect(damage=self.caster.strength, damage_type=GridEntity.DAMAGE_FIRE), area1)
+            if turn == 2:
+                self.add_effect(SpellEffect(menace=True), area3)
+                self.add_effect(SpellEffect(damage=self.caster.strength, damage_type=GridEntity.DAMAGE_FIRE), area2)
+            if turn == 3:
+                self.add_effect(SpellEffect(damage=self.caster.strength, damage_type=GridEntity.DAMAGE_FIRE), area3)
         return self.effects, self.areas, self.delays
 
 

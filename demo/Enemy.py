@@ -304,11 +304,12 @@ class Demon(Bat):
     name = "DEMON"
     hit_points = 9
     strength = 3
-    spells = [Spell.DragonAttack, Spell.DragonBreath]
-    move_squares = Math.get_squares(linear=1, diagonal=1)
+    immunities = (GridEntity.DAMAGE_DEMON,)
+    spells = [Spell.DemonSpell]
+    move_squares = Math.get_squares(custom=1, linear=2, diagonal=2)
 
     def load_sprite(self):
-        sprite = StaticSprite.from_path("images/dragon.png", flippable=True)
+        sprite = StaticSprite.from_path("images/demon.png", flippable=True)
         sprite.set_colorkey((255, 0, 255))
         return sprite
 
