@@ -18,7 +18,6 @@ class TurnManager:
             for entity in cls.entities[:]:
                 if entity.health <= 0:
                     if entity.is_player and entity.game_over:
-                        entity.destroy()
                         game_over = True
                     entity.destroy()
             if game_over:

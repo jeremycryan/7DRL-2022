@@ -59,7 +59,7 @@ class Player(GridEntity):
         self.pressed_keys = []
 
     def add_starting_spells(self, list_of_spells=None):
-        starting_spells = [0, "zap"]#, "teleport", "lightning", "firestorm", "hop", "frostbite", "barrier", "golem", "condemn"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "zap"] if not list_of_spells else list_of_spells #, "teleport", "lightning", "firestorm", "hop", "frostbite", "barrier", "golem", "condemn"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = Spell.get_spell(self, starting_spells[i])
 
@@ -78,6 +78,7 @@ class Player(GridEntity):
 
     def update(self, dt, events):
         super().update(dt, events)
+        self.get_letters()
 
         # Start of turn setup
         if self.new_turn:
@@ -251,8 +252,27 @@ class Player(GridEntity):
         if not unknown_spells:
             CalloutManager.post_message(CalloutManager.LOST_PAGE, "Nothing", "All the dungeon's secrets are known to you already.")
             return
-        new_spell = random.choice(unknown_spells)
+        random.shuffle(unknown_spells)
+        letters = self.get_letters()
+        unknown_spells.sort(key=lambda s: self.score_spell(s, letters))
+        new_spell = unknown_spells[0]
         spell_class = Spell.get_spell(self, new_spell)
         Settings.Dynamic.KNOWN_SPELLS.append(new_spell.upper())
 
         CalloutManager.post_message(CalloutManager.LOST_PAGE, new_spell.capitalize(), spell_class.description)
+
+    def score_spell(self, spell, letters):
+        score = 0
+        for letter in spell:
+            if letter in letters:
+                letters.remove(letter)
+            else:
+                score += 1
+        return score
+
+    def get_letters(self):
+        letters = [tile.letter for tile in self.letter_tiles]
+        for spell in self.spells:
+            if spell:
+                letters += [l for l in spell.get_name()]
+        return letters

@@ -268,12 +268,12 @@ class Bolt(Spell):
     description = "A simple ranged bolt of magical damage."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
-        # target = self.snap_to_line(target)
+        target = self.snap_to_line(target)
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=5, lower=1)
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_CREATURE)
         if target:
-            self.add_effect(SpellEffect(damage=2), Area.Point(target))
+            self.add_effect(SpellEffect(damage=2), Area.Line(endpoint=target))
         return self.effects, self.areas, self.delays
 
 

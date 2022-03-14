@@ -37,6 +37,9 @@ class Game:
         ImageHandler.init()
         CalloutManager.init()
         Camera.init()
+        self.music = pygame.mixer.Sound("sounds/music.mp3")
+        self.music.set_volume(0.3)
+        self.music.play(-1)
 
         self.screen = pygame.Surface((640, 360))
         self.true_screen = pygame.display.set_mode((1280, 720))

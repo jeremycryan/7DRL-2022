@@ -119,13 +119,13 @@ class DragonBreath(Spell):
             c2, _ = self.caster.layer.map.raycast(c.copy() + p, c2 + p, (GridEntity.DENSITY_WALL,), offset=False)
             if turn == 1:
                 if a2:
-                    self.add_effect(SpellEffect(damage=3, damage_type=GridEntity.DAMAGE_FIRE),
+                    self.add_effect(SpellEffect(damage=2, damage_type=GridEntity.DAMAGE_FIRE),
                                     Area.Line(origin=a, endpoint=a2 - p, offset=False))
                 if b2:
-                    self.add_effect(SpellEffect(damage=3, damage_type=GridEntity.DAMAGE_FIRE),
+                    self.add_effect(SpellEffect(damage=2, damage_type=GridEntity.DAMAGE_FIRE),
                                     Area.Line(origin=b, endpoint=b2 - p, offset=False))
                 if c2:
-                    self.add_effect(SpellEffect(damage=3, damage_type=GridEntity.DAMAGE_FIRE),
+                    self.add_effect(SpellEffect(damage=2, damage_type=GridEntity.DAMAGE_FIRE),
                                     Area.Line(origin=c, endpoint=c2 - p, offset=False))
             if turn == 0:
                 if a2:
