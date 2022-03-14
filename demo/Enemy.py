@@ -337,7 +337,7 @@ class GolemSummon(Enemy):
         self.add_animation(Spawn(self))
 
     def load_sprite(self):
-        sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
+        sprite = StaticSprite.from_path("images/golem.png", flippable=True)
         sprite.set_colorkey((255, 0, 255))
         return sprite
 
@@ -356,6 +356,9 @@ class GolemSummon(Enemy):
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
+
+    def name_y_offset(self):
+        return -26
 
 
 class BarrierSummon(Enemy):

@@ -330,5 +330,8 @@ class GridEntity(GameObject):
 
     def heal(self, amt):
         if hasattr(self, "health"):
-            if self.health + amt <= self.hit_points:
+            if self.health < self.hit_points:
                 self.health += amt
+                self.health = min(self.hit_points, self.health)
+                return True
+        return False

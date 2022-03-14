@@ -16,6 +16,7 @@ from lib.GridEntity import GridEntity
 from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
+from lib.Primitives import Pose
 from lib.Scene import TitleScreen
 from lib.Settings import Settings
 import random
@@ -27,6 +28,7 @@ from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
 import threading
 import os
+from lib.Math import lerp
 
 class Game:
     def __init__(self):
@@ -156,12 +158,15 @@ class Game:
 
     def generate_map(self):
 
-        mapLength = 6
+        lerpAmount = (self.current_dungeon_level - 1)/6
+        mapLength = int(lerp(2,7, lerpAmount))
+
+        lerpAmount = (self.current_dungeon_level - 1) / 7
+        mapExtraRooms = int(lerp(0, 9, lerpAmount))
+
         mapBossRoom = "rooms/boss_room_1.yaml"
-        mapExtraRooms = 5
-        mapBranchChance = 0
-        roomAttemptLimit = 30
-        placementAttemptLimit = 30
+        roomAttemptLimit = 250
+        placementAttemptLimit = 250
 
 
         # TODO: Somehow determine a good height for the map, in tiles.
@@ -198,7 +203,6 @@ class Game:
         stringMap = [wall * width for _ in range(height)] 
 
         # Spawn Room
-        self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/spawn_room.yaml"), stringMap, (centerX, centerY), closed_walls=[])
 
         currentX = centerX
         currentY = centerY
@@ -222,7 +226,11 @@ class Game:
                 for roomAttemptCount in range(roomAttemptLimit):
 
                     # pick a room
-                    room = random.choice(rooms)
+                    if(stepCount == mapLength - 1):
+                        room = self.get_yaml_room("rooms/special_rooms/exit_room.yaml")
+                    else:
+                        room = random.choice(rooms)
+
                     roomWidth = room["width"]
                     roomHeight = room["height"]
 
@@ -349,9 +357,10 @@ class Game:
             #````````````````````````
 
         if generationSuceeded:
+
+            self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/spawn_room.yaml"), stringMap,(centerX, centerY), closed_walls=[])
+
             #PURGE U D L R
-            for mapRoom in mapData:
-                pass
 
             #PLACE ROOMS
             for roomToPlace in mapData:
@@ -360,34 +369,41 @@ class Game:
 
                 closed_walls = []
                 try:
-                    if roomGrid[roomToPlace[0] - 1][roomToPlace[1]]:
-                        closed_walls.append("L")
+                    for blep in range(roomToPlace[2]["height"]):
+                        if roomGrid[roomToPlace[0] - 1][roomToPlace[1]+blep]:
+                            closed_walls.append("L")
                 except:
                     pass
 
                 try:
-                    if roomGrid[roomToPlace[0] + roomToPlace[2]["width"]][roomToPlace[1]]:
-                        closed_walls.append("R")
+                    for blep in range(roomToPlace[2]["height"]):
+                        if roomGrid[roomToPlace[0] + roomToPlace[2]["width"]][roomToPlace[1] + blep]:
+                            closed_walls.append("R")
                 except:
                     pass
 
                 try:
-                    if roomGrid[roomToPlace[0]][roomToPlace[1] - 1]:
-                        closed_walls.append("U")
+                    for blep in range(roomToPlace[2]["width"]):
+                        if roomGrid[roomToPlace[0] + blep][roomToPlace[1] - 1]:
+                            closed_walls.append("U")
                 except:
                     pass
 
                 try:
-                    if roomGrid[roomToPlace[0]][roomToPlace[1] + roomToPlace[2]["height"]]:
-                        closed_walls.append("D")
+                    for blep in range(roomToPlace[2]["width"]):
+                        if roomGrid[roomToPlace[0] + blep][roomToPlace[1] + roomToPlace[2]["height"]]:
+                            closed_walls.append("D")
                 except:
                     pass
 
                 for char in closed_walls:
-                    valid_chars.remove(char)
+                    if(char in valid_chars):
+                        valid_chars.remove(char)
 
                 self.merge_room_onto_character_array(roomToPlace[2], stringMap, (roomToPlace[0], roomToPlace[1]), valid_chars)
         else:
+            self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/backup.yaml"), stringMap,(centerX, centerY), closed_walls=[])
+
             pass
             #place special room with down stairs
 
@@ -450,12 +466,34 @@ class Game:
             for tile in cell:
                 tile.load_sprite()
 
-    def spawn_enemies(self, layer):
+    def spawn_enemies(self, layer, player):
         enemies = 0
         enemy_objects = []
+        frequency = 0.06
+        if self.current_dungeon_level == 1:
+            frequency = 0.02
+            enemy_types = [Bat, Bat, Bat, Spider, Spider]
+        elif self.current_dungeon_level == 2:
+            frequency = 0.03
+            enemy_types = [Bat, Bat, Bat, Spider, Spider, Wolf]
+        elif self.current_dungeon_level == 3:
+            frequency = 0.03
+            enemy_types = [Spider, Wolf, Slime, Shade, Wolf]
+        elif self.current_dungeon_level == 4:
+            frequency = 0.03
+            enemy_types = [Spider, Wolf, Slime, Shade, Slime]
+        elif self.current_dungeon_level == 5:
+            frequency = 0.03
+            enemy_types = [Orc, Shade, Slime, Slime, Spider]
+        else:
+            frequency = 0.04
+            enemy_types = [Orc, Shade, Slime]
+
         for x, y in layer.cell_coordinates():
-            if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < 0.06:
-                enemy_type = random.choice([Bat, Spider, Wolf, Slime, Orc, Shade])
+            if (Pose((x, y)) - player.position).magnitude() < 8:
+                continue
+            if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < frequency:
+                enemy_type = random.choice(enemy_types)
                 enemy = enemy_type()
                 enemy_objects.append(enemy)
                 layer.add_to_cell(enemy, x, y)
@@ -505,15 +543,16 @@ class Game:
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         player.add_animation(Spawn(player))
 
-        pickup = LostPage()
-        map.add_to_cell(pickup, player.position_on_grid.x - 2, player.position_on_grid.y, 0)
-        pickup = HealthPickup()
-        map.add_to_cell(pickup, player.position_on_grid.x +2, player.position_on_grid.y, 0)
+        if self.current_dungeon_level > 1:
+            pickup = LostPage()
+            map.add_to_cell(pickup, player.position_on_grid.x - 2, player.position_on_grid.y, 0)
+            pickup = HealthPickup()
+            map.add_to_cell(pickup, player.position_on_grid.x +2, player.position_on_grid.y, 0)
 
         Camera.position = player.position.copy()
         spell_hud = SpellHUD(player)
         crafting_menu = CraftingMenu(player)
-        enemies = self.spawn_enemies(map.get_layer(0))
+        enemies = self.spawn_enemies(map.get_layer(0), player)
         TurnManager.add_entities(player)
         vignette = ImageHandler.load("images/vignette.png")
 
