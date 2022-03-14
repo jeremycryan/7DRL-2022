@@ -59,7 +59,7 @@ class Camera:
                          - Pose((Settings.Static.WINDOW_WIDTH//2, Settings.Static.WINDOW_HEIGHT//2), 0)
         mouse_game_pos.x *= Settings.Static.GAME_WIDTH/Settings.Static.WINDOW_WIDTH
         mouse_game_pos.y *= Settings.Static.GAME_HEIGHT/Settings.Static.WINDOW_HEIGHT
-        mouse_game_pos.y *= 1.2 # give a little more vertical scrollability since the aspect ratio is wide
+        mouse_game_pos.y *= 1.4 # give a little more vertical scrollability since the aspect ratio is wide
         mouse_game_pos.x *= 0.8
         mouse_game_pos += cls.position
 

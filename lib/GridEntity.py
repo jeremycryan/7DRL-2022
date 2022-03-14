@@ -301,7 +301,6 @@ class GridEntity(GameObject):
         tile_size = Settings.Static.TILE_SIZE
         center = (self.position_on_grid + Pose((x, y), 0))*tile_size + Pose(offset, 0)
         rect = (center.x - tile_size//2, center.y - tile_size//2, tile_size, tile_size)
-        pygame.draw.rect(surface, color, rect, 2)
         if color == 1:
             image = ImageHandler.load("images/player_target_indicator.png")
         elif color == 2:
@@ -310,6 +309,8 @@ class GridEntity(GameObject):
             image = ImageHandler.load("images/enemy_damage_indicator.png")
         else:
             image = ImageHandler.load("images/enemy_damage_indicator.png")
+        image.set_alpha(150)
+        image.set_colorkey((255, 0, 255))
         surface.blit(image, rect)
 
     def destroy(self):

@@ -78,7 +78,7 @@ class SpellHUD:
         spell = self.player.spells[idx]
         self.player.letter_tiles += [LetterTile(letter.upper()) for letter in spell.get_name()]
         self.player.spells[idx] = None
-        self.player.cooldown[idx] = None
+        self.player.cooldown[idx] = 0
 
     def get_spells(self):
         return self.player.spells

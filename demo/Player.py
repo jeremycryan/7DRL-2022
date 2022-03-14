@@ -230,7 +230,7 @@ class Player(GridEntity):
 
     def recharge(self, letters=1):
         for i, charge in enumerate(self.cooldown):
-            self.cooldown[i] = max(0, self.cooldown[i] - 1)
+            self.cooldown[i] = max(0, self.cooldown[i] - letters)
 
     def check_for_pickups(self):
         if not self.position_on_grid:
