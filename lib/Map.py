@@ -298,8 +298,8 @@ class Map:
             x1, y1 = self.world_pixel_to_grid(*top_left.get_position())
             x2, y2 = self.world_pixel_to_grid(*bottom_right.get_position())
             turn_entities = set(TurnManager.entities)
-            for x in range(int(x1 - 2), int(x2+3)):
-                for y in range(int(y1 - 2), int(y2+3)):
+            for x in range(int(x1 - 5), int(x2+5)):
+                for y in range(int(y1 - 5), int(y2+5)):
                     if self.map.cell_in_range(x, y):
                         cell = self.peek_at_cell(x, y)
                         for game_object in cell:

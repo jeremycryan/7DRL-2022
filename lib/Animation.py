@@ -186,6 +186,26 @@ class ShrinkToNothing(Animation):
         if self.parent.is_pickup:
             self.parent.destroy()
 
+
+class Die(Animation):
+    blocking = True
+    keep_turn = True
+
+    def __init__(self, parent, duration=2):
+        super().__init__(parent, duration)
+        parent.shrinking = True
+
+    def update(self, dt, events):
+        super().update(dt, events)
+        for sprite in self.parent.sprites:
+            sprite.distortion = Pose((1 - 0.5*self.through(), 1 - 0.5*self.through()))
+            sprite.set_alpha(255 * (1 - self.through()))
+            self.parent.position.y -= (6*dt)/self.duration
+
+    def on_destroy(self):
+        self.parent.destroy()
+
+
 class Spawn(Animation):
     blocking = True
     keep_turn = True
