@@ -248,5 +248,13 @@ class Player(GridEntity):
         # TODO randomly pick an unknown spell
         # TODO update Settings.Static.KNOWN_SPELLS to include the new spell's name as a capitalized string
         # TODO call CalloutManager.post_message(CalloutManager.LOST_PAGE, <spell.get_name()>, <spell.description>)
-        CalloutManager.post_message(CalloutManager.LOST_PAGE, "Freeze", "Magically freezes enemies in a large area for three turns")
-        unknown_spells = Spell.list_unknown_spells
+        unknown_spells = Spell.list_unknown_spells()
+
+        if not unknown_spells:
+            CalloutManager.post_message(CalloutManager.LOST_PAGE, "Nothing", "All the dungeon's secrets are known to you already.")
+            return
+        new_spell = random.choice(unknown_spells)
+        spell_class = Spell.get_spell(self, new_spell)
+        Settings.Dynamic.KNOWN_SPELLS.append(new_spell.upper())
+
+        CalloutManager.post_message(CalloutManager.LOST_PAGE, new_spell.capitalize(), spell_class.description)

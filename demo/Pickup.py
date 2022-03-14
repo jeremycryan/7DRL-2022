@@ -65,6 +65,6 @@ class HealthPickup(Pickup):
         self.pip_sprite.position = self.position + Pose((0, -5 - math.sin(time.time()*10) * 1))
 
     def on_pickup(self, pickupper):
-        super().on_pickup(pickupper)
         if hasattr(pickupper, "heal"):
-            pickupper.heal(1)
+            if pickupper.heal(1):
+                super().on_pickup(pickupper)

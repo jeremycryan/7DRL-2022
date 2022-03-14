@@ -64,7 +64,7 @@ class CalloutManager:
 
         if text_shownness > 0:
             if cls.current_message()[0] == cls.LOST_PAGE:
-                surf.blit(cls.lost_page_found, (Settings.Static.GAME_WIDTH//2 - cls.header_render.get_width()//2, 14))
+                surf.blit(cls.lost_page_found, (Settings.Static.GAME_WIDTH//2 - cls.lost_page_found.get_width()//2, 14))
             if cls.header_render:
                 surf.blit(cls.header_render, (Settings.Static.GAME_WIDTH//2 - cls.header_render.get_width()//2, 24))
             if cls.body_render:
