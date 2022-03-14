@@ -51,6 +51,7 @@ class Game:
         self.ending = False
         self.proceed_to_next_level = False
         self.stored_player_spells = []
+        self.stored_player_letters = []
 
         self.run_game_from_menu()
 
@@ -82,6 +83,7 @@ class Game:
         """
         EnemyDropHandler.init()  # Don't keep drop history from previous run
         self.stored_player_spells = []  # Don't keep spells from previous run
+        self.stored_player_letters = []
         Player.hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS  # in case we've gotten heart containers
         self.current_dungeon_level = 1
 
@@ -540,6 +542,7 @@ class Game:
 
         player = Player()
         player.add_starting_spells(self.stored_player_spells)
+        player.letter_tiles += self.stored_player_letters
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         player.add_animation(Spawn(player))
 
@@ -612,6 +615,7 @@ class Game:
                 break
 
         self.stored_player_spells = player.spells_as_names()
+        self.stored_player_letters = player.letter_tiles.copy()
         self.current_dungeon_level += 1
 
 
