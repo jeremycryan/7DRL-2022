@@ -17,7 +17,7 @@ from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
 from lib.Primitives import Pose
-from lib.Scene import TitleScreen
+from lib.Scene import TitleScreen, GameOverScreen
 from lib.Settings import Settings
 import random
 from demo.Player import Player
@@ -47,6 +47,7 @@ class Game:
         self.black = pygame.Surface((Settings.Static.GAME_WIDTH, Settings.Static.GAME_HEIGHT))
         self.black.fill((0, 0, 0))
         self.shade_shown = 1
+
         self.starting = True
         self.ending = False
         self.proceed_to_next_level = False
@@ -65,17 +66,22 @@ class Game:
             if self.shade_shown <= 0:
                 self.starting = False
         if self.ending:
-            self.shade_shown += dt * 3
+            rate = 3 if not self.game_over else 0.5
+            self.shade_shown += dt * rate
             self.shade_shown = min(1, self.shade_shown)
             if self.shade_shown >= 1:
                 self.end_level()
         self.black.set_alpha(self.shade_shown * 255)
 
     def run_game_from_menu(self):
-        self.run_menu()
-        self.on_run_start()
         while True:
-            self.main()
+            self.run_menu()
+            self.on_run_start()
+            while True:
+                self.main()
+                if self.game_over:
+                    self.run_game_over()
+                    break
 
     def on_run_start(self):
         """
@@ -86,7 +92,23 @@ class Game:
         self.stored_player_letters = []
         Player.hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS  # in case we've gotten heart containers
         self.current_dungeon_level = 1
+        self.game_over = False
 
+    def run_game_over(self):
+        menu_scene = GameOverScreen(self.current_dungeon_level)
+        clock = pygame.time.Clock()
+        clock.tick(60)
+        while not menu_scene.is_over():
+            events = pygame.event.get()
+            dt = clock.tick(60)/1000
+            menu_scene.update(dt, events)
+            menu_scene.draw(self.screen, (0, 0))
+
+            scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
+            self.true_screen.blit(scaled, (0, 0))
+            pygame.display.flip()
+
+            pygame.display.flip()
 
     def run_menu(self):
         menu_scene = TitleScreen()
@@ -508,6 +530,7 @@ class Game:
                 i += 1
                 self.screen.blit(letter, (x, y + math.sin(t * 8 - i)*2))
                 x += letter.get_width()
+            events = pygame.event.get()
 
             t += clock.tick()/1000
 
@@ -619,8 +642,10 @@ class Game:
             self.true_screen.blit(scaled, (0, 0))
             pygame.display.flip()
 
-            if player.advanced:
+            if player.advanced or player.game_over:
                 self.ending = True
+                if player.game_over:
+                    self.game_over = True
             if self.proceed_to_next_level:
                 GridEntity.allies = []
                 break
