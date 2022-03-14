@@ -48,6 +48,7 @@ class Player(GridEntity):
         self.cooldown = [0 for i in range(10)]
         self.new_turn = True
         self.solid = True
+        self.game_over = False
 
         self.lockout_count = 0
 
@@ -132,7 +133,7 @@ class Player(GridEntity):
                         break
 
     def can_make_turn_movement(self):
-        return not self.animating() and self.taking_turn and not self.advanced and not CalloutManager.current_message()
+        return not self.animating() and self.taking_turn and not self.advanced and not CalloutManager.current_message() and not self.game_over
 
     def locked_out(self):
         """
@@ -210,9 +211,10 @@ class Player(GridEntity):
         self.stun = max(self.stun, stun)
         self.health -= hp
         if self.health <= 0:
-            self.health = 1
-            # self.destroy()
-            print("Game Over")  # TODO: Game Over
+            self.health = 0
+            self.destroy()
+            self.game_over = True
+
 
     def push(self, x=0, y=0, teleport=False, instant=False):
         if not teleport:

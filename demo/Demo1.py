@@ -17,7 +17,7 @@ from lib.ImageHandler import ImageHandler
 from lib.Map import Map
 from lib.Camera import Camera
 from lib.Primitives import Pose
-from lib.Scene import TitleScreen
+from lib.Scene import TitleScreen, GameOverScreen
 from lib.Settings import Settings
 import random
 from demo.Player import Player
@@ -47,6 +47,7 @@ class Game:
         self.black = pygame.Surface((Settings.Static.GAME_WIDTH, Settings.Static.GAME_HEIGHT))
         self.black.fill((0, 0, 0))
         self.shade_shown = 1
+
         self.starting = True
         self.ending = False
         self.proceed_to_next_level = False
@@ -65,17 +66,22 @@ class Game:
             if self.shade_shown <= 0:
                 self.starting = False
         if self.ending:
-            self.shade_shown += dt * 3
+            rate = 3 if not self.game_over else 0.5
+            self.shade_shown += dt * rate
             self.shade_shown = min(1, self.shade_shown)
             if self.shade_shown >= 1:
                 self.end_level()
         self.black.set_alpha(self.shade_shown * 255)
 
     def run_game_from_menu(self):
-        self.run_menu()
-        self.on_run_start()
         while True:
-            self.main()
+            self.run_menu()
+            self.on_run_start()
+            while True:
+                self.main()
+                if self.game_over:
+                    self.run_game_over()
+                    break
 
     def on_run_start(self):
         """
@@ -86,7 +92,23 @@ class Game:
         self.stored_player_letters = []
         Player.hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS  # in case we've gotten heart containers
         self.current_dungeon_level = 1
+        self.game_over = False
 
+    def run_game_over(self):
+        menu_scene = GameOverScreen(self.current_dungeon_level)
+        clock = pygame.time.Clock()
+        clock.tick(60)
+        while not menu_scene.is_over():
+            events = pygame.event.get()
+            dt = clock.tick(60)/1000
+            menu_scene.update(dt, events)
+            menu_scene.draw(self.screen, (0, 0))
+
+            scaled = pygame.transform.scale(self.screen, (Settings.Static.WINDOW_WIDTH, Settings.Static.WINDOW_HEIGHT))
+            self.true_screen.blit(scaled, (0, 0))
+            pygame.display.flip()
+
+            pygame.display.flip()
 
     def run_menu(self):
         menu_scene = TitleScreen()
@@ -167,8 +189,8 @@ class Game:
         mapExtraRooms = int(lerp(0, 9, lerpAmount))
 
         mapBossRoom = "rooms/boss_room_1.yaml"
-        roomAttemptLimit = 250
-        placementAttemptLimit = 250
+        roomAttemptLimit = 125
+        placementAttemptLimit = 25
 
 
         # TODO: Somehow determine a good height for the map, in tiles.
@@ -214,7 +236,7 @@ class Game:
         roomGrid = []
 
         #generate main path
-        for mapGenAttempt in range(200):
+        for mapGenAttempt in range(50):
 
             roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
             roomGrid[centerX][centerY] = True
@@ -239,11 +261,14 @@ class Game:
                     #place attempt code
                     for placeAttemptCount in range(placementAttemptLimit):
 
-                        attemptX = random.randrange(-roomWidth, roomWidth+1)
-                        attemptY = random.randrange(-roomHeight, roomHeight+1)
+                        attemptX = random.randrange(-roomWidth, 2)
+                        attemptY = random.randrange(-roomHeight, 2)
 
                         # If same space or not connected due to angle
-                        if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
+                        if ((attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight)):
+                            continue
+
+                        if not attemptX in range(-roomWidth + 1, 1) and not attemptY in range(-roomHeight + 1, 1):
                             continue
 
                         attemptX = currentX + attemptX
@@ -282,21 +307,9 @@ class Game:
                 if not placementSucceded:
                     generationSuceeded = False
                     break
-                #if random.random() < mapBranchChance:
-                #    # MAKE BRANCH
-                #    for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
-                #
-                #        testX = random.choice(range(mapWidth))
-                #        testY = random.choice(range(mapWidth))
+
             if generationSuceeded:
                 break
-
-
-
-
-                        #x and y are in room coordinates
-                        #self.merge_room_onto_character_array(room, stringMap, (x, y), closed_walls=[up])
-
 
         #spam extra rooms
         for extraRoomAttempts in range(mapExtraRooms):
@@ -406,9 +419,8 @@ class Game:
         else:
             self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/backup.yaml"), stringMap,(centerX, centerY), closed_walls=[])
 
-            pass
-            #place special room with down stairs
-
+        self.mapdata = mapData;
+        self.room_grid = roomGrid;
         #apply U D L R in tile_array into floors based on room coordinates
         #searches based on room coordinate
 
@@ -518,6 +530,7 @@ class Game:
                 i += 1
                 self.screen.blit(letter, (x, y + math.sin(t * 8 - i)*2))
                 x += letter.get_width()
+            events = pygame.event.get()
 
             t += clock.tick()/1000
 
@@ -569,7 +582,7 @@ class Game:
         elif self.current_dungeon_level == 2:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Respite of Scholars")
         elif self.current_dungeon_level == 3:
-            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Shattered Shire to Orthodoxy")
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Shattered Orthodoxy")
         elif self.current_dungeon_level == 4:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Home of the Dialectics")
         elif self.current_dungeon_level == 5:
@@ -583,7 +596,7 @@ class Game:
         elif self.current_dungeon_level == 42:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
         else:
-            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", f"The Eternal Library, Shelf {self.current_dungeon_level}")
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", f"The Eternal Library, Shelf {self.current_dungeon_level - 8}")
 
 
 
@@ -629,8 +642,10 @@ class Game:
             self.true_screen.blit(scaled, (0, 0))
             pygame.display.flip()
 
-            if player.advanced:
+            if player.advanced or player.game_over:
                 self.ending = True
+                if player.game_over:
+                    self.game_over = True
             if self.proceed_to_next_level:
                 GridEntity.allies = []
                 break
