@@ -58,7 +58,7 @@ class Player(GridEntity):
         self.pressed_keys = []
 
     def add_starting_spells(self, list_of_spells=None):
-        starting_spells = [0, "zap", "teleport", "lightning", "firestorm", "hop", "frostbite", "barrier", "golem", "condemn"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "zap", "teleport", "lightning", "firestorm", "doomblast", "frostbite", "barrier", "golem", "condemn"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = Spell.get_spell(self, starting_spells[i])
 
@@ -219,14 +219,14 @@ class Player(GridEntity):
             x = x//self.weight
             y = y//self.weight
         if teleport:
-            self.move(x, y)
+            self.move(x, y, instant)
         else:
             target = Pose((x, y))
             target, entity = self.layer.map.raycast(self.position_on_grid, self.position_on_grid + target,
                                                     (GridEntity.DENSITY_WALL, GridEntity.DENSITY_CREATURE), offset=True)
             if target:
                 target -= self.position_on_grid
-                self.move(target.x, target.y)
+                self.move(target.x, target.y, instant)
 
     def recharge(self, letters=1):
         for i, charge in enumerate(self.cooldown):

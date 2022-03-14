@@ -356,7 +356,6 @@ class GolemSummon(Enemy):
         attack_squares = move_squares
         attack_target, _ = Ai.find(self, squares=attack_squares)
         if attack_target:
-            print(attack_target)
             self.attacks[0].cast(attack_target)
             return
         hunt_target = GridEntity.allies[0].position_on_grid - self.position_on_grid

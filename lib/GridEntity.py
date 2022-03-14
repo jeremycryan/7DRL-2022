@@ -207,6 +207,7 @@ class GridEntity(GameObject):
         :param keep_turn: Finish animating move before allowing other entities to take turns
         """
         animation = InstantMoveAnimation if keep_turn else MoveAnimation
+        print(keep_turn)
         self.animations.append(animation(self,
                                          self.position.copy(),
                                          self.layer.grid_to_world_pixel(*self.position_on_grid.get_position()),
