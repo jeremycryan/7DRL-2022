@@ -22,7 +22,7 @@ from lib.Settings import Settings
 import random
 from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator, Exit, Stair
-from demo.Enemy import Bat, Spider, Wolf, Slime, Orc, Shade
+from demo.Enemy import Bat, Spider, Wolf, Slime, Orc, Shade, Dragon
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
@@ -490,26 +490,26 @@ class Game:
 
 
         if self.current_dungeon_level == 1:
-            frequency = 0.01
+            frequency = 0.015
             enemy_types = [Bat, Bat, Bat, Bat, Wolf]
         elif self.current_dungeon_level == 2:
-            frequency = 0.015
+            frequency = 0.025
             enemy_types = [Bat, Bat, Bat, Wolf, Spider, Wolf]
         elif self.current_dungeon_level == 3:
-            frequency = 0.0225
-            enemy_types = [Bat, Bat, Slime, Wolf]
-        elif self.current_dungeon_level == 4:
             frequency = 0.025
+            enemy_types = [Bat, Bat, Slime, Slime, Wolf]
+        elif self.current_dungeon_level == 4:
+            frequency = 0.035
             enemy_types = [Spider, Spider, Wolf, Spider, Spider, Shade, Wolf]
         elif self.current_dungeon_level == 5:
-            frequency = 0.03
+            frequency = 0.032
             enemy_types = [Spider, Bat, Bat, Slime, Slime, Spider, Bat, Bat, Slime, Slime, Orc]
         elif self.current_dungeon_level == 6:
-            frequency = 0.03
+            frequency = 0.035
             enemy_types = [Orc, Shade, Orc, Shade, Orc, Shade, Bat]
         elif self.current_dungeon_level == 7:
-            frequency = 0.1
-            enemy_types = [Bat] #replace with dragon
+            frequency = 0.4
+            enemy_types = [Bat, Bat, Bat, Bat, Bat, Bat, Bat, Bat, Dragon, Dragon, Bat, Bat, Bat, Bat, Bat, Bat, Bat, Bat, Dragon, Dragon, Spider, Orc, Wolf, Spider] #replace with dragon
         elif self.current_dungeon_level == 42:
             frequency = 0.08
             enemy_types = [Slime]
@@ -523,6 +523,7 @@ class Game:
 
             if enemy_types == []:
                 enemy_types = [Bat]
+                frequency = .1
                 
 
 
