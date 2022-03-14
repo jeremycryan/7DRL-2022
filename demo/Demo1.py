@@ -559,7 +559,7 @@ class Game:
         elif self.current_dungeon_level == 2:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Respite of Scholars")
         elif self.current_dungeon_level == 3:
-            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Shattered Shire to Orthodoxy")
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Shattered Orthodoxy")
         elif self.current_dungeon_level == 4:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Home of the Dialectics")
         elif self.current_dungeon_level == 5:
