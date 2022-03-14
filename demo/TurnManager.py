@@ -13,10 +13,16 @@ class TurnManager:
 
     @classmethod
     def take_next_turn(cls):
+        game_over = False
         while not any([entity.taking_turn or entity.keep_turn() for entity in cls.entities]):
             for entity in cls.entities[:]:
                 if entity.health <= 0:
+                    if entity.is_player and entity.game_over:
+                        entity.destroy()
+                        game_over = True
                     entity.destroy()
+            if game_over:
+                break
             if cls.entities[cls.next_entity_turn].health > 0:
                 if cls.entities[cls.next_entity_turn].stun > 0:
                     cls.entities[cls.next_entity_turn].stun -= 1

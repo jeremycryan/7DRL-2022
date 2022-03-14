@@ -59,7 +59,7 @@ class Player(GridEntity):
         self.pressed_keys = []
 
     def add_starting_spells(self, list_of_spells=None):
-        starting_spells = [0, "zap", "teleport", "lightning", "firestorm", "hop", "frostbite", "barrier", "golem", "condemn"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "zap"]#, "teleport", "lightning", "firestorm", "hop", "frostbite", "barrier", "golem", "condemn"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = Spell.get_spell(self, starting_spells[i])
 
@@ -212,7 +212,6 @@ class Player(GridEntity):
         self.health -= hp
         if self.health <= 0:
             self.health = 0
-            self.destroy()
             self.game_over = True
 
 

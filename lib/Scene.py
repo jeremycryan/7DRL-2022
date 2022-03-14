@@ -91,7 +91,7 @@ class GameOverScreen(Scene):
     def draw(self, surf, offset=(0, 0)):
         super().draw(surf, offset=offset)
         surf.blit(self.splash, (0, 0))
-        font_surf = self.font.render(f"You reached level {self.level} before meeting your end.", 0, (133, 133, 133))
+        font_surf = self.font.render(f"You reached level {self.level - 1} before meeting your end.", 0, (133, 133, 133))
         surf.blit(font_surf, (Settings.Static.GAME_WIDTH//2 - font_surf.get_width()//2, Settings.Static.GAME_HEIGHT//2))
 
         font_surf = self.font.render(f"Press Enter to continue", 0, (88, 88, 88))
