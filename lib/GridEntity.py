@@ -309,6 +309,8 @@ class GridEntity(GameObject):
             image = ImageHandler.load("images/enemy_damage_indicator.png")
         else:
             image = ImageHandler.load("images/enemy_damage_indicator.png")
+        image.set_alpha(150)
+        image.set_colorkey((255, 0, 255))
         surface.blit(image, rect)
 
     def destroy(self):
