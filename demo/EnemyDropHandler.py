@@ -1,5 +1,5 @@
-from demo.Pickup import LetterTile
-
+from demo.Pickup import LetterTile, HealthPickupSmall
+import random
 
 class EnemyDropHandler:
 
@@ -21,7 +21,9 @@ class EnemyDropHandler:
             cls.enemy_drops_so_far[key].append(new_tile)
             return new_tile
         else:
-            return None
+            if random.random() < 0.05:
+                pip = HealthPickupSmall()
+                return pip
 
     @classmethod
     def get_drops_so_far(cls, key):

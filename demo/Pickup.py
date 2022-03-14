@@ -68,3 +68,20 @@ class HealthPickup(Pickup):
         if hasattr(pickupper, "heal"):
             if pickupper.heal(3):
                 super().on_pickup(pickupper)
+
+
+class HealthPickupSmall(Pickup):
+    def __init__(self):
+        super().__init__()
+        self.add_sprite(StaticSprite(ImageHandler.load("images/small_shadow.png"), blend_mode=pygame.BLEND_MULT))
+        self.pip_sprite = (StaticSprite(ImageHandler.load("images/ui/heart_pip_pickup.png"), colorkey=(255, 0, 255)))
+        self.add_sprite(self.pip_sprite)
+
+    def update(self, dt, events):
+        super().update(dt, events)
+        self.pip_sprite.position = self.position + Pose((0, -5 - math.sin(time.time()*10) * 1))
+
+    def on_pickup(self, pickupper):
+        if hasattr(pickupper, "heal"):
+            if pickupper.heal(1):
+                super().on_pickup(pickupper)
