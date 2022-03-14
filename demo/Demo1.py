@@ -190,8 +190,8 @@ class Game:
         mapExtraRooms = int(lerp(0, 9, lerpAmount))
 
         mapBossRoom = "rooms/boss_room_1.yaml"
-        roomAttemptLimit = 125
-        placementAttemptLimit = 25
+        roomAttemptLimit = 20
+        placementAttemptLimit = 60
 
 
         # TODO: Somehow determine a good height for the map, in tiles.
@@ -490,22 +490,22 @@ class Game:
 
 
         if self.current_dungeon_level == 1:
-            frequency = 0.015
-            enemy_types = [Bat, Bat, Bat, Bat, Wolf]
+            frequency = 0.02
+            enemy_types = [Bat, Bat, Wolf]
         elif self.current_dungeon_level == 2:
-            frequency = 0.025
-            enemy_types = [Bat, Bat, Bat, Wolf, Spider, Wolf]
+            frequency = 0.0275
+            enemy_types = [Bat, Wolf, Spider, Wolf]
         elif self.current_dungeon_level == 3:
-            frequency = 0.025
+            frequency = 0.035
             enemy_types = [Bat, Bat, Slime, Slime, Wolf]
         elif self.current_dungeon_level == 4:
             frequency = 0.035
             enemy_types = [Spider, Spider, Wolf, Spider, Spider, Shade, Wolf]
         elif self.current_dungeon_level == 5:
-            frequency = 0.032
+            frequency = 0.04
             enemy_types = [Spider, Bat, Bat, Slime, Slime, Spider, Bat, Bat, Slime, Slime, Orc]
         elif self.current_dungeon_level == 6:
-            frequency = 0.035
+            frequency = 0.0425
             enemy_types = [Orc, Shade, Orc, Shade, Orc, Shade, Bat]
         elif self.current_dungeon_level == 7:
             frequency = 0.4
@@ -514,8 +514,8 @@ class Game:
             frequency = 0.08
             enemy_types = [Slime]
         else:
-            lerpAmount = (self.current_dungeon_level - 8)/20
-            frequency = lerp(0.04, .08, lerpAmount)
+            lerpAmount = (self.current_dungeon_level - 8)/40
+            frequency = lerp(0.042, .15, lerpAmount)
             enemy_types = []
 
             for i in range(10):
@@ -523,12 +523,10 @@ class Game:
 
             if enemy_types == []:
                 enemy_types = [Bat]
-                frequency = .1
-                
-
+                frequency = .15
 
         for x, y in layer.cell_coordinates():
-            if (Pose((x, y)) - player.position).magnitude() < 8:
+            if (Pose((x, y)) - Pose((7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH // 2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT // 2)) ).magnitude() < 9:
                 continue
             if not any([item.solid for item in layer.map.get_all_at_position(x, y)]) and random.random() < frequency:
                 enemy_type = random.choice(enemy_types)
