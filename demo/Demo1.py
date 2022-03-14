@@ -167,8 +167,8 @@ class Game:
         mapExtraRooms = int(lerp(0, 9, lerpAmount))
 
         mapBossRoom = "rooms/boss_room_1.yaml"
-        roomAttemptLimit = 250
-        placementAttemptLimit = 250
+        roomAttemptLimit = 125
+        placementAttemptLimit = 25
 
 
         # TODO: Somehow determine a good height for the map, in tiles.
@@ -214,7 +214,7 @@ class Game:
         roomGrid = []
 
         #generate main path
-        for mapGenAttempt in range(200):
+        for mapGenAttempt in range(50):
 
             roomGrid = [[False for _ in range(mapWidth)] for _ in range(mapHeight)]
             roomGrid[centerX][centerY] = True
