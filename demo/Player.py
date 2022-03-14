@@ -58,7 +58,7 @@ class Player(GridEntity):
         self.pressed_keys = []
 
     def add_starting_spells(self, list_of_spells=None):
-        starting_spells = [0, "zap"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "zap", "golem"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = Spell.get_spell(self, starting_spells[i])
 
@@ -230,7 +230,7 @@ class Player(GridEntity):
 
     def recharge(self, letters=1):
         for i, charge in enumerate(self.cooldown):
-            self.cooldown[i] = max(0, self.cooldown[i] - 1)
+            self.cooldown[i] = max(0, self.cooldown[i] - letters)
 
     def check_for_pickups(self):
         if not self.position_on_grid:
