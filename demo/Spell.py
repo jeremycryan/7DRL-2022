@@ -182,6 +182,10 @@ def list_known_spells():
     spells = [spell for spell in list_spells() if spell in Settings.Dynamic.KNOWN_SPELLS]
     return spells
 
+def list_unknown_spells():
+    spells = [spell for spell in list_spells() if spell not in Settings.Dynamic.KNOWN_SPELLS]
+    return spells
+
 def list_spells():
     """
     Get a list of all existing spell names

@@ -95,8 +95,13 @@ class Map:
             layer.update(dt, events)
 
     def draw(self, surface, offset=(0, 0)):
-        for layer in self.layers:
-            layer.draw(surface, offset=offset)
+        for i, layer in enumerate(self.layers):
+            if i == 3:  # draw targets
+                layer.draw(surface, offset=offset, density=(GridEntity.DENSITY_WALL, GridEntity.DENSITY_EMPTY))
+                layer.draw_overlays(surface, offset)
+                layer.draw(surface, offset=offset, density=(GridEntity.DENSITY_CREATURE, GridEntity.DENSITY_PICKUP))
+            else:
+                layer.draw(surface, offset=offset)
 
     def get_layer(self, key):
         for layer in self.layers:
@@ -261,7 +266,7 @@ class Map:
             for x, y in self._populated_cells:
                 yield self.cells[y][x], x, y
 
-        def draw(self, surface, offset=(0, 0)):
+        def draw(self, surface, offset=(0, 0), density=None):
             if not self._draws_enabled:
                 return
             camera_position = Camera.position
@@ -274,7 +279,14 @@ class Map:
                     if self.map.cell_in_range(x, y):
                         cell = self.peek_at_cell(x, y)
                         for game_object in cell:
-                            game_object.draw(surface, offset=offset)
+                            if not density or game_object.density in density:
+                                game_object.draw(surface, offset=offset)
+
+        def draw_overlays(self, surface, offset=(0, 0)):
+            for cell in self._populated_cells:
+                entities = self.peek_at_cell(*cell)
+                for entity in entities:
+                    entity.draw_targets(surface, offset)
 
         def update(self, dt, events):
             if not self._updates_enabled:

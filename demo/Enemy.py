@@ -65,9 +65,10 @@ class Enemy(GridEntity):
         if self.name not in Settings.Dynamic.KNOWN_ENEMIES:
             Settings.Dynamic.KNOWN_ENEMIES.append(self.name)
             Settings.Dynamic.KNOWN_ENEMIES.sort()
-        color = (255, 0, 0)
+
+    def draw_targets(self, surface, offset=(0, 0)):
         for square in self.menacing:
-            self.draw_highlight(surface, *square.get_position(), color, offset=offset)
+            self.draw_highlight(surface, *square.get_position(), color=3, offset=offset)
 
     def draw_name(self, surface, offset=(0, 0)):
         letters = [Enemy.name_letters[letter] for letter in self.name]
@@ -337,7 +338,7 @@ class GolemSummon(Enemy):
         self.add_animation(Spawn(self))
 
     def load_sprite(self):
-        sprite = StaticSprite.from_path("images/goomba.png", flippable=True)
+        sprite = StaticSprite.from_path("images/golem.png", flippable=True)
         sprite.set_colorkey((255, 0, 255))
         return sprite
 
@@ -356,6 +357,9 @@ class GolemSummon(Enemy):
         if destination:
             self.move(*destination.get_position())
             self.align_sprites()
+
+    def name_y_offset(self):
+        return -26
 
 
 class BarrierSummon(Enemy):

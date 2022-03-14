@@ -18,8 +18,8 @@ class Settings:
         TILE_SIZE = 32
         ROOM_WIDTH = 15
         ROOM_HEIGHT = 15
-        MAP_WIDTH = 2
-        MAP_HEIGHT = 2
+        MAP_WIDTH = 10
+        MAP_HEIGHT = 10
         WINDOW_WIDTH = 1280
         WINDOW_HEIGHT = 720
         GAME_WIDTH = 640
@@ -30,13 +30,13 @@ class Settings:
 
         PICKUP_LAYER = 0.8
         DECORATOR_LAYER = 0.9
-        STARTING_LETTERS = [letter for letter in "ABCDEFGHIJLKMNOPQRSTUVWXYZ"] * 3
+        STARTING_LETTERS = []
 
     class Dynamic:
         """
         Settings that can change during runtime
         """
         SHOW_FPS_COUNTER = True
-        KNOWN_SPELLS = ["ZAP", "FLARE", "BOLT", "STAB", "GOLEM"]
+        KNOWN_SPELLS = ["ZAP", "FLARE", "BOLT", "STAB"]
         KNOWN_ENEMIES = []
         MENU_SHOWN = 0  # Amount of shown between 0 and 1

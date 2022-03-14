@@ -165,21 +165,18 @@ class Player(GridEntity):
         if not self.shrinking:
             surface.blit(staff_rotated, (sx, sy))
         super().draw(surface, offset=offset)
+
+    def draw_targets(self, surface, offset=(0, 0)):
         hovered = self.layer.map.get_hovered_tile()
         if hovered and self.get_spell() and not self.locked_out():
             effects, areas, delays = self.get_spell().get_effects(hovered - self.position_on_grid)
             for effect, area, delay in zip(effects, areas, delays):
                 if effect.damage > 0:
-                    color = (255, 0, 0)
+                    color = 2
                 else:
-                    color = (255, 255, 0)
+                    color = 1
                 for square in area.squares:
                     self.draw_highlight(surface, *square.get_position(), color, offset=offset)
-
-            # if any([item.solid for item in self.layer.map.get_all_at_position(hovered.x, hovered.y)]):
-            #     color = (255, 0, 0)
-            # off = hovered - self.position_on_grid
-            # self.draw_highlight(surface, *off.get_position(), color, offset=offset)
 
     def take_turn(self):
         self.taking_turn = True
@@ -248,4 +245,13 @@ class Player(GridEntity):
         # TODO randomly pick an unknown spell
         # TODO update Settings.Static.KNOWN_SPELLS to include the new spell's name as a capitalized string
         # TODO call CalloutManager.post_message(CalloutManager.LOST_PAGE, <spell.get_name()>, <spell.description>)
-        CalloutManager.post_message(CalloutManager.LOST_PAGE, "Freeze", "Magically freezes enemies in a large area for three turns")
+        unknown_spells = Spell.list_unknown_spells()
+
+        if not unknown_spells:
+            CalloutManager.post_message(CalloutManager.LOST_PAGE, "Nothing", "All the dungeon's secrets are known to you already.")
+            return
+        new_spell = random.choice(unknown_spells)
+        spell_class = Spell.get_spell(self, new_spell)
+        Settings.Dynamic.KNOWN_SPELLS.append(new_spell.upper())
+
+        CalloutManager.post_message(CalloutManager.LOST_PAGE, new_spell.capitalize(), spell_class.description)
