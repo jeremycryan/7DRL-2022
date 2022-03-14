@@ -65,9 +65,10 @@ class Enemy(GridEntity):
         if self.name not in Settings.Dynamic.KNOWN_ENEMIES:
             Settings.Dynamic.KNOWN_ENEMIES.append(self.name)
             Settings.Dynamic.KNOWN_ENEMIES.sort()
-        color = (255, 0, 0)
+
+    def draw_targets(self, surface, offset=(0, 0)):
         for square in self.menacing:
-            self.draw_highlight(surface, *square.get_position(), color, offset=offset)
+            self.draw_highlight(surface, *square.get_position(), color=3, offset=offset)
 
     def draw_name(self, surface, offset=(0, 0)):
         letters = [Enemy.name_letters[letter] for letter in self.name]
@@ -253,9 +254,10 @@ class Wolf(Bat):
 
 class Orc(Bat):
     name = "ORC"
-    hit_points = 6
-    period = 3
+    hit_points = 9
+    period = 2
     spells = [Spell.OrcAttack]
+    move_squares = Math.get_squares(linear=1)
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/orca.png", flippable=True)
@@ -268,7 +270,7 @@ class Orc(Bat):
 
 class Shade(Bat):
     name = "SHADE"
-    hit_points = 6
+    hit_points = 5
     spells = [Spell.ShadeAttack]
     can_melee = False
     move_squares = Math.get_squares(linear=1, custom=1)
@@ -326,7 +328,7 @@ class Slime(Bat):
 
 class GolemSummon(Enemy):
     name = "GOLEM"
-    hit_points = 3
+    hit_points = 6
     faction = GridEntity.FACTION_ALLY
     drop_letters = False
 
@@ -362,10 +364,10 @@ class GolemSummon(Enemy):
 
 class BarrierSummon(Enemy):
     name = "BARRIER"
-    hit_points = 5
-    faction = GridEntity.FACTION_NEUTRAL
+    hit_points = 10
+    faction = GridEntity.FACTION_ALLY
     drop_letters = False
-    invulnerabilities = (Enemy.DAMAGE_SPELL,)
+    #invulnerabilities = (Enemy.DAMAGE_SPELL,)
 
     def __init__(self):
         super().__init__()

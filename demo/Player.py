@@ -58,7 +58,7 @@ class Player(GridEntity):
         self.pressed_keys = []
 
     def add_starting_spells(self, list_of_spells=None):
-        starting_spells = [0, "zap"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
+        starting_spells = [0, "zap", "teleport", "lightning", "firestorm", "hop", "frostbite", "barrier", "golem", "condemn"] if not list_of_spells else list_of_spells #[0, "flare", "push", "bolt", "jump", "recharge", "beam", "freeze", "golem", "barrier"]
         for i, spell in enumerate(starting_spells):
             self.spells[i] = Spell.get_spell(self, starting_spells[i])
 
@@ -165,21 +165,18 @@ class Player(GridEntity):
         if not self.shrinking:
             surface.blit(staff_rotated, (sx, sy))
         super().draw(surface, offset=offset)
+
+    def draw_targets(self, surface, offset=(0, 0)):
         hovered = self.layer.map.get_hovered_tile()
         if hovered and self.get_spell() and not self.locked_out():
             effects, areas, delays = self.get_spell().get_effects(hovered - self.position_on_grid)
             for effect, area, delay in zip(effects, areas, delays):
                 if effect.damage > 0:
-                    color = (255, 0, 0)
+                    color = 2
                 else:
-                    color = (255, 255, 0)
+                    color = 1
                 for square in area.squares:
                     self.draw_highlight(surface, *square.get_position(), color, offset=offset)
-
-            # if any([item.solid for item in self.layer.map.get_all_at_position(hovered.x, hovered.y)]):
-            #     color = (255, 0, 0)
-            # off = hovered - self.position_on_grid
-            # self.draw_highlight(surface, *off.get_position(), color, offset=offset)
 
     def take_turn(self):
         self.taking_turn = True

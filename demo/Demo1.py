@@ -564,7 +564,28 @@ class Game:
         clock = pygame.time.Clock()
         clock.tick(60)
 
-        CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
+        if self.current_dungeon_level == 1:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Font's Fissure")
+        elif self.current_dungeon_level == 2:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Respite of Scholars")
+        elif self.current_dungeon_level == 3:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Shattered Shire to Orthodoxy")
+        elif self.current_dungeon_level == 4:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Home of the Dialectics")
+        elif self.current_dungeon_level == 5:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Lost Phrontistery")
+        elif self.current_dungeon_level == 6:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Athenaeum Storerooms")
+        elif self.current_dungeon_level == 7:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
+        elif self.current_dungeon_level == 8:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Arch of Knowledge")
+        elif self.current_dungeon_level == 42:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
+        else:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", f"The Eternal Library, Shelf {self.current_dungeon_level}")
+
+
 
         while True:
             dt = clock.tick(120)/1000
