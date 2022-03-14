@@ -93,6 +93,7 @@ class Game:
         Player.hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS  # in case we've gotten heart containers
         self.current_dungeon_level = 1
         self.game_over = False
+        self.stored_player_health = Player.hit_points
 
     def run_game_over(self):
         menu_scene = GameOverScreen(self.current_dungeon_level)
@@ -580,6 +581,7 @@ class Game:
         player.letter_tiles += self.stored_player_letters
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         player.add_animation(Spawn(player))
+        player.health = self.stored_player_health
 
         if self.current_dungeon_level > 1:
             pickup = LostPage()
@@ -672,6 +674,7 @@ class Game:
 
         self.stored_player_spells = player.spells_as_names()
         self.stored_player_letters = player.letter_tiles.copy()
+        self.stored_player_health = player.health
         self.current_dungeon_level += 1
 
 

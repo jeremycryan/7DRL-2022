@@ -284,6 +284,22 @@ class Shade(Bat):
         return -26
 
 
+class Dragon(Bat):
+    name = "DRAGON"
+    hit_points = 9
+    strength = 3
+    spells = [Spell.DragonAttack, Spell.DragonBreath]
+    move_squares = Math.get_squares(linear=1, diagonal=1)
+
+    def load_sprite(self):
+        sprite = StaticSprite.from_path("images/dragon.png", flippable=True)
+        sprite.set_colorkey((255, 0, 255))
+        return sprite
+
+    def name_y_offset(self):
+        return -26
+
+
 class Slime(Bat):
     name = "SLIME"
     hit_points = 4
