@@ -303,7 +303,7 @@ class Dragon(Bat):
 class Demon(Bat):
     name = "DEMON"
     hit_points = 9
-    strength = 3
+    strength = 1
     immunities = (GridEntity.DAMAGE_DEMON,)
     spells = [Spell.DemonSpell]
     move_squares = Math.get_squares(custom=1, linear=2, diagonal=2)

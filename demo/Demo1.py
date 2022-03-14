@@ -22,7 +22,7 @@ from lib.Settings import Settings
 import random
 from demo.Player import Player
 from demo.Wall import Wall, Floor, Decorator, Exit, Stair
-from demo.Enemy import Bat, Spider, Wolf, Slime, Orc, Shade, Dragon
+from demo.Enemy import Bat, Spider, Wolf, Slime, Orc, Shade, Dragon, Demon
 from demo.TurnManager import TurnManager
 from demo.CraftingMenu import CraftingMenu
 from demo.ParticleHandler import ParticleHandler
@@ -489,11 +489,10 @@ class Game:
         enemy_objects = []
         frequency = 0.06
 
-        enimies = [Bat, Wolf, Spider, Slime, Slime, Orc, Shade, Wolf, Spider, Slime, Orc, Shade, Dragon]
-
+        enimies = [Bat, Wolf, Spider, Slime, Slime, Orc, Shade, Wolf, Demon, Slime, Orc, Shade, Dragon]
 
         if self.current_dungeon_level == 1:
-            frequency = 0.02
+            frequency = 0.025
             enemy_types = [Bat, Bat, Wolf]
         elif self.current_dungeon_level == 2:
             frequency = 0.0275
@@ -505,20 +504,20 @@ class Game:
             frequency = 0.035
             enemy_types = [Spider, Spider, Wolf, Spider, Spider, Shade, Wolf]
         elif self.current_dungeon_level == 5:
-            frequency = 0.04
-            enemy_types = [Spider, Bat, Bat, Slime, Slime, Spider, Bat, Bat, Slime, Slime, Orc]
+            frequency = 0.03
+            enemy_types = [Spider, Bat, Bat, Orc, Slime, Slime, Orc]
         elif self.current_dungeon_level == 6:
-            frequency = 0.0425
-            enemy_types = [Orc, Shade, Orc, Shade, Orc, Shade, Bat]
+            frequency = 0.0175
+            enemy_types = [Demon, Demon, Shade, Shade, Demon, Demon, Shade, Shade, Orc, Shade, Bat]
         elif self.current_dungeon_level == 7:
-            frequency = 0.4
-            enemy_types = [Bat, Bat, Bat, Bat, Bat, Bat, Bat, Bat, Dragon, Dragon, Bat, Bat, Bat, Bat, Bat, Bat, Bat, Bat, Dragon, Dragon, Spider, Orc, Wolf, Spider] #replace with dragon
+            frequency = 0.0175
+            enemy_types = [Dragon, Bat, Bat, Bat, Bat, Dragon, Dragon, Spider, Orc, Wolf, Spider] #replace with dragon
         elif self.current_dungeon_level == 42:
-            frequency = 0.08
+            frequency = 0.1
             enemy_types = [Slime]
         else:
             lerpAmount = (self.current_dungeon_level - 8)/40
-            frequency = lerp(0.042, .15, lerpAmount)
+            frequency = lerp(0.025, .15, lerpAmount)
             enemy_types = []
 
             for i in range(10):
@@ -615,6 +614,8 @@ class Game:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Lost Phrontistery")
         elif self.current_dungeon_level == 6:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Athenaeum Storerooms")
+        elif self.current_dungeon_level == 7:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Iambic Cage")
         elif self.current_dungeon_level == 8:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Arch of Knowledge")
         elif self.current_dungeon_level == 42:
