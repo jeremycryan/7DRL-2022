@@ -573,7 +573,7 @@ class Game:
         elif self.current_dungeon_level == 42:
             CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
         else:
-            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", f"The Eternal Library, Shelf {self.current_dungeon_level}")
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", f"The Eternal Library, Shelf {self.current_dungeon_level - 8}")
 
 
 
