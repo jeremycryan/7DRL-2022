@@ -346,6 +346,7 @@ class Frostbite(Spell):
                             Area.Circle(target, radius=1))
         return self.effects, self.areas, self.delays
 
+
 class Golem(Spell):
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()

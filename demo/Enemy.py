@@ -329,13 +329,18 @@ class Slime(Bat):
 class GolemSummon(Enemy):
     name = "GOLEM"
     hit_points = 6
+    strength = 2
     faction = GridEntity.FACTION_ALLY
     drop_letters = False
+    active_golems = []
 
     def __init__(self):
         super().__init__()
-        self.attacks = [Spell.SpiderAttack(self)]
+        self.attacks = [Spell.BatAttack(self)]
         self.add_animation(Spawn(self))
+        GolemSummon.active_golems.append(self)
+        if len(GolemSummon.active_golems) > 2:
+            GolemSummon.active_golems.remove(GolemSummon.active_golems[0])
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/golem.png", flippable=True)
@@ -343,10 +348,15 @@ class GolemSummon(Enemy):
         return sprite
 
     def take_turn(self):
+        if self not in GolemSummon.active_golems:
+            self.health = 1
+            self.damage(1, damage_type=self.DAMAGE_OVERRIDE)
+            return
         move_squares = Math.get_squares(linear=1)
         attack_squares = move_squares
         attack_target, _ = Ai.find(self, squares=attack_squares)
         if attack_target:
+            print(attack_target)
             self.attacks[0].cast(attack_target)
             return
         hunt_target = GridEntity.allies[0].position_on_grid - self.position_on_grid
