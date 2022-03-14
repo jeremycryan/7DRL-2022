@@ -63,6 +63,9 @@ class Sprite(GameObject):
         if self.distortion.x != 1 or self.distortion.y != 1:
             width = int(self.distortion.x * my_surface.get_width())
             height = int(self.distortion.y * my_surface.get_height())
+
+            width = max(width, 1)
+            height = max(height, 1)
             my_surface = pygame.transform.scale(my_surface, (width, height))
             rect = my_surface.get_rect()
         else:
