@@ -307,8 +307,6 @@ class Doomblast(Spell):
             a2 = a + c*9
             b2 = b + c*9
             c2 = c*10
-            print(a, b, c)
-            print(a2, b2, c2)
             p = self.caster.position_on_grid
             a2, _ = self.caster.layer.map.raycast(a.copy()+p, a2+p, (GridEntity.DENSITY_WALL,), offset=False)
             b2, _ = self.caster.layer.map.raycast(b.copy()+p, b2+p, (GridEntity.DENSITY_WALL,), offset=False)
@@ -430,6 +428,12 @@ class Barrier(Spell):
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         target = self.snap_to_range(target, upper=4, lower=1)
         if target:
+            if abs(target.x) > abs(target.y):
+                start = target + Pose((0, 1))
+                end = target + Pose((0, -1))
+            else:
+                start = target + Pose((1, 0))
+                end = target + Pose((-1, 0))
             import demo.Enemy as Enemy
-            self.add_effect(SpellEffect(summon=Enemy.BarrierSummon, density=GridEntity.DENSITY_EMPTY), Area.Point(target))
+            self.add_effect(SpellEffect(summon=Enemy.BarrierSummon, density=GridEntity.DENSITY_EMPTY), Area.Line(start, end, offset=False))
         return self.effects, self.areas, self.delays
