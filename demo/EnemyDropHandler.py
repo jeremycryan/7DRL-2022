@@ -24,6 +24,9 @@ class EnemyDropHandler:
             if random.random() < 0.05:
                 pip = HealthPickupSmall()
                 return pip
+            if random.random() < 0.1:
+                new_tile = LetterTile(random.choice(enemy.name))
+                return new_tile
 
     @classmethod
     def get_drops_so_far(cls, key):
