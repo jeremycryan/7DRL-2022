@@ -237,11 +237,14 @@ class Game:
                     #place attempt code
                     for placeAttemptCount in range(placementAttemptLimit):
 
-                        attemptX = random.randrange(-roomWidth, roomWidth+1)
-                        attemptY = random.randrange(-roomHeight, roomHeight+1)
+                        attemptX = random.randrange(-roomWidth, 2)
+                        attemptY = random.randrange(-roomHeight, 2)
 
                         # If same space or not connected due to angle
-                        if (attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight):
+                        if ((attemptX == 0 and attemptY == 0) or (abs(attemptX) == roomWidth and abs(attemptY) == roomHeight)):
+                            continue
+
+                        if not attemptX in range(-roomWidth + 1, 1) and not attemptY in range(-roomHeight + 1, 1):
                             continue
 
                         attemptX = currentX + attemptX
@@ -280,21 +283,9 @@ class Game:
                 if not placementSucceded:
                     generationSuceeded = False
                     break
-                #if random.random() < mapBranchChance:
-                #    # MAKE BRANCH
-                #    for _ in random.randrange(mapBranchLength - 1 , mapBranchLength + 2):
-                #
-                #        testX = random.choice(range(mapWidth))
-                #        testY = random.choice(range(mapWidth))
+
             if generationSuceeded:
                 break
-
-
-
-
-                        #x and y are in room coordinates
-                        #self.merge_room_onto_character_array(room, stringMap, (x, y), closed_walls=[up])
-
 
         #spam extra rooms
         for extraRoomAttempts in range(mapExtraRooms):
@@ -404,9 +395,8 @@ class Game:
         else:
             self.merge_room_onto_character_array(self.get_yaml_room("rooms/special_rooms/backup.yaml"), stringMap,(centerX, centerY), closed_walls=[])
 
-            pass
-            #place special room with down stairs
-
+        self.mapdata = mapData;
+        self.room_grid = roomGrid;
         #apply U D L R in tile_array into floors based on room coordinates
         #searches based on room coordinate
 
