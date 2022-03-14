@@ -51,6 +51,7 @@ class Game:
         self.ending = False
         self.proceed_to_next_level = False
         self.stored_player_spells = []
+        self.stored_player_letters = []
 
         self.run_game_from_menu()
 
@@ -82,6 +83,7 @@ class Game:
         """
         EnemyDropHandler.init()  # Don't keep drop history from previous run
         self.stored_player_spells = []  # Don't keep spells from previous run
+        self.stored_player_letters = []
         Player.hit_points = Settings.Static.PLAYER_STARTING_HIT_POINTS  # in case we've gotten heart containers
         self.current_dungeon_level = 1
 
@@ -540,6 +542,7 @@ class Game:
 
         player = Player()
         player.add_starting_spells(self.stored_player_spells)
+        player.letter_tiles += self.stored_player_letters
         map.add_to_cell(player, 7 + Settings.Static.ROOM_WIDTH * Settings.Static.MAP_WIDTH//2, 7 + Settings.Static.ROOM_HEIGHT * Settings.Static.MAP_HEIGHT//2, 0)
         player.add_animation(Spawn(player))
 
@@ -561,7 +564,28 @@ class Game:
         clock = pygame.time.Clock()
         clock.tick(60)
 
-        CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
+        if self.current_dungeon_level == 1:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Font's Fissure")
+        elif self.current_dungeon_level == 2:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Respite of Scholars")
+        elif self.current_dungeon_level == 3:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Shattered Shire to Orthodoxy")
+        elif self.current_dungeon_level == 4:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Home of the Dialectics")
+        elif self.current_dungeon_level == 5:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "The Lost Phrontistery")
+        elif self.current_dungeon_level == 6:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Athenaeum Storerooms")
+        elif self.current_dungeon_level == 7:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
+        elif self.current_dungeon_level == 8:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Arch of Knowledge")
+        elif self.current_dungeon_level == 42:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", "Lost dungeons of Gargabundle")
+        else:
+            CalloutManager.post_message(CalloutManager.NEW_LEVEL, f"Level {self.current_dungeon_level}", f"The Eternal Library, Shelf {self.current_dungeon_level}")
+
+
 
         while True:
             dt = clock.tick(120)/1000
@@ -612,6 +636,7 @@ class Game:
                 break
 
         self.stored_player_spells = player.spells_as_names()
+        self.stored_player_letters = player.letter_tiles.copy()
         self.current_dungeon_level += 1
 
 

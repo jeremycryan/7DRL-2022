@@ -254,9 +254,10 @@ class Wolf(Bat):
 
 class Orc(Bat):
     name = "ORC"
-    hit_points = 6
-    period = 3
+    hit_points = 9
+    period = 2
     spells = [Spell.OrcAttack]
+    move_squares = Math.get_squares(linear=1)
 
     def load_sprite(self):
         sprite = StaticSprite.from_path("images/orca.png", flippable=True)
@@ -269,7 +270,7 @@ class Orc(Bat):
 
 class Shade(Bat):
     name = "SHADE"
-    hit_points = 6
+    hit_points = 5
     spells = [Spell.ShadeAttack]
     can_melee = False
     move_squares = Math.get_squares(linear=1, custom=1)
@@ -327,7 +328,7 @@ class Slime(Bat):
 
 class GolemSummon(Enemy):
     name = "GOLEM"
-    hit_points = 3
+    hit_points = 6
     faction = GridEntity.FACTION_ALLY
     drop_letters = False
 
@@ -363,10 +364,10 @@ class GolemSummon(Enemy):
 
 class BarrierSummon(Enemy):
     name = "BARRIER"
-    hit_points = 5
-    faction = GridEntity.FACTION_NEUTRAL
+    hit_points = 10
+    faction = GridEntity.FACTION_ALLY
     drop_letters = False
-    invulnerabilities = (Enemy.DAMAGE_SPELL,)
+    #invulnerabilities = (Enemy.DAMAGE_SPELL,)
 
     def __init__(self):
         super().__init__()

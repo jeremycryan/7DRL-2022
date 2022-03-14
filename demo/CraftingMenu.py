@@ -73,6 +73,8 @@ class CraftingMenu(GameObject):
         self.position = Pose((0, Settings.Static.GAME_HEIGHT), 0)
         self.curve = PowerCurve(0, 0.8, 1.5)
         self.shown = 0
+        self.menu_bar = ImageHandler.load("images/ui/spell_menu_bar.png")
+        self.menu_bar.set_colorkey((255, 0, 255))
         craft_button_surf = ImageHandler.load("images/craft_button.png")
         craft_button_surf.set_colorkey((255, 0, 255))
         craft_button_hover = ImageHandler.load("images/craft_button_hover.png")
@@ -148,6 +150,8 @@ class CraftingMenu(GameObject):
         offset = Pose(offset, 0)
         offset += self.position
         offset = offset.get_position()
+
+        surf.blit(self.menu_bar, (Settings.Static.GAME_WIDTH//2 - self.menu_bar.get_width()//2, 0 - int(self.shown * 20)))
         if self.shown == 0:
             return
         surf.blit(self.black, (0, 0))
