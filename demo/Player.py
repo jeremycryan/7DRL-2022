@@ -220,14 +220,14 @@ class Player(GridEntity):
             x = x//self.weight
             y = y//self.weight
         if teleport:
-            self.move(x, y)
+            self.move(x, y, instant)
         else:
             target = Pose((x, y))
             target, entity = self.layer.map.raycast(self.position_on_grid, self.position_on_grid + target,
                                                     (GridEntity.DENSITY_WALL, GridEntity.DENSITY_CREATURE), offset=True)
             if target:
                 target -= self.position_on_grid
-                self.move(target.x, target.y)
+                self.move(target.x, target.y, instant)
 
     def recharge(self, letters=1):
         for i, charge in enumerate(self.cooldown):

@@ -80,7 +80,7 @@ class SpellEffect:
                     if self.summon and not summoned:
                         entity = self.summon(**self.summon_args)
                         caster.layer.add_to_cell(entity, item.position_on_grid.x, item.position_on_grid.y)
-                        TurnManager.add_entities(entity)
+                        # TurnManager.add_entities(entity)
                         summoned = True
                     if self.action:
                         self.action(self, item)

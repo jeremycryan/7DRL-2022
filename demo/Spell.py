@@ -1,6 +1,7 @@
 from demo.SpellEffect import SpellEffect
 import demo.SpellArea as Area
 from lib.GridEntity import GridEntity
+from lib.Primitives import Pose
 from lib.Settings import Settings
 
 
@@ -199,7 +200,7 @@ def list_spells():
 
 
 def recharge(_, entity):
-    entity.recharge(letters=1)
+    entity.recharge(letters=3)
 
 
 class Zap(Spell):
@@ -237,16 +238,19 @@ class Firestorm(Spell):
         return self.effects, self.areas, self.delays
 
 class Condemn(Spell):
+    description = "Judgement comes for all."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
         target = self.snap_to_visible(target, pierce=True)
         if target:
             self.add_effect(SpellEffect(damage=7), Area.Circle(target, radius=5.5, include_origin = False))
-            self.add_effect(SpellEffect(damage=3), Area.Circle(target, radius=.5, include_origin = False))
+            self.add_effect(SpellEffect(damage=3), Area.Circle(target, radius=0, include_origin = True))
         return self.effects, self.areas, self.delays
 
+
 class Push(Spell):
+    description = "Repel nearby enemies."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
@@ -257,6 +261,7 @@ class Push(Spell):
 
 
 class Bolt(Spell):
+    description = "A simple ranged bolt of magical damage."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         # target = self.snap_to_line(target)
@@ -269,6 +274,7 @@ class Bolt(Spell):
 
 
 class Beam(Spell):
+    description = "Summon a beam of flame."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target *= 5
@@ -276,25 +282,61 @@ class Beam(Spell):
         target = self.snap_to_visible(target, pierce=True)
         target = self.snap_to_range(target, upper=7, lower=1)
         if target:
-            self.add_effect(SpellEffect(damage=2), Area.Line(endpoint=target, offset=True))
+            self.add_effect(SpellEffect(damage=2, damage_type=GridEntity.DAMAGE_FIRE), Area.Line(endpoint=target, offset=True))
         return self.effects, self.areas, self.delays
 
+
+class Doomblast(Spell):
+    description = "A massive beam of fiery destruction."
+    def get_effects(self, target, crit=False, turn=0):
+        self.clear_effects()
+        target *= 5
+        target = self.snap_to_line(target, diagonals=False)
+        target = self.snap_to_range(target, upper=10, lower=1)
+        if target:
+            target.scale_to(1.1)
+            target.x = int(target.x)
+            target.y = int(target.y)
+            if abs(target.x) > 0:
+                a = target + Pose((0, 1))
+                b = target + Pose((0, -1))
+            else:
+                a = target + Pose((1, 0))
+                b = target + Pose((-1, 0))
+            c = target.copy()
+            a2 = a + c*9
+            b2 = b + c*9
+            c2 = c*10
+            print(a, b, c)
+            print(a2, b2, c2)
+            p = self.caster.position_on_grid
+            a2, _ = self.caster.layer.map.raycast(a.copy()+p, a2+p, (GridEntity.DENSITY_WALL,), offset=False)
+            b2, _ = self.caster.layer.map.raycast(b.copy()+p, b2+p, (GridEntity.DENSITY_WALL,), offset=False)
+            c2, _ = self.caster.layer.map.raycast(c.copy()+p, c2+p, (GridEntity.DENSITY_WALL,), offset=False)
+            if a2:
+                self.add_effect(SpellEffect(damage=3, damage_type=GridEntity.DAMAGE_FIRE), Area.Line(origin=a, endpoint=a2-p, offset=False))
+            if b2:
+                self.add_effect(SpellEffect(damage=3, damage_type=GridEntity.DAMAGE_FIRE), Area.Line(origin=b, endpoint=b2-p, offset=False))
+            if c2:
+                self.add_effect(SpellEffect(damage=3, damage_type=GridEntity.DAMAGE_FIRE), Area.Line(origin=c, endpoint=c2-p, offset=False))
+        return self.effects, self.areas, self.delays
+
+
 class Lightning(Spell):
+    description = "Surrounds you with a storm of lightning and releases a powerful concentrated beam."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target *= 5
         target = self.snap_to_line(target)
-        target = self.snap_to_visible(target, pierce=True)
         target = self.snap_to_range(target, upper=6, lower=1)
         if target:
-            self.add_effect(SpellEffect(damage=2), Area.Cross(radius = 3, no_origin = True))
-            self.add_effect(SpellEffect(damage=2), Area.Cross(radius = 2, no_origin = True))
-            self.add_effect(SpellEffect(damage=2), Area.Cross(radius = 1, no_origin = True))
+            self.add_effect(SpellEffect(damage=2), Area.Cross(radius=[1, 2], no_origin=True))
             self.add_effect(SpellEffect(damage=3), Area.Line(endpoint=target, offset=True))
         return self.effects, self.areas, self.delays
 
 
 class Hop(Spell):
+    description = "Quickly jump to a nearby square, even over obstacles."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=2, lower=1)
@@ -304,17 +346,34 @@ class Hop(Spell):
             self.add_effect(SpellEffect(), Area.Point(target))
         return self.effects, self.areas, self.delays
 
+
 class Teleport(Spell):
+    description = "A long range teleportation spell to quickly dance across the map."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
-        target = self.snap_to_range(target, upper=4.5, lower=1)
+        target = self.snap_to_range(target, upper=5.5, lower=1)
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         if target:
             self.add_effect(SpellEffect(move_linear=target, teleport=True), Area.Point())
             self.add_effect(SpellEffect(), Area.Point(target))
         return self.effects, self.areas, self.delays
 
+
+# class Shockwave(Spell):
+#     def get_effects(self, target, crit=False, turn=0):
+#         self.clear_effects()
+#         target = self.snap_to_range(target, upper=2.5, lower=1)
+#         target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
+#         if target:
+#             self.add_effect(SpellEffect(move_linear=target, teleport=True), Area.Point())
+#             self.add_effect(SpellEffect(), Area.Point(target))
+#             self.add_effect(SpellEffect(damage=3, damage_type=GridEntity.DAMAGE_PHYSICAL, move_radial=3),
+#                             Area.Circle(target, radius=1.5, include_origin=False))
+#         return self.effects, self.areas, self.delays
+
+
 class Recharge(Spell):
+    description = "Recharge 3 letters for each of your spells that are on cooldown."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=0, lower=0)
@@ -327,6 +386,7 @@ class Recharge(Spell):
 
 
 class Freeze(Spell):
+    description = "Summon a large ice storm that freezes anyone in range for 3 turns."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_visible(target)
@@ -336,17 +396,21 @@ class Freeze(Spell):
                             Area.Circle(target, radius=2))
         return self.effects, self.areas, self.delays
 
+
 class Frostbite(Spell):
+    description = "Summon a concentrated blizzard that both damages and deeply freezes anyone in range."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=2.5, lower=1)
         if target:
-            self.add_effect(SpellEffect(damage_type=GridEntity.DAMAGE_ICE, stun=4),
+            self.add_effect(SpellEffect(damage=2, damage_type=GridEntity.DAMAGE_ICE, stun=4),
                             Area.Circle(target, radius=1))
         return self.effects, self.areas, self.delays
 
+
 class Golem(Spell):
+    description = "Summon a helper to assist you in your adventures. Only two can exist at a time."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_visible(target)
@@ -359,6 +423,7 @@ class Golem(Spell):
 
 
 class Barrier(Spell):
+    description = "Summon a temporary wall to block your retreat."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_visible(target)

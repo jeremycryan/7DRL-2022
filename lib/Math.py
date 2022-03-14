@@ -126,9 +126,9 @@ def get_squares_in_range(radius, origin=Pose((0, 0)), no_origin=False):
 
 def get_squares(origin=Pose((0, 0)), linear=0, diagonal=0, radius=0, custom=0):
     squares = []
-    if not hasattr(linear, "__iter__"):
+    if linear and not hasattr(linear, "__iter__"):
         linear = (linear,)
-    if not hasattr(diagonal, "__iter__"):
+    if diagonal and not hasattr(diagonal, "__iter__"):
         diagonal = (diagonal,)
     if linear:  # Cardinal movement
         for i in linear:
