@@ -84,5 +84,5 @@ class SpellEffect:
                         summoned = True
                     if self.action:
                         self.action(self, item)
-                    if self.menace:
-                        caster.menacing = target.squares
+            if self.menace:
+                caster.menacing += target.squares

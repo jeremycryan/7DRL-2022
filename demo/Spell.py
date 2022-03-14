@@ -204,6 +204,7 @@ def recharge(_, entity):
 
 
 class Zap(Spell):
+    description = "A small burst of magical text you shouldn't see."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=1.5, lower=1)
@@ -212,6 +213,7 @@ class Zap(Spell):
         return self.effects, self.areas, self.delays
 
 class Stab(Spell):
+    description = "A short-range lash of darkwoven mana."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=1.5, lower=1)
@@ -220,6 +222,7 @@ class Stab(Spell):
         return self.effects, self.areas, self.delays
 
 class Flare(Spell):
+    description = "A small burst of magical flame."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=2.5, lower=0)
@@ -229,6 +232,7 @@ class Flare(Spell):
         return self.effects, self.areas, self.delays
 
 class Firestorm(Spell):
+    description = "Channel the wrath of the Aether."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target = self.snap_to_range(target, upper=4.5, lower=1)
@@ -264,12 +268,12 @@ class Bolt(Spell):
     description = "A simple ranged bolt of magical damage."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
-        # target = self.snap_to_line(target)
+        target = self.snap_to_line(target)
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=5, lower=1)
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_CREATURE)
         if target:
-            self.add_effect(SpellEffect(damage=2), Area.Point(target))
+            self.add_effect(SpellEffect(damage=2), Area.Line(endpoint=target))
         return self.effects, self.areas, self.delays
 
 
@@ -287,7 +291,7 @@ class Beam(Spell):
 
 
 class Doomblast(Spell):
-    description = "A massive beam of fiery destruction."
+    description = "A ungodly beam of fiery destruction."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target *= 5
@@ -307,8 +311,6 @@ class Doomblast(Spell):
             a2 = a + c*9
             b2 = b + c*9
             c2 = c*10
-            print(a, b, c)
-            print(a2, b2, c2)
             p = self.caster.position_on_grid
             a2, _ = self.caster.layer.map.raycast(a.copy()+p, a2+p, (GridEntity.DENSITY_WALL,), offset=False)
             b2, _ = self.caster.layer.map.raycast(b.copy()+p, b2+p, (GridEntity.DENSITY_WALL,), offset=False)
@@ -323,7 +325,7 @@ class Doomblast(Spell):
 
 
 class Lightning(Spell):
-    description = "Surrounds you with a storm of lightning and releases a powerful concentrated beam."
+    description = "Surrounds you with a storm of lightning and releases a powerful, concentrated beam."
     def get_effects(self, target, crit=False, turn=0):
         self.clear_effects()
         target *= 5
@@ -404,7 +406,7 @@ class Frostbite(Spell):
         target = self.snap_to_visible(target)
         target = self.snap_to_range(target, upper=2.5, lower=1)
         if target:
-            self.add_effect(SpellEffect(damage=2, damage_type=GridEntity.DAMAGE_ICE, stun=4),
+            self.add_effect(SpellEffect(damage=2, damage_type=GridEntity.DAMAGE_ICE, stun=5),
                             Area.Circle(target, radius=1))
         return self.effects, self.areas, self.delays
 
@@ -430,6 +432,12 @@ class Barrier(Spell):
         target = self.snap_to_entity(target, density=GridEntity.DENSITY_EMPTY)
         target = self.snap_to_range(target, upper=4, lower=1)
         if target:
+            if abs(target.x) > abs(target.y):
+                start = target + Pose((0, 1))
+                end = target + Pose((0, -1))
+            else:
+                start = target + Pose((1, 0))
+                end = target + Pose((-1, 0))
             import demo.Enemy as Enemy
-            self.add_effect(SpellEffect(summon=Enemy.BarrierSummon, density=GridEntity.DENSITY_EMPTY), Area.Point(target))
+            self.add_effect(SpellEffect(summon=Enemy.BarrierSummon, density=GridEntity.DENSITY_EMPTY), Area.Line(start, end, offset=False))
         return self.effects, self.areas, self.delays
